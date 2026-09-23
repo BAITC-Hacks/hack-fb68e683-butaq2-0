@@ -9,9 +9,24 @@ PostgreSQL catalog on every turn; this is not an intent classifier. The separate
 
 ```bash
 cp .env.example .env
-# Set V2V_API_KEY and ROUTER_ADMIN_TOKEN in .env
-docker compose up --build
+# Set V2V_API_KEY, ROUTER_ADMIN_TOKEN and POSTGRES_PASSWORD in .env
+make up
 ```
+
+`make down` stops the stack without deleting its data; `make logs` follows the
+logs. On the server (`129.151.210.13`), clone the repository once, configure
+its `.env`, then run deployment **on the server**:
+
+```bash
+cp .env.example .env  # first deployment only; set real secrets
+make deploy
+```
+
+`make deploy` fast-forwards the server's checked-out Git branch and rebuilds
+the full Compose stack in place. It leaves `.env` and the PostgreSQL/Caddy
+volumes intact. The server needs Docker with Compose and Git access to the
+repository. Point the `owlpeer.com` DNS A record to `129.151.210.13` and
+allow inbound TCP 80/443 for HTTPS.
 
 The backend runs on http://localhost:8000 (`/docs` for OpenAPI); PostgreSQL
 is reachable locally on port 5433. Compose also starts the separately maintained
