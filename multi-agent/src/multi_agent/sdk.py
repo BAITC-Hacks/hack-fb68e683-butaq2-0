@@ -145,6 +145,14 @@ class SdkAgentGateway:
     def _conversation(context: RoutingContext) -> dict[str, Any]:
         return {
             "utterance": context.text,
+            "language_context": {
+                "current_utterance": context.text,
+                "prior_user_utterances": [
+                    entry["content"]
+                    for entry in context.history
+                    if entry.get("role") == "user" and entry.get("content", "").strip()
+                ],
+            },
             "explicit_demo_ids": sorted(explicit_demo_ids(context)),
             "current_record_references": [
                 {"id": identifier, "resource": demo_record_resource(identifier)}

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import os
+from collections.abc import Awaitable, Callable
 from time import perf_counter
 from typing import Any
 
@@ -14,6 +15,7 @@ from multi_agent.contracts import (
     AgentGateway,
     Catalog,
     InvalidDecision,
+    RoutingDecision,
     RuntimeConfig,
     TurnResult,
     TurnTimeout,
@@ -41,6 +43,7 @@ class RouterService:
         self.catalog = catalog
         self.database = database
         self.pipeline = pipeline
+        self.stream_sessions: set[str] = set()
         self.config = RuntimeConfig(
             model=model or os.getenv("ROUTER_MODEL", DEFAULT_MODEL),
             routing_prompt=ROUTING_PROMPT,
@@ -69,7 +72,13 @@ class RouterService:
         text: str,
         stt_ms: float = 0,
         synthesize: bool = False,
+        on_route: Callable[[RoutingDecision], Awaitable[None]] | None = None,
+        delivery_id: str | None = None,
     ) -> TurnResult:
+        if delivery_id is None and session_id in self.stream_sessions:
+            raise HTTPException(
+                409, "This session already has an active voice connection"
+            )
         text = text.strip()
         if not text:
             raise HTTPException(422, "Empty utterance")
@@ -93,7 +102,12 @@ class RouterService:
 
         try:
             result = await self.orchestrator.turn(
-                session_id=session_id, text=text, catalog=catalog, config=config
+                session_id=session_id,
+                text=text,
+                catalog=catalog,
+                config=config,
+                on_route=on_route,
+                delivery_id=delivery_id,
             )
         except (InvalidDecision, AgentFailure) as exc:
             raise HTTPException(502, str(exc)) from exc

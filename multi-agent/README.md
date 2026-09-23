@@ -1,6 +1,7 @@
 # Multi-agent voice runtime
 
-The browser's existing `/router/voice` and `/router/text` endpoints use one Python
+The browser's `/router/stream` WebSocket and the existing `/router/voice` and
+`/router/text` fallback endpoints use one Python
 orchestrator with two OpenAI Agents SDK agents: Router and Resolution. The Router
 runs on every turn; Resolution runs only after Python accepts a route. Clarification
 and requests for an operator do not add another agent call. Tool calls can add model
@@ -13,7 +14,7 @@ The root wheel includes this package; there is no dependency on `hack-tools` or 
 an absolute developer path.
 
 ```text
-Browser microphone → upload/STT ┐
+Browser PCM microphone → live STT ┐
 Text fallback ──────────────────┴→ RouterService
                                   ↓
                          VoiceRouterOrchestrator
@@ -21,7 +22,7 @@ Text fallback ──────────────────┴→ Route
                                       ↓
                          Resolution + read-only tools
                                       ↓
-                            reply + trace → TTS
+                            validated reply + trace → streamed PCM TTS
 ```
 
 ## Run and check
@@ -46,6 +47,7 @@ Optional runtime settings:
 MULTI_AGENT_TIMEOUT_SECONDS=20
 MULTI_AGENT_RESOLUTION_MAX_TURNS=3
 MULTI_AGENT_TRACING=false
+MULTI_AGENT_TRANSCRIBE_MODEL=gpt-live-transcribe
 ```
 
 Tests use fake gateways or fake provider responses and make no paid model calls.
@@ -74,9 +76,10 @@ not the official starter kit or evidence of jury accuracy.
 - Resolution tools are read-only and scoped to the selected scenario. There is no
   payment, cancellation, or account mutation. Confirmation/execution is a later sprint.
 - `handoff` reports the need for an operator; no queue or carrier transfer exists yet.
-- Existing stage timings measure completed operations. Full audio is still buffered;
-  `total_ms` is not speech-end-to-first-playback latency. Streaming and barge-in are
-  separate sprints. A disconnected HTTP client is not guaranteed to cancel server work.
+- WebSocket audio is streamed as PCM; the full Resolution text is validated before
+  synthesis begins. HTTP fallback still buffers audio. `total_ms` is not first-audio
+  latency. Socket interruption/disconnection cancels obsolete work. A disconnected
+  HTTP fallback client is not guaranteed to cancel server work.
 - Trace IDs and per-stage timings are returned in the turn result. External SDK
   tracing is opt-in and excludes sensitive model/tool payloads. Durable application
   event storage and the operator queue are still pending.
@@ -88,7 +91,7 @@ SDK implementation references: [agent definitions](https://developers.openai.com
 and [models and providers](https://developers.openai.com/api/docs/guides/agents/models).
 
 
-## Voice lookup and grounding regressions
+## Voice lookup and grounding regressions (pre-streaming baseline)
 
 Spoken synthetic identifiers such as `демо П-1001` and `Demo R 4001` are
 normalized conservatively. Only casing, separators and supported Cyrillic code
@@ -137,7 +140,7 @@ See [sanitized API results](evals/live-api-smoke.jsonl); audio bytes and credent
 are excluded. Streaming playback, interruption and durable sessions remain open.
 
 
-## Terra migration
+## Terra migration (pre-streaming baseline)
 
 The current shared model is `gpt-5.6-terra`, with low reasoning explicitly sent
 for both Router and Resolution. The model ID and supported effort were checked
@@ -154,9 +157,8 @@ transcript was labelled `kk`, with a Kazakh rationale and a Russian spoken reply
 This small reused development set is not a held-out quality score, and does not
 establish a speed improvement over Luna. Offline checks: 129 passed, 9 skipped.
 
-Only the Terra migration is in the current sprint. Streaming output and then
-streaming microphone/interruption are the next two sprints, awaiting the user's
-instruction; see [SPRINTS.md](SPRINTS.md).
+The subsequent streaming implementation is described below and tracked in
+[SPRINTS.md](SPRINTS.md).
 
 
 Deployment verification: the backend was rebuilt and restarted, and only the
@@ -166,3 +168,76 @@ routed to S01 and returned 140,160 bytes of MP3 speech. Server total: 7,389 ms
 (STT 1,069; routing 2,260; response 1,570; TTS 2,479). This one buffered request
 is not a browser playback measurement or evidence of a general speedup. See
 [sanitized Terra API smoke](evals/terra-live-api-smoke.jsonl).
+
+
+## Streaming voice and interruption
+
+`/router/stream` is the primary browser transport. A `start` event supplies a
+session ID and mode (`voice` or `text`). The service replies `ready` after setup.
+Only one socket owns a session; concurrent HTTP turns for that session return 409.
+The strict `FRONTEND_ORIGINS` list must include the browser origin. It was not
+expanded during this change; localhost:3000 remains the verified browser origin.
+
+Client events:
+
+- `audio.append`: turn ID and base64 PCM16 mono 24 kHz, streamed while speaking.
+- `audio.commit`: finalize an utterance; repeated commits cannot route twice.
+- `text`: turn ID and typed input through the same decision service.
+- `interrupt`: invalidate the active turn and stop pending synthesis/model work.
+- `playback.started` and `playback.completed`: acknowledge actual browser playback.
+
+Server events are ordered with a sequence number and turn ID: `transcript.delta`,
+`transcript.final`, `turn.started`, validated `route`, validated `reply`, `audio.delta`,
+`turn.completed`, `turn.cancelled`, or a sanitized `error`. Only final transcripts
+invoke Router. Generation IDs drop obsolete replies/audio; late ASR item IDs stay
+attached to their original inputs. Socket disconnect closes provider sessions and
+cancels pending work. Network failure requires an explicit reconnect; it never
+silently replays a turn or falls back to another paid request.
+
+`gpt-live-transcribe` uses a transcription-only Realtime connection with RU/KZ
+language hints. AudioWorklet resamples device input, retains 200 ms of pre-roll,
+sends 20 ms frames, detects sustained speech, and commits after 500 ms of silence.
+The microphone remains active during output. Local speech onset stops queued audio
+before the backend cancellation request. Browser echo cancellation is requested;
+physical-device echo and room noise still require listening tests.
+
+Full Resolution text is checked before any TTS. PCM synthesis is then forwarded
+chunk by chunk; this is streaming audio, not speculative unvalidated LLM speech.
+Assistant history is deferred until playback completion. If interrupted, accepted
+user/scenario facts remain but the unheard full assistant reply is not added.
+A cancelled model turn still leaves prior state intact. HTTP fallback retains its
+previous buffered behavior and does not offer this delivery acknowledgement.
+
+Streaming `stt_ms` measures finalization after client commit, rather than full audio
+capture. `first_audio_ms` measures commit/text request to first server audio;
+`first_text_ms` and `playback_ms` are client measurements. Output timestamps measure
+browser playback onset/drain when available; otherwise the UI labels the estimate.
+These exclude the client's 500 ms silence-detection window and are not p50/p95.
+
+The Terra language regression replay now returns `ru, ru, mixed, ru, ru` with all
+five action/scenario pairs matching the development expectations. No additional
+LLM call or alphabet-based language override was added. See
+[language replay](evals/language-fixed-terra-replay.jsonl) and
+[live ASR events](evals/live-transcription-smoke.jsonl).
+
+Provider contracts were checked against official OpenAI documentation for
+[Realtime transcription](https://developers.openai.com/api/docs/guides/realtime-transcription)
+and [streamed PCM synthesis](https://developers.openai.com/api/docs/guides/text-to-speech).
+
+
+Validation after integration: **158 Python tests passed, 9 skipped; 10 frontend
+streaming tests passed; TypeScript and both production builds passed**. The backend
+and frontend were rebuilt and restarted. A live voice WebSocket emitted 87 PCM
+chunks, first audio at 6.52 s and completion at 7.52 s after commit. Interruption
+then a new turn succeeded; late old audio was absent and unheard replies stayed
+out of history. See [live stream results](evals/live-streaming-smoke.jsonl).
+
+A Chromium test with a synthetic microphone exercised the real AudioWorklet/VAD,
+provider ASR, Terra agents and browser PCM scheduling. First playback was 5.56 s
+after commit, before synthesis finished. A new spoken phrase stopped 13 scheduled
+sources; the server acknowledged interruption in 2.4 ms on localhost. There was
+no playback-completed acknowledgement for the cancelled reply; the next utterance
+was handled and acknowledged normally. See [browser events and assertions](evals/browser-streaming-smoke.json).
+These measurements do not include room acoustics, physical microphone quality,
+mobile browser checks, or the 500 ms VAD silence window. Terra remains the shared
+model and no general latency distribution or sub-second response is claimed.

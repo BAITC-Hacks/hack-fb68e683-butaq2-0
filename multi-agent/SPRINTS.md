@@ -7,9 +7,8 @@ for the baseline: Router and Resolution. Deep Router is conditional on evaluatio
 
 ## Active delivery order — three separately authorized sprints
 
-The user has authorized **Sprint A only**. Finish the Terra migration and report
-its results, then stop. Sprint B and Sprint C are planned below and start only
-when the user requests them. Development subagents can work in parallel within
+Sprint A is complete. The user has now authorized **Sprint B and Sprint C**,
+including the RU/KZ language regression fix. Development subagents can work in parallel within
 the active sprint; the runtime remains Router + Resolution.
 
 ### Sprint A — Terra for the shared conversation service (completed)
@@ -43,9 +42,9 @@ replay matched all expected route/action pairs, with one language-label defect
 recorded. A fresh synthesized-input voice request returned speech in 7.39 seconds
 of server time. This is not a streaming latency or broad quality claim. Raw results
 and limitations are in [README.md](README.md#terra-migration). Sprint A is complete;
-Sprint B and C remain awaiting the user's instruction.
+Sprint B and C are implemented; verification and limits are recorded below.
 
-### Sprint B — Stream replies and begin audio playback sooner (awaiting user)
+### Sprint B — Stream replies and begin audio playback sooner (implemented)
 
 Scope: implement the streaming reply/audio work detailed in backlog **03**, retaining
 one shared Router/Resolution decision service and the upload/text fallback. Emit
@@ -64,7 +63,7 @@ Acceptance:
 - No fixed latency target is called achieved until measured. This sprint does not
   claim to solve interruption or continuous microphone input.
 
-### Sprint C — Streaming microphone and interruption (awaiting user)
+### Sprint C — Streaming microphone and interruption (implemented)
 
 Scope: implement backlog **04** after the streaming output path is verified. Add
 streaming input, transcript finalization and cancellation shared across browser
@@ -80,6 +79,31 @@ Acceptance:
   are covered. Actual RU, KK and mixed-language speech is checked by listening.
 - Speech-end-to-first-playback latency is reported with sample counts and conditions.
 
+### Verification of B and C
+
+- 158 Python tests passed, 9 database/integration checks skipped; 10 frontend audio
+  tests, TypeScript checks and both Docker production builds passed.
+- Live provider test returned partial transcription during input and the correct
+  final Russian question. Only its final transcript invoked Router.
+- Live WebSocket test received 87 PCM chunks; first audio at 6.52 s preceded full
+  response generation at 7.52 s. Interruption and a subsequent turn succeeded,
+  with no old audio after cancellation acknowledgement or unheard assistant history.
+- Chromium with a synthetic microphone exercised the actual AudioWorklet, VAD,
+  ASR, Router/Resolution and PCM playback. Playback began at 5.56 s after commit,
+  before synthesis completed. Speaking the next fixture during output stopped
+  13 scheduled sources; cancellation acknowledgement took 2.4 ms on localhost.
+  The next utterance routed correctly, and cancelled output was not acknowledged.
+- The language regression replay returned `ru, ru, mixed, ru, ru` and matched all
+  five expected action/scenario pairs. This reused development set is not an
+  accuracy benchmark. Timing samples above are not p50/p95 or physical-device
+  acoustic measurements; the 500 ms client silence window is outside commit timing.
+- Real microphone/speaker echo, actual RU/KK/mixed listening quality and mobile
+  browser behavior still need device checks. Session persistence and SignalWire
+  remain later work. The production domain needs its own explicitly approved
+  `FRONTEND_ORIGINS` entry; no origin permissions were expanded in this change.
+
+See [implementation and measured artifacts](README.md#streaming-voice-and-interruption).
+
 ### Remaining beyond these three sprints
 
 - **Durable sessions and real operator/action workflows:** backlog **02**. Current
@@ -92,7 +116,7 @@ Acceptance:
   inbound call through the shared service. Browser readiness is not phone readiness.
 
 The numbered sections below retain the detailed original backlog. Their numbers
-are references; the active execution order is A, then B and C only on instruction.
+are references; the active execution order is A, followed by the now-authorized B and C.
 
 ## 00 — Contracts and reproducible checks
 

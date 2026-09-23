@@ -1,0 +1,9 @@
+{"type": "transcript.delta", "turn_id": "live-asr", "delta": " Какие", "elapsed_ms": 861}
+{"type": "transcript.delta", "turn_id": "live-asr", "delta": " виды", "elapsed_ms": 1275}
+{"type": "transcript.delta", "turn_id": "live-asr", "delta": " страх", "elapsed_ms": 1844}
+{"type": "transcript.delta", "turn_id": "live-asr", "delta": "ования", "elapsed_ms": 2093}
+{"type": "transcript.delta", "turn_id": "live-asr", "delta": " у", "elapsed_ms": 2669}
+{"type": "transcript.delta", "turn_id": "live-asr", "delta": " вас", "elapsed_ms": 2911}
+{"type": "transcript.delta", "turn_id": "live-asr", "delta": " есть", "elapsed_ms": 3320}
+{"type": "transcript.delta", "turn_id": "live-asr", "delta": "?", "elapsed_ms": 3335}
+{"type": "transcript.final", "turn_id": "live-asr", "text": "Какие виды страхования у вас есть?", "elapsed_ms": 3678}

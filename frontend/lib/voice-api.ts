@@ -1,5 +1,15 @@
+export interface LiveRoutingDecision {
+  action: "route" | "clarify" | "handoff";
+  scenario_id: string | null;
+  confidence: number;
+  reason: string;
+}
+
 export interface TurnResult {
   session_id: string;
+  turn_id?: string;
+  playback_interrupted?: boolean;
+  playback_estimated?: boolean;
   transcript: string;
   reply: string;
   action: "route" | "clarify" | "handoff";
@@ -9,7 +19,7 @@ export interface TurnResult {
   reason: string;
   alternatives: { scenario_id: string; reason: string }[];
   pending_scenario_ids: string[];
-  timings: { stt_ms: number; routing_ms: number; response_ms: number; tts_ms: number; total_ms: number };
+  timings: { stt_ms: number; routing_ms: number; response_ms: number; tts_ms: number; total_ms: number; first_audio_ms?: number; first_text_ms?: number; playback_ms?: number };
   audio_base64: string | null;
   audio_content_type: string | null;
 }

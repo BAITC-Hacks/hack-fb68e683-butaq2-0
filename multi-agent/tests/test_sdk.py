@@ -475,3 +475,73 @@ async def test_model_reasoning_settings_reach_both_agents(model):
             assert request["reasoning"]["effort"] == "low"
         else:
             assert request.get("reasoning") is None
+
+
+@pytest.mark.asyncio
+async def test_both_agents_receive_user_only_language_evidence():
+    current = resolution_context(
+        text="Задам, какие виды страхования у вас есть?",
+        history=[
+            {"role": "user", "content": "Сәлем, полисім белсенді ме?"},
+            {"role": "assistant", "content": "ASSISTANT-LANGUAGE: Қазақша жауап."},
+            {"role": "user", "content": "Расскажите по-русски."},
+            {"role": "assistant", "content": "ASSISTANT-LANGUAGE: Тағы не керек?"},
+            {"role": "user", "content": " "},
+        ],
+    )
+    current.catalog.scenarios["policy"].title = "CATALOG-LANGUAGE: Полис мерзімі"
+    transport = ResponsesTransport(
+        [
+            [message(decision().model_dump_json())],
+            [message("Уточните, пожалуйста, номер полиса.")],
+        ]
+    )
+    async with transport.client() as client:
+        gateway = SdkAgentGateway(client)
+        await gateway.route(current, config())
+        await gateway.resolve(current, config())
+    assert len(transport.requests) == 2
+    for request in transport.requests:
+        payload = json.loads(request["input"][0]["content"])
+        assert payload["language_context"] == {
+            "current_utterance": current.text,
+            "prior_user_utterances": [
+                "Сәлем, полисім белсенді ме?",
+                "Расскажите по-русски.",
+            ],
+        }
+        # Assistant context remains available for intent, but not as user speech.
+        assert payload["recent_dialog"] == current.history
+        assert "ASSISTANT-LANGUAGE" not in json.dumps(payload["language_context"])
+        assert "CATALOG-LANGUAGE" not in json.dumps(payload["language_context"])
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "utterance,language",
+    [
+        ("Задам, какие виды страхования у вас есть?", "ru"),
+        ("Кашан ол аякталады?", "kk"),
+        ("Когда он оканчается, кашан ол аякталады?", "mixed"),
+        ("Я про возврат за двойную оплату на Demo R 4001.", "ru"),
+        ("DEMO-P-1001", "unknown"),
+    ],
+)
+async def test_language_input_keeps_noisy_and_mixed_speech_without_alphabet_rules(
+    utterance, language
+):
+    current = resolution_context(text=utterance)
+    output = decision().model_copy(update={"language": language})
+    transport = ResponsesTransport([[message(output.model_dump_json())]])
+    async with transport.client() as client:
+        result = await SdkAgentGateway(client).route(current, config())
+    payload = json.loads(transport.requests[0]["input"][0]["content"])
+    assert payload["utterance"] == utterance
+    assert payload["language_context"] == {
+        "current_utterance": utterance,
+        "prior_user_utterances": [],
+    }
+    # Semantic language remains the model's decision. These offline fixtures test
+    # lossless context and no alphabet-based override, not language accuracy.
+    assert result.language == language
+    assert len(transport.requests) == 1
