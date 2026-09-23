@@ -8,6 +8,7 @@ async function compiled(name) {
   return `data:text/javascript;base64,${Buffer.from(stripTypeScriptTypes(source, { mode: "transform" })).toString("base64")}`;
 }
 const { VoiceLive } = await import(await compiled("voice-live"));
+const { measuredTimings, exportTrace } = await import(await compiled("voice-presentation"));
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 class Socket {
   static OPEN = 1;
@@ -55,6 +56,55 @@ function setup(getUserMedia) {
   const live = new VoiceLive("session", { phase: (p) => events.phases.push(p), error: (e) => events.errors.push(e), result: (r) => events.results.push(r), caption: (c) => events.captions.push(c), route() {}, level() {} });
   return { live, track, media, events };
 }
+
+test("Live text waits for acknowledgement, rejects invalid input and resolves pending sends on stop", async () => {
+  const { live, socket } = await started();
+  try {
+    assert.equal(await live.sendText("x".repeat(2001)), false);
+    const pending = live.sendText("Полис мерзімі?");
+    const message = socket.sent.at(-1);
+    assert.equal(message.type, "text");
+    assert.equal(await live.sendText("duplicate"), false);
+    socket.emit({ type: "text.accepted", request_id: "stale" });
+    let resolved = false;
+    pending.then(() => { resolved = true; });
+    await tick();
+    assert.equal(resolved, false);
+    socket.emit({ type: "text.accepted", request_id: message.request_id });
+    assert.equal(await pending, true);
+    const rejected = live.sendText("Next");
+    socket.emit({ type: "text.rejected", request_id: socket.sent.at(-1).request_id, message: "Rejected" });
+    assert.equal(await rejected, false);
+    const send = socket.send;
+    socket.send = () => { throw new Error("Socket failed during send"); };
+    try { assert.equal(await live.sendText("Keep this draft"), false); }
+    finally { socket.send = send; }
+    const interrupted = live.sendText("Again");
+    live.stop();
+    assert.equal(await interrupted, false);
+    assert.equal(await live.sendText("After disconnect"), false);
+  } finally { live.stop(); }
+});
+
+test("muting keeps the call connected and toggles the microphone track", async () => {
+  const { live, track, peer } = await started();
+  live.setMicrophoneMuted(true);
+  assert.equal(track.enabled, false);
+  assert.equal(track.stopped, false);
+  assert.equal(peer.connectionState, "connected");
+  live.setMicrophoneMuted(false);
+  assert.equal(track.enabled, true);
+  live.stop();
+});
+
+test("Live trace never represents unmeasured speech latency as zero", () => {
+  const turn = { transport: "live", timings: { stt_ms: 0, tts_ms: 0, routing_ms: 45, response_ms: 60, total_ms: 110 }, audio_base64: "not-for-export" };
+  assert.equal(measuredTimings(turn).stt_ms, null);
+  const exported = JSON.parse(exportTrace([turn]));
+  assert.equal(exported.turns[0].timings.speech_end_to_audio_ms, null);
+  assert.equal(exported.turns[0].timings.routing_ms, 45);
+  assert.equal(exported.turns[0].audio_base64, undefined);
+});
 async function started() {
   const value = setup();
   const pending = value.live.start();

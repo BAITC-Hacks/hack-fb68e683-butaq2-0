@@ -26,8 +26,10 @@ class Catalog:
 
     @classmethod
     def from_payload(
-        cls, raw: Any, *, knowledge: Any = None, backend: Any = None
+        cls, raw: Any, *, knowledge: Any = None, backend: Any = None, slots: Any = None, actions: Any = None
     ) -> Catalog:
+        from .starter_kit import normalize_scenarios
+        raw = normalize_scenarios(raw, knowledge, backend, slots, actions)
         entries = raw.get("scenarios", raw) if isinstance(raw, dict) else raw
         if isinstance(entries, dict):
             if any(not isinstance(value, dict) for value in entries.values()):

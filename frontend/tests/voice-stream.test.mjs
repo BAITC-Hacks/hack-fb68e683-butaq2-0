@@ -257,5 +257,22 @@ test("connection failure cleans up and never retries a turn automatically", asyn
   assert.match(events.errors.at(-1), /not resent/);
   assert.equal(socket.sent.filter((event) => event.type === "text").length, 1);
   assert.equal(context.state, "closed");
+  assert.equal(await stream.textAccepted(), false);
   stream.stop();
+});
+
+test("text draft may clear only after its own server acceptance, never on socket readiness", async () => {
+  const { stream, socket } = await connected("text");
+  const turn = socket.sent.find((event) => event.type === "text").turn_id;
+  let settled = false;
+  const accepted = stream.textAccepted().then((value) => { settled = true; return value; });
+  try {
+    await Promise.resolve();
+    assert.equal(settled, false);
+    socket.emit({ type: "turn.started", turn_id: "stale" });
+    await Promise.resolve();
+    assert.equal(settled, false);
+    socket.emit({ type: "turn.started", turn_id: turn });
+    assert.equal(await accepted, true);
+  } finally { stream.stop(); }
 });

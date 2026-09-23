@@ -20,6 +20,8 @@ from multi_agent.contracts import (
 from multi_agent.prompts import ANSWER_PROMPT, ROUTING_PROMPT
 from multi_agent.sdk import SdkAgentGateway
 from multi_agent.tools import DemoRecordLookup, scenario_knowledge
+from app.import_catalog import load_catalog
+from pathlib import Path
 from openai import AsyncOpenAI
 
 
@@ -413,6 +415,28 @@ async def test_spoken_identifier_prefetches_record_in_one_resolution_call():
     assert payload["explicit_demo_ids"] == ["DEMO-P-1001"]
     assert payload["verified_records"][0]["record"]["status"] == "active"
     assert "PRIVATE-RECORD" not in json.dumps(payload)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("text,scenario,answer,allowed", [
+    ("Статус SQ-OGPO-104501", "SC25", "Полис SQ-OGPO-104501 активен.", True),
+    ("Статус SQ-OGPO-104501", "SC25", "Полис SQ-OGPO-999999 активен.", False),
+    ("Ваш телефон?", "SC33", "Наш телефон +7 727 000 7575.", True),
+])
+async def test_official_records_reach_resolution_without_exposing_other_clients(text, scenario, answer, allowed):
+    dataset = Path(__file__).parents[2] / "case_2" / "voice_router_dataset"
+    current = resolution_context(catalog=load_catalog(dataset), text=text)
+    current.decision.scenario_id = scenario
+    transport = ResponsesTransport([[message(answer)]])
+    async with transport.client() as client:
+        output = await SdkAgentGateway(client).resolve(current, config())
+    assert (output == answer) == allowed
+    payload = json.loads(transport.requests[0]["input"][0]["content"])
+    assert payload["selected_scenario"]["details"]["action_definitions"]
+    assert "company" in payload["knowledge"]
+    assert "SQ-OGPO-104502" not in json.dumps(payload["verified_records"])
+    if scenario == "SC25":
+        assert any(item["record"].get("policy_number") == "SQ-OGPO-104501" for item in payload["verified_records"])
 
 
 @pytest.mark.asyncio

@@ -22,6 +22,23 @@ export interface TurnResult {
   timings: { stt_ms: number; routing_ms: number; response_ms: number; tts_ms: number; total_ms: number; first_audio_ms?: number; first_text_ms?: number; playback_ms?: number };
   audio_base64: string | null;
   audio_content_type: string | null;
+  trace_id?: string;
+  language?: "ru" | "kk" | "mixed" | "unknown";
+  topic_transition?: "continue" | "switch" | "resume";
+  extracted_parameters?: { scenario_id: string; name: string; value: string }[];
+  transport?: "live" | "stream" | "http";
+}
+
+export interface CatalogStatus {
+  name: string;
+  version: string | null;
+  as_of_date: string | null;
+  scenario_count: number;
+  official: boolean;
+  official_ids_complete: boolean;
+  knowledge_loaded: boolean;
+  records_loaded: boolean;
+  execution_mode: "read_only";
 }
 
 export function routerUrl(path: string): string {

@@ -33,6 +33,7 @@ from .contracts import (
 from .identifiers import demo_record_resource, explicit_demo_ids, parse_demo_ids
 from .prompts import RESOLUTION_INVARIANTS, ROUTER_INVARIANTS
 from .tools import DemoRecordLookup, scenario_knowledge
+from .starter_kit import StarterRecords, references
 
 NATIVE_VOICE_CONTEXT_GUIDANCE = """
 observed_native_voice_context contains recent user and assistant GPT-Live captions.
@@ -94,6 +95,9 @@ class SdkAgentGateway:
             raise InvalidDecision("Resolution requires a validated route")
         lookup = DemoRecordLookup(context)
         records = lookup.available_records()
+        starter = StarterRecords(context)
+        if starter.enabled:
+            records = starter.available_records()
         supported_ids = explicit_demo_ids(context)
         for record in records:
             supported_ids.update(parse_demo_ids(json.dumps(record, ensure_ascii=False)))
@@ -140,6 +144,10 @@ class SdkAgentGateway:
             if decision.language == "kk":
                 return "Бұл мәліметтер расталмады. Полис немесе өтініш нөмірін нақтылаңызшы."
             return "Не удалось подтвердить эти сведения. Уточните, пожалуйста, номер полиса или обращения."
+        allowed_references = references(json.dumps({"records": records, "knowledge": payload["knowledge"]}, ensure_ascii=False))
+        if starter.enabled and references(output) - allowed_references:
+            return ("Бұл деректер расталмады. Нөмірді нақтылаңызшы." if decision.language == "kk"
+                    else "Эти сведения не подтверждены. Уточните, пожалуйста, номер.")
         return output.strip()
 
     @staticmethod

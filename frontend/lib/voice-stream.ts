@@ -59,6 +59,9 @@ export class VoiceStream {
   private connectReject: ((error: Error) => void) | null = null;
   private connectTimer: ReturnType<typeof setTimeout> | null = null;
   private responseTimer: ReturnType<typeof setTimeout> | null = null;
+  private textAck: Promise<boolean> = Promise.resolve(false);
+  private resolveTextAck: ((accepted: boolean) => void) | null = null;
+  private textAckTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(private readonly sessionId: string, private readonly callbacks: Callbacks) {}
 
@@ -76,6 +79,11 @@ export class VoiceStream {
       else {
         const turn = this.beginTurn();
         turn.committedAt = performance.now();
+        this.textAck = new Promise((resolve) => { this.resolveTextAck = resolve; });
+        this.textAckTimer = setTimeout(() => {
+          this.settleTextAck(false);
+          this.callbacks.error("Не удалось подтвердить приём текста. Черновик сохранён; перед повтором проверьте историю.");
+        }, 8000);
         this.send({ type: "text", turn_id: turn.id, text });
         this.awaitResponse();
       }
@@ -85,6 +93,15 @@ export class VoiceStream {
         ? "Microphone permission was denied. Allow access or type your message."
         : cause instanceof Error ? cause.message : "Unable to connect the voice service.");
     }
+  }
+
+  textAccepted(): Promise<boolean> { return this.textAck; }
+
+  private settleTextAck(accepted: boolean): void {
+    if (this.textAckTimer) clearTimeout(this.textAckTimer);
+    this.textAckTimer = null;
+    this.resolveTextAck?.(accepted);
+    this.resolveTextAck = null;
   }
 
   commit(): void {
@@ -110,6 +127,7 @@ export class VoiceStream {
 
   stop(): void {
     ++this.epoch;
+    this.settleTextAck(false);
     this.ready = false;
     this.connectReject?.(new Error("Conversation ended."));
     this.connectReject = null;
@@ -258,6 +276,7 @@ export class VoiceStream {
       turn.sequence = message.seq;
     }
     switch (message.type) {
+      case "turn.started": this.settleTextAck(true); break;
       case "error": this.fail(message.message || "This turn failed. Please try again."); break;
       case "turn.cancelled":
         turn.playback.stop();

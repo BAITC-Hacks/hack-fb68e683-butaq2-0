@@ -1,6 +1,7 @@
 """Browser signaling and UI events for the shared GPT-Live adapter."""
 import asyncio
 import logging
+import anyio
 from contextlib import suppress
 from typing import Annotated
 
@@ -53,9 +54,14 @@ async def live_conversation(socket: WebSocket, service: Annotated[RouterService,
                     await conversation.interrupt()
                 elif kind == "text":
                     text = message.get("text")
+                    request_id = message.get("request_id")
                     if not isinstance(text, str) or not text.strip() or len(text) > 2000:
-                        raise ValueError("Invalid typed message")
+                        await conversation.emit({"type": "text.rejected", "request_id": request_id, "message": "Use between 1 and 2000 characters."})
+                        continue
+                    if request_id is not None and (not isinstance(request_id, str) or len(request_id) > 128):
+                        raise ValueError("Invalid request_id")
                     await conversation.say(text)
+                    await conversation.emit({"type": "text.accepted", "request_id": request_id})
                 else:
                     raise ValueError("Unknown Live control")
 
@@ -73,12 +79,17 @@ async def live_conversation(socket: WebSocket, service: Annotated[RouterService,
         with suppress(Exception):
             await socket.send_json({"type": "error", "message": "Не удалось подключить GPT-Live. Начните сеанс заново или напишите сообщение."})
     finally:
-        for task in tasks:
-            task.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
-        if conversation is not None:
-            await conversation.close()
-        if session_id is not None:
-            service.stream_sessions.discard(session_id)
-        with suppress(Exception):
-            await socket.close()
+        # ASGI disconnect may cancel its surrounding AnyIO scope. Cleanup must
+        # still release provider resources and the exclusive conversation lease.
+        with anyio.CancelScope(shield=True):
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            try:
+                if conversation is not None:
+                    await conversation.close()
+            finally:
+                if session_id is not None:
+                    service.stream_sessions.discard(session_id)
+                with suppress(Exception):
+                    await socket.close()

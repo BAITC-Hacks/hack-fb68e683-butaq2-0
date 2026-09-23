@@ -125,9 +125,11 @@ async def delete_scenario(
 
 
 class CatalogImport(BaseModel):
-    scenarios: list[dict[str, Any]] = Field(min_length=1)
+    scenarios: list[dict[str, Any]] | dict[str, Any] = Field(min_length=1)
     knowledge_base: Any = None
     mock_backend: Any = None
+    slots: Any = None
+    actions: Any = None
 
 
 @router.post("/admin/catalog/import")
@@ -136,7 +138,7 @@ async def import_catalog(
 ) -> dict[str, int]:
     try:
         catalog = Catalog.from_payload(
-            body.scenarios, knowledge=body.knowledge_base, backend=body.mock_backend
+            body.scenarios, knowledge=body.knowledge_base, backend=body.mock_backend, slots=body.slots, actions=body.actions
         )
     except (TypeError, ValueError) as exc:
         raise HTTPException(422, str(exc)) from exc
@@ -151,6 +153,8 @@ async def import_files(
     scenarios: Annotated[UploadFile, File()],
     knowledge_base: Annotated[UploadFile | None, File()] = None,
     mock_backend: Annotated[UploadFile | None, File()] = None,
+    slots: Annotated[UploadFile | None, File()] = None,
+    actions: Annotated[UploadFile | None, File()] = None,
 ) -> dict[str, int]:
     async def decode(file: UploadFile | None) -> Any:
         if file is None:
@@ -168,8 +172,21 @@ async def import_files(
             await decode(scenarios),
             knowledge=await decode(knowledge_base),
             backend=await decode(mock_backend),
+            slots=await decode(slots),
+            actions=await decode(actions),
         )
     except (TypeError, ValueError) as exc:
         raise HTTPException(422, str(exc)) from exc
     service.database.replace_catalog(catalog)
     return {"count": len(catalog.scenarios)}
+
+
+@router.get("/catalog/status")
+async def active_catalog_status(service: Service) -> dict[str, Any]:
+    from multi_agent.starter_kit import catalog_status
+    if service.database is not None and service.database.count_scenarios() == 0:
+        return catalog_status(None)
+    catalog = service.database.catalog() if service.database else service.catalog
+    if catalog is None:
+        raise HTTPException(503, "Catalogue not configured")
+    return catalog_status(catalog)

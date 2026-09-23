@@ -38,6 +38,14 @@ export class VoiceLive {
   private muted = false;
   private silenceSince = 0;
   private phase: VoicePhase = "idle";
+  private pendingText = new Map<string, { resolve: (accepted: boolean) => void; timer: ReturnType<typeof setTimeout> }>();
+  private microphoneMuted = false;
+  private lastInputAt = 0;
+
+  setMicrophoneMuted(muted: boolean): void {
+    this.microphoneMuted = muted;
+    this.microphone?.getAudioTracks().forEach((track) => { track.enabled = !muted; });
+  }
 
   constructor(private readonly sessionId: string, private readonly callbacks: Callbacks) {}
 
@@ -127,9 +135,25 @@ export class VoiceLive {
   }
 
   /** Typed message on an open call: the server verifies it and Live reads the answer. */
-  sendText(text: string): void {
-    if (!this.ready) return;
-    this.send({ type: "text", text });
+  sendText(text: string): Promise<boolean> {
+    text = text.trim();
+    if (!this.ready || !text || text.length > 2000 || this.pendingText.size) return Promise.resolve(false);
+    const requestId = crypto.randomUUID();
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        this.pendingText.delete(requestId);
+        this.callbacks.error("Приём сообщения не подтверждён. Текст сохранён; проверьте ответ перед повторной отправкой.");
+        resolve(false);
+      }, 8000);
+      this.pendingText.set(requestId, { resolve, timer });
+      try { this.send({ type: "text", request_id: requestId, text }); }
+      catch {
+        clearTimeout(timer);
+        this.pendingText.delete(requestId);
+        resolve(false);
+        this.callbacks.error("Не удалось отправить сообщение. Текст сохранён.");
+      }
+    });
   }
 
   stop(): void {
@@ -143,6 +167,8 @@ export class VoiceLive {
     if (this.frame !== null) cancelAnimationFrame(this.frame);
     this.frame = null;
     this.ready = false;
+    for (const pending of this.pendingText.values()) { clearTimeout(pending.timer); pending.resolve(false); }
+    this.pendingText.clear();
     this.working.clear();
     if (this.channel) { this.channel.onmessage = null; this.channel.close(); }
     this.channel = null;
@@ -212,6 +238,17 @@ export class VoiceLive {
               case "caption":
                 if ((message.speaker === "user" || message.speaker === "assistant") && typeof message.delta === "string") this.callbacks.caption({ speaker: message.speaker, text: message.delta, start_ms: message.start_ms ?? 0, end_ms: message.end_ms ?? 0 });
                 break;
+              case "text.accepted":
+              case "text.rejected": {
+                const pending = this.pendingText.get(message.request_id);
+                if (pending) {
+                  clearTimeout(pending.timer);
+                  this.pendingText.delete(message.request_id);
+                  pending.resolve(message.type === "text.accepted");
+                  if (message.type === "text.rejected") this.callbacks.error(message.message || "Сообщение не принято. Текст сохранён.");
+                }
+                break;
+              }
               case "working": this.working.add(message.turn_id); break;
               case "working.done": this.working.delete(message.turn_id); break;
               case "route": this.callbacks.route(message.decision); break;
@@ -237,7 +274,8 @@ export class VoiceLive {
     };
     const tick = () => {
       if (run !== this.epoch) return;
-      const input = rms(this.input), output = rms(this.output), now = performance.now();
+      const input = this.microphoneMuted ? 0 : rms(this.input), output = rms(this.output), now = performance.now();
+      if (input > 0.015) this.lastInputAt = now;
       if (this.muted) {
         if (output < 0.004) {
           this.silenceSince ||= now;
@@ -246,7 +284,7 @@ export class VoiceLive {
       }
       if (!this.muted && output > 0.004) this.lastOutputAt = now;
       const speaking = !this.muted && this.lastOutputAt > 0 && now - this.lastOutputAt < 250;
-      this.callbacks.level(Math.min(1, Math.max(input, this.muted ? 0 : output) * 8), input > 0.015);
+      this.callbacks.level(Math.min(1, Math.max(input, this.muted ? 0 : output) * 8), !this.microphoneMuted && this.lastInputAt > 0 && now - this.lastInputAt < 250);
       this.changePhase(speaking ? "speaking" : this.working.size ? "processing" : "listening");
       this.frame = requestAnimationFrame(tick);
     };

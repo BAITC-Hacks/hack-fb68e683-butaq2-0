@@ -26,6 +26,7 @@ def routing_catalog(catalog: Catalog) -> list[dict[str, Any]]:
         entry = scenario_definition(scenario)
         details = entry["details"]
         details.pop("actions", None)
+        details.pop("action_definitions", None)
         details.pop("knowledge_refs", None)
         parameters = details.get("parameters")
         if isinstance(parameters, list):

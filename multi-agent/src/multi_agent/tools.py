@@ -6,6 +6,7 @@ from typing import Any
 
 from .contracts import ResolutionContext
 from .identifiers import demo_record_resource, explicit_demo_ids, normalize_demo_id
+from .starter_kit import is_starter_scenario
 
 # These are resource types, not scenario or utterance routing rules.
 _COLLECTIONS = {
@@ -27,6 +28,9 @@ def scenario_knowledge(context: ResolutionContext) -> dict[str, Any]:
     knowledge = context.catalog.knowledge
     if not isinstance(knowledge, dict):
         return {}
+    if is_starter_scenario(scenario.details):
+        # The official KB contains public synthetic company facts, no client rows.
+        return knowledge
     references = scenario.details.get("knowledge_refs", [])
     if not isinstance(references, list):
         return {}

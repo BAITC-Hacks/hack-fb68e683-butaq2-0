@@ -46,6 +46,9 @@ def service(monkeypatch):
             self.interrupted = True
             await self.send({"type": "interrupted"})
 
+        async def say(self, text):
+            self.last_text = text
+
         async def close(self):
             self.closed = True
 
@@ -147,3 +150,19 @@ def test_existing_stream_connection_blocks_live_without_releasing_its_session(se
             socket.receive_json()
     assert instance.stream_sessions == {"stream-caller"}
     assert not connections
+
+
+def test_invalid_text_does_not_close_live_and_valid_text_is_acknowledged(service):
+    instance, connections, _ = service
+    with TestClient(app) as client, client.websocket_connect("/router/live") as socket:
+        start(socket)
+        socket.send_json({"type": "text", "request_id": "bad", "text": "x" * 2001})
+        assert socket.receive_json()["type"] == "text.rejected"
+        assert instance.stream_sessions == {"live-caller"}
+        socket.send_json({"type": "text", "request_id": "valid", "text": "Полис мерзімі?"})
+        assert socket.receive_json() == {"type": "text.accepted", "request_id": "valid"}
+        assert connections[0].last_text == "Полис мерзімі?"
+        socket.send_json({"type": "stop"})
+        with pytest.raises(WebSocketDisconnect):
+            socket.receive_json()
+    assert connections[0].closed and not instance.stream_sessions

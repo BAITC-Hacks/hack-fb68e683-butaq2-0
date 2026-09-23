@@ -1,56 +1,45 @@
 # Butaq — Voice Router frontend
 
-Original React template running in Next.js with Tailwind CSS, including the video hero, Inter / Instrument Serif fonts and glass buttons.
+Next.js, React, TypeScript and Tailwind CSS. The homepage preserves the Velorah video landing; `/voice/` is the conversation workspace, `/admin/` edits the catalogue and settings.
 
 ## Run
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. The homepage renders `components/templates/velorah/velorah.tsx`.
+Open http://localhost:3000/voice/ with the backend at http://localhost:8000.
+Production: `make up` from the repository root. Next exports `out/`; Caddy serves it and proxies `/router/*` to the backend. An optional build-time `NEXT_PUBLIC_API_BASE_URL` overrides the API origin. Backend `FRONTEND_ORIGINS` must include the exact browser origin. Microphone access requires HTTPS or localhost.
 
-Production: run `docker compose up --build` from the repository root. Next.js exports to `out/`, which Caddy serves along with a same-origin `/router/*` proxy to the backend. Type check: `npm run typecheck`.
+## Current voice path
 
-## Voice conversation
+- **Поговорить с Butaq** opens OpenAI Live over WebRTC. `/router/live` is the WebSocket for setup, captions, delegated Router → Resolution tasks and traces. The provider handles turn-taking; the old local VAD/“Send now” flow is not the primary voice UI.
+- You can interrupt, mute/unmute the microphone without reconnecting, finish the call, or reset the conversation. The orb reads the existing call's audio analyser; it never opens a second microphone.
+- Typed messages during a call use Live and wait for a server acceptance acknowledgement. Acceptance means queued, not answered. Timeout/rejection keeps the draft, and no failed request is automatically resent.
+- Outside a call, text uses `/router/stream` with streamed TTS. A failed streamed request exposes an explicit HTTP fallback. The PCM/AudioWorklet implementation remains available to legacy API consumers but is not used by the main voice button.
+- UI labels are RU/KK. Spoken response language is selected from the user's utterance, not the UI toggle.
 
-The voice workspace is at `/voice/`, linked as **Voice** in the navbar. The homepage keeps the original video landing layout. The backend automatically seeds an empty database with 40 synthetic insurance scenarios, company facts and linked mock records. Voice checks readiness before opening the microphone; there is no upload form or admin token field. Existing imported catalogues are preserved. The bundled catalogue contains synthetic demo data and is not the official starter kit.
+The catalogue banner reports the **active backend data**, not provider health. A fresh DB initially seeds the author demo. For jury testing, explicitly import all five official files using `make import-official` (replaces catalogue data) or `/admin/import/`. See the root README.
 
-Click **Talk to Butaq**, allow microphone access, speak and pause. AudioWorklet
-captures mono PCM and resamples it to 24 kHz. The browser streams 20 ms frames over
-`/router/stream`, retaining 200 ms of pre-roll. After 500 ms of silence it commits
-the utterance; sustained speech is capped at 20 seconds. Partial transcription
-appears while speaking. Only final transcripts enter Router → Resolution.
+## Trace and measurements
 
-The microphone stays active during a reply. Sustained new speech or **Interrupt**
-stops queued playback immediately and invalidates the old server turn. **Send now**
-commits an in-progress utterance. **End conversation** closes capture, playback and
-the socket; **New conversation** also resets the session. Browser echo cancellation
-is requested, but microphone/speaker feedback still needs testing on real devices.
+Select any of the last 10 processed turns to inspect its scenario, short rationale, alternatives, extracted parameters, language, pending topics and measured backend times. Download JSON includes the same turns without audio blobs. Do not use real personal data.
 
-The server sends a validated routing decision, then a complete validated reply,
-then PCM audio chunks as synthesis produces them. The browser schedules each chunk
-without waiting for the final audio file. It acknowledges delivery only after the
-output timeline drains; cancelled replies never receive a completion acknowledgement.
-First text, first server audio and playback onset are separate metrics; browsers
-without output timestamps explicitly label playback time as estimated.
+Live captions and the validated backend answer are separate: the provider may paraphrase commentary. Separate Live STT/TTS times and end-of-speech → first-audio latency are currently **unmeasured**, never reported as zero. Backend total is not voice end-to-end latency. Legacy estimated playback times are labelled as estimates.
 
-Typed messages use the same streaming path. After a streaming failure the user can
-explicitly send a typed message through the existing buffered HTTP fallback. No
-failed request is automatically resent. A `handoff` ends capture but does not connect
-a real operator. No intent classifier runs in the browser.
+The system is read-only: `handoff` means human help is needed, not that an operator was connected. No policy changes or payments are executed.
 
-Validation: `npm run typecheck`, `npm run build`, and `npm run test:voice` (Node 22+).
-The deterministic tests cover resampling, VAD, chunk playback, interruption and stale
-messages; these do not replace microphone/listening checks on target devices.
+## Validation and structure
 
-For local development, run the backend at `http://localhost:8000`; its CORS defaults allow the Next dev origin. Production uses relative URLs through Caddy. Optional `NEXT_PUBLIC_API_BASE_URL` overrides the API origin at build time. The backend `FRONTEND_ORIGINS` must already include the exact browser origin for WebSocket access. Backend credentials and a loaded scenario catalogue are required; backend failures are shown in the interface. Microphone access requires HTTPS or localhost.
+```bash
+npm run test:voice
+npm run typecheck
+npm run build
+```
 
-## UI structure
+Node 22+ tests cover connection lifecycle, typed acknowledgements, cleanup, mute, VAD/resampling, interruption, playback and exported measurements. They do not replace physical microphone/listening or browser layout checks; use [the jury checklist](../docs/jury-checklist.md).
 
-Tailwind CSS and TypeScript are already installed. `components.json` configures shadcn aliases. Reusable components live in `components/ui` (the supplied OGL orb and shadcn Button); call UI lives in `components/voice`, lifecycle code in `hooks/use-voice-session.ts`, styles in `app/globals.css`. Keeping primitives in `components/ui` lets shadcn registry imports resolve consistently. No extra provider is needed. The orb receives the call's shared audio-level ref so only one microphone stream is opened.
+`components.json` configures shadcn aliases. Reusable primitives live in `components/ui`; conversation UI in `components/voice`; lifecycle in `hooks/use-voice-session.ts`; styles in `app/globals.css`. No extra provider is required.
 
-The original videos load from CloudFront and Mux; Google fonts are downloaded by Next.js. These assets require network access.
-
-See ATTRIBUTION.md for original template attribution.
+CloudFront/Mux videos and Google fonts require network access. See `ATTRIBUTION.md` for template attribution.
