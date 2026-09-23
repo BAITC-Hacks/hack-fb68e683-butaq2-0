@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "fastapi>=0.115",
-    "openai>=1.109",
+    "openai[realtime]>=3.19.0",
     "openai-agents>=0.22.3,<0.23",
     "pydantic>=2.9",
     "pydantic-settings>=2.5",

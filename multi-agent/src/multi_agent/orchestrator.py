@@ -149,6 +149,7 @@ class VoiceRouterOrchestrator:
         config: RuntimeConfig,
         on_route: Callable[[RoutingDecision], Awaitable[None]] | None = None,
         delivery_id: str | None = None,
+        voice_context: list[dict[str, str]] | None = None,
     ) -> TurnResult:
         text = text.strip()
         if not text:
@@ -160,7 +161,13 @@ class VoiceRouterOrchestrator:
             try:
                 result = await asyncio.wait_for(
                     self._execute(
-                        session_id, text, catalog, config, candidate, on_route
+                        session_id,
+                        text,
+                        catalog,
+                        config,
+                        candidate,
+                        on_route,
+                        voice_context=voice_context,
                     ),
                     timeout=config.timeout_seconds,
                 )
@@ -206,6 +213,8 @@ class VoiceRouterOrchestrator:
         config: RuntimeConfig,
         state: Conversation,
         on_route: Callable[[RoutingDecision], Awaitable[None]] | None = None,
+        *,
+        voice_context: list[dict[str, str]] | None = None,
     ) -> TurnResult:
         context = RoutingContext(
             catalog=catalog,
@@ -216,6 +225,7 @@ class VoiceRouterOrchestrator:
             parameters=state.parameters,
             trace_id="trace_" + uuid4().hex,
             session_id=session_id,
+            voice_context=voice_context or [],
         )
         timings = Timings()
         started = perf_counter()
@@ -287,6 +297,7 @@ class VoiceRouterOrchestrator:
                 trace_id=context.trace_id,
                 session_id=session_id,
                 decision=decision,
+                voice_context=context.voice_context,
             )
             started = perf_counter()
             reply = await self.gateway.resolve(resolution, config)

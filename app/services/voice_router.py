@@ -74,6 +74,7 @@ class RouterService:
         synthesize: bool = False,
         on_route: Callable[[RoutingDecision], Awaitable[None]] | None = None,
         delivery_id: str | None = None,
+        voice_context: list[dict[str, str]] | None = None,
     ) -> TurnResult:
         if delivery_id is None and session_id in self.stream_sessions:
             raise HTTPException(
@@ -108,6 +109,7 @@ class RouterService:
                 config=config,
                 on_route=on_route,
                 delivery_id=delivery_id,
+                voice_context=voice_context,
             )
         except (InvalidDecision, AgentFailure) as exc:
             raise HTTPException(502, str(exc)) from exc
