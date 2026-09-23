@@ -8,6 +8,7 @@ WORKDIR /app
 COPY pyproject.toml README.md alembic.ini ./
 COPY app/ ./app/
 COPY v2v/ ./v2v/
+COPY multi-agent/src/ ./multi-agent/src/
 
 RUN pip install --no-cache-dir .
 
