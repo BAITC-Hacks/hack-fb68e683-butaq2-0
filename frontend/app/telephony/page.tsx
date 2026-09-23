@@ -5,7 +5,7 @@ import { VelorahStyles } from "@/components/templates/velorah/styles";
 import { inter, instrumentSerif } from "@/components/templates/velorah/fonts";
 import { VideoBackground } from "@/components/ui/video-background";
 
-export const metadata: Metadata = { title: "Telephony — Butaq", description: "Phone access to Butaq is being prepared. Try a conversation in your browser with Voice." };
+export const metadata: Metadata = { title: "Telephony — Butaq", description: "Call Butaq at +1 (201) 231-1497 or start a conversation in your browser with Voice." };
 
 export default function TelephonyPage() {
   return (
@@ -23,9 +23,10 @@ export default function TelephonyPage() {
         <h1 className="text-5xl tracking-tight [font-family:var(--font-velorah-serif)] sm:text-7xl">Telephony</h1>
         <div className="mt-16 flex w-full max-w-md flex-col items-center rounded-3xl border border-white/15 bg-black/60 p-8 backdrop-blur-xl sm:mt-20 sm:p-10">
           <Phone className="mb-6 size-8 text-white/80" strokeWidth={1.25} aria-hidden="true" />
-          <h2 className="text-xl font-medium">Phone access is coming soon.</h2>
-          <p className="mt-3 text-sm leading-relaxed text-white/70">For now, talk to Butaq in your browser.</p>
-          <a href="/voice/" className="liquid-glass mt-8 rounded-full px-8 py-3 text-sm text-white transition-colors hover:bg-white/10 motion-reduce:transition-none">Open Voice</a>
+          <h2 className="whitespace-nowrap text-xl font-medium sm:text-2xl">+1 (201) 231-1497</h2>
+          <p className="mt-3 text-sm leading-relaxed text-white/70">Call and speak in Russian or Kazakh.</p>
+          <a href="tel:+12012311497" className="liquid-glass mt-8 rounded-full px-8 py-3 text-sm text-white transition-colors hover:bg-white/10 motion-reduce:transition-none">Call Butaq</a>
+          <a href="/voice/" className="mt-5 text-sm text-white/70 underline underline-offset-4 hover:text-white">Open Voice</a>
         </div>
       </main>
     </div>

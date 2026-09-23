@@ -2,7 +2,7 @@ import { Wordmark } from "./primitives";
 
 const FOOTER_LINKS = [
   { label: "How to use Butaq", href: "#routing" },
-  { label: "Start a conversation", href: "/voice/" },
+  { label: "Talk to Butaq", href: "/voice/" },
   { label: "Review the result", href: "#insights" },
   { label: "Admin settings", href: "/admin/" },
 ];
