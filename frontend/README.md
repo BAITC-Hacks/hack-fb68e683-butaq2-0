@@ -15,7 +15,7 @@ Production: run `docker compose up --build` from the repository root. Next.js ex
 
 ## Voice conversation
 
-The voice workspace is at `/voice/`, linked as **Voice** in the navbar. The homepage keeps the original video landing layout. The backend automatically seeds an empty database with 40 synthetic insurance scenarios, company facts and linked mock records. Voice checks readiness before opening the microphone; there is no upload form or admin token field. A small label identifies the synthetic demo. Existing imported catalogues are preserved, and the demo is not the official starter kit.
+The voice workspace is at `/voice/`, linked as **Voice** in the navbar. The homepage keeps the original video landing layout. The backend automatically seeds an empty database with 40 synthetic insurance scenarios, company facts and linked mock records. Voice checks readiness before opening the microphone; there is no upload form or admin token field. Existing imported catalogues are preserved. The bundled catalogue contains synthetic demo data and is not the official starter kit.
 
 Click **Talk to Butaq**, allow microphone access, speak and pause. AudioWorklet
 captures mono PCM and resamples it to 24 kHz. The browser streams 20 ms frames over

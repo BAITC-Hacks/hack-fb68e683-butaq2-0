@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ArrowRight, Camera, Check, Fingerprint, LockKeyhole, LogOut, Plus, RefreshCw, ShieldCheck, Trash2, UploadCloud } from "lucide-react";
+import { ArrowRight, Check, Fingerprint, LogOut, Plus, RefreshCw, ShieldCheck, Trash2, UploadCloud } from "lucide-react";
 import { adminRequest, usePasskey, type Scenario, type Settings } from "@/lib/admin-api";
 import { routerUrl } from "@/lib/voice-api";
-import { FaceCapture } from "./face-capture";
+import { LoginBackground } from "./login-background";
 
 type Section = "overview" | "settings" | "scenarios" | "import";
 const links: { key: Section; label: string; href: string; number: string }[] = [
@@ -25,9 +25,6 @@ export function AdminWorkspace({ section }: { section: Section }) {
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [selected, setSelected] = useState<Scenario | null>(null);
   const [details, setDetails] = useState("");
-  const [faceImage, setFaceImage] = useState<Blob | null>(null);
-  const [faceId, setFaceId] = useState("");
-  const [enrollingFace, setEnrollingFace] = useState(false);
 
   const load = useCallback(async (accessToken?: string) => {
     const [config, catalog] = await Promise.all([
@@ -64,33 +61,18 @@ export function AdminWorkspace({ section }: { section: Section }) {
 
   if (auth === "locked") return (
     <main className="admin-signin">
-      <div className="admin-eyebrow"><span className="admin-dot" /> SECURE WORKSPACE · BUTAQ ROUTER</div>
-      <div className="admin-signin-grid">
-        <div>
-          <div className="admin-orbit"><Fingerprint size={70} strokeWidth={1} /><span className="admin-orbit-ring" /></div>
-          <p className="admin-kicker">PRIVATE ACCESS / 001</p>
-          <h1>Make every<br /><em>decision count.</em></h1>
-          <p className="admin-lead">A focused space for the people shaping every conversation. Sign in with your device passkey to manage routing, prompts, and scenarios.</p>
-          <p className="admin-footnote">Face ID, Touch ID, or your device&apos;s secure passkey. Your biometric data stays on your device.</p>
-        </div>
-        <div className="admin-auth-card">
-          <div className="admin-card-icon"><LockKeyhole size={20} /></div>
-          <p className="admin-kicker">ADMINISTRATOR ACCESS</p>
-          <h2>Welcome back.</h2>
-          <p>Authenticate with a passkey enrolled for this router.</p>
-          <button className="admin-primary" disabled={busy} onClick={() => void run(async () => { await usePasskey("login"); setAuth("passkey"); await load(); }, "Signed in successfully.")}><Fingerprint size={19} /> Sign in with passkey <ArrowRight size={17} /></button>
-          <div className="admin-divider"><span>FACE VERIFICATION</span></div>
-          <label className="admin-label" htmlFor="face-id">Admin ID</label>
-          <input id="face-id" className="admin-input" value={faceId} onChange={(event) => setFaceId(event.target.value)} placeholder="Your enrolled admin ID" autoComplete="username" />
-          <FaceCapture onImage={setFaceImage} />
-          <button className="admin-secondary" disabled={busy || !faceImage || !faceId} onClick={() => void run(async () => { const form = new FormData(); form.append("subject_id", faceId); form.append("image", faceImage!, "capture.jpg"); await adminRequest("auth/face/login", { method: "POST", body: form }); setAuth("passkey"); await load(); }, "Face verified. Signed in successfully.")}>Sign in with Face ID <ArrowRight size={16} /></button>
-          <div className="admin-divider"><span>OR USE YOUR ROUTER TOKEN</span></div>
+      <LoginBackground />
+      <div className="text-center">
+        <p className="mb-4 text-xs uppercase tracking-[0.25em] text-muted-foreground">Butaq · Admin</p>
+        <h1 className="text-5xl tracking-tight [font-family:var(--font-velorah-serif)] sm:text-7xl">Login Admin</h1>
+      </div>
+      <div className="admin-auth-card" aria-label="Admin sign in">
           <label className="admin-label" htmlFor="admin-token">Router admin token</label>
           <input id="admin-token" className="admin-input" type="password" autoComplete="off" placeholder="Enter your token" value={draftToken} onChange={(event) => setDraftToken(event.target.value)} />
           <button className="admin-secondary" disabled={busy || !draftToken} onClick={() => void run(async () => { await adminRequest("auth/token/login", { method: "POST" }, draftToken); await load(); setToken(draftToken); setDraftToken(""); setAuth("token"); }, "Token verified.")}>Continue with token <ArrowRight size={16} /></button>
           <p className="admin-hint">First time? Sign in with the router token, then register a passkey from Overview.</p>
+          <button className="admin-secondary" disabled={busy} onClick={() => void run(async () => { await usePasskey("login"); setAuth("passkey"); await load(); }, "Signed in successfully.")}><Fingerprint size={19} /> Sign in with Face ID <ArrowRight size={17} /></button>
           {error && <p className="admin-error" role="alert">{error}</p>}
-        </div>
       </div>
     </main>
   );
@@ -98,7 +80,6 @@ export function AdminWorkspace({ section }: { section: Section }) {
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
-        <a href="/" className="admin-brand">butaq<span>.</span></a>
         <div className="admin-side-caption">CONTROL ROOM <span> / 2026</span></div>
         <nav aria-label="Admin navigation">{links.map((link) => <a key={link.key} href={link.href} aria-current={section === link.key ? "page" : undefined} className={`admin-nav-item ${section === link.key ? "active" : ""}`}><span>{link.number}</span>{link.label}<ArrowRight size={15} /></a>)}</nav>
         <div className="admin-side-bottom"><div className="admin-online"><span className="admin-dot" /> ROUTER ONLINE</div><p>Changes to your configuration take effect on the next conversation turn.</p><button onClick={() => void run(async () => { await adminRequest("auth/logout", { method: "POST" }); setToken(""); setAuth("locked"); }, "Signed out.")}><LogOut size={16} /> Sign out</button></div>
@@ -114,8 +95,6 @@ export function AdminWorkspace({ section }: { section: Section }) {
             <div className="admin-section-heading"><h2>Workspace</h2><span>YOUR TOOLS / 03</span></div>
             <div className="admin-tool-grid">{links.slice(1).map((link) => <a href={link.href} className="admin-tool" key={link.key}><span>{link.number} / CONFIGURE</span><h3>{link.label}</h3><p>{link.key === "settings" ? "Tune instructions, model, and routing confidence." : link.key === "scenarios" ? "Review and edit the paths behind each conversation." : "Bring a new catalogue and grounding data online."}</p><ArrowRight size={21} /></a>)}</div>
             <div className="admin-enroll"><div><p className="admin-kicker">DEVICE SECURITY</p><h2>Add a device passkey</h2><p>Enroll Face ID, Touch ID, or another platform passkey. Your router token is required to authorize enrollment.</p></div><button className="admin-secondary" disabled={busy} onClick={() => { const supplied = token || window.prompt("Enter the router admin token to enroll this device") || ""; if (supplied) void run(() => usePasskey("register", supplied), "Device passkey registered. You can use it next time you sign in."); }}><Plus size={17} /> Register passkey</button></div>
-            <div className="admin-enroll"><div><p className="admin-kicker">FACE ENROLLMENT</p><h2>Enroll an admin face</h2><p>Capture a clear photo of one person. A router token is required; only the face template is retained.</p></div><button className="admin-secondary" type="button" onClick={() => setEnrollingFace((value) => !value)}><Camera size={17} /> {enrollingFace ? "Close enrollment" : "Enroll face"}</button></div>
-            {enrollingFace && <div className="admin-face-enroll"><label className="admin-label" htmlFor="enroll-face-id">Admin ID</label><input id="enroll-face-id" className="admin-input" placeholder="e.g. team_lead" value={faceId} onChange={(event) => setFaceId(event.target.value)} /><FaceCapture onImage={setFaceImage} /><button className="admin-primary" disabled={busy || !faceId || !faceImage} onClick={() => { const supplied = token || window.prompt("Enter the router admin token to authorize enrollment") || ""; if (supplied) void run(async () => { const form = new FormData(); form.append("subject_id", faceId); form.append("image", faceImage!, "capture.jpg"); await adminRequest("auth/face/enroll", { method: "POST", body: form }, supplied); setEnrollingFace(false); setFaceImage(null); }, "Admin face enrolled. You can sign in with your face next time."); }}>Save face enrollment <ArrowRight size={16} /></button></div>}
           </>}
           {section === "settings" && <><PageHeading number="02" eyebrow="LIVE CONFIGURATION" title={<>The voice behind<br /><em>every answer.</em></>} description="Adjust the instructions and decision thresholds that guide the router. Saved changes apply on the next turn." />{settings && <form className="admin-form" onSubmit={(event) => { event.preventDefault(); void run(async () => setSettings(await adminRequest<Settings>("settings", { method: "PATCH", body: JSON.stringify(settings) }, token)), "Configuration saved. Changes are live for the next turn."); }}><div className="admin-form-row"><label htmlFor="model">Routing model<span>Model ID used to select a scenario</span></label><input id="model" className="admin-input" value={settings.model} onChange={(event) => setSettings({ ...settings, model: event.target.value })} required /></div><div className="admin-form-row"><label htmlFor="threshold">Confidence threshold<span>When confidence falls below this value, Butaq asks for clarification</span></label><div className="admin-threshold"><input id="threshold" type="range" min="0" max="1" step="0.01" value={settings.confidence_threshold} onChange={(event) => setSettings({ ...settings, confidence_threshold: event.target.value })} /><input aria-label="Confidence threshold value" className="admin-input" type="number" min="0" max="1" step="0.01" value={settings.confidence_threshold} onChange={(event) => setSettings({ ...settings, confidence_threshold: event.target.value })} required /></div></div><div className="admin-form-row"><label htmlFor="routing-prompt">Routing instructions<span>How the assistant selects, clarifies, or escalates a scenario</span></label><textarea id="routing-prompt" className="admin-input" rows={12} value={settings.routing_prompt} onChange={(event) => setSettings({ ...settings, routing_prompt: event.target.value })} required /></div><div className="admin-form-row"><label htmlFor="answer-prompt">Response instructions<span>How the assistant speaks once a scenario is selected</span></label><textarea id="answer-prompt" className="admin-input" rows={12} value={settings.answer_prompt} onChange={(event) => setSettings({ ...settings, answer_prompt: event.target.value })} required /></div><div className="admin-form-actions"><button type="button" className="admin-secondary" disabled={busy} onClick={() => void run(async () => setSettings(await adminRequest<Settings>("settings", {}, token)), "Latest configuration loaded.")}><RefreshCw size={16} /> Reload</button><button className="admin-primary" disabled={busy} type="submit">Save changes <ArrowRight size={17} /></button></div></form>}</>}
           {section === "scenarios" && <><PageHeading number="03" eyebrow="LIVE CATALOGUE" title={<>Every path,<br /><em>in one place.</em></>} description="Select a scenario to edit its title and JSON details. The router reads the latest catalogue on every turn." /><div className="admin-scenario-layout"><div className="admin-scenario-list"><div className="admin-list-top"><span>{scenarios.length} SCENARIOS</span><button title="Add scenario" aria-label="Add scenario" onClick={() => choose({ id: "", title: "", details: {} })}><Plus size={18} /></button></div>{scenarios.map((scenario, index) => <button className={`admin-scenario-item ${selected?.id === scenario.id ? "active" : ""}`} key={scenario.id} onClick={() => choose(scenario)}><span>{String(index + 1).padStart(2, "0")}</span><span><strong>{scenario.title}</strong><small>{scenario.id}</small></span><ArrowRight size={16} /></button>)}</div><div className="admin-editor">{selected ? <form onSubmit={(event) => { event.preventDefault(); void run(async () => { const payload = { ...selected, details: JSON.parse(details) as Record<string, unknown> }; const saved = await adminRequest<Scenario>(`scenarios/${encodeURIComponent(payload.id)}`, { method: "PUT", body: JSON.stringify(payload) }, token); await load(token); choose(saved); }, "Scenario saved and available to the router."); }}><p className="admin-kicker">SCENARIO EDITOR</p><label className="admin-label" htmlFor="scenario-id">Scenario ID</label><input id="scenario-id" className="admin-input" value={selected.id} onChange={(event) => setSelected({ ...selected, id: event.target.value })} readOnly={scenarios.some((item) => item.id === selected.id)} required /><label className="admin-label" htmlFor="scenario-title">Title</label><input id="scenario-title" className="admin-input" value={selected.title} onChange={(event) => setSelected({ ...selected, title: event.target.value })} required /><label className="admin-label" htmlFor="scenario-details">Details · JSON</label><textarea id="scenario-details" className="admin-input admin-code" rows={15} value={details} onChange={(event) => setDetails(event.target.value)} spellCheck={false} required /><div className="admin-editor-actions"><button type="submit" className="admin-primary" disabled={busy}>Save scenario <ArrowRight size={16} /></button>{scenarios.some((item) => item.id === selected.id) && <button type="button" className="admin-danger" disabled={busy} onClick={() => { if (window.confirm(`Delete ${selected.title}?`)) void run(async () => { await adminRequest(`scenarios/${encodeURIComponent(selected.id)}`, { method: "DELETE" }, token); setSelected(null); await load(token); }, "Scenario deleted."); }}><Trash2 size={16} /> Delete</button>}</div></form> : <div className="admin-empty"><Plus size={28} /><h3>Choose a scenario</h3><p>Select an item from the catalogue or create a new one to get started.</p></div>}</div></div></>}

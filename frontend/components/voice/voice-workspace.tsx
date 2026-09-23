@@ -11,7 +11,6 @@ type Readiness = "checking" | "ready" | "empty" | "offline";
 export function VoiceWorkspace() {
   const [readiness, setReadiness] = useState<Readiness>("checking");
   const [retry, setRetry] = useState(0);
-  const [demo, setDemo] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 10_000);
@@ -23,17 +22,14 @@ export function VoiceWorkspace() {
         if (!response.ok) throw new Error("Catalogue unavailable");
         const scenarios: unknown = await response.json();
         if (!Array.isArray(scenarios)) throw new Error("Invalid catalogue response");
-        if (mounted) {
-          setDemo(scenarios.some((scenario) => scenario?.details?.dataset === "butaq-demo-1"));
-          setReadiness(scenarios.length ? "ready" : "empty");
-        }
+        if (mounted) setReadiness(scenarios.length ? "ready" : "empty");
       } catch { if (mounted) setReadiness("offline"); }
       finally { clearTimeout(timeout); }
     })();
     return () => { mounted = false; clearTimeout(timeout); controller.abort(); };
   }, [retry]);
 
-  if (readiness === "ready") return <div className="w-full max-w-4xl">{demo && <p className="mt-6 text-xs text-muted-foreground">Demo insurance · 40 synthetic scenarios · no real transactions<br /><span className="mt-2 inline-block">Try: «По заявке DEMO-A-2001 деньги списались, а полиса нет»</span></p>}<VoiceSession /></div>;
+  if (readiness === "ready") return <div className="w-full max-w-4xl"><VoiceSession /></div>;
   return (
     <div className="mt-10 w-full max-w-xl">
       <div className="mx-auto h-56 w-56"><VoicePoweredOrb enableVoiceControl={false} /></div>
