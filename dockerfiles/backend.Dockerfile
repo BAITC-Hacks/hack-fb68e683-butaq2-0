@@ -15,9 +15,16 @@ COPY pyproject.toml README.md alembic.ini ./
 COPY app/ ./app/
 COPY v2v/ ./v2v/
 COPY multi-agent/src/ ./multi-agent/src/
+COPY faceid/ ./faceid/
 
-RUN pip install --no-cache-dir . && python -c "import app.main"
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential cmake && \
+    pip install --no-cache-dir . && \
+    pip uninstall -y opencv-python && pip install --no-cache-dir --force-reinstall 'opencv-python-headless>=4.10,<5' && \
+    python -c 'from insightface.app import FaceAnalysis; import app.main' && \
+    apt-get purge -y build-essential cmake && apt-get autoremove -y && rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /home/app && chown 10001:10001 /home/app
 
+ENV HOME=/home/app
 USER 10001:10001
 
 EXPOSE 8000

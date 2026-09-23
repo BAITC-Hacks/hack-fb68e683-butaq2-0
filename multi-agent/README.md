@@ -8,7 +8,7 @@ round trips inside Resolution's bounded run.
 
 All runtime implementation lives in `src/multi_agent/`. The root application's
 `RouterService` adapts its PostgreSQL catalog/settings and existing STT/TTS pipeline
-to this package. `app.domain` re-exports the same contracts for API compatibility.
+to this package. Backend API and persistence code import the contracts directly.
 The root wheel includes this package; there is no dependency on `hack-tools` or on
 an absolute developer path.
 

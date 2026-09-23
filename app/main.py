@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from v2v import register_exception_handlers
 
 from .api.routes import router
+from .api.admin_auth import auth_router
 
 app = FastAPI(title="Butaq V2V")
 app.add_middleware(
@@ -21,8 +22,10 @@ app.add_middleware(
     ],
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["Content-Type", "X-Admin-Token"],
+    allow_credentials=True,
 )
 app.include_router(router)
+app.include_router(auth_router)
 register_exception_handlers(app)
 
 

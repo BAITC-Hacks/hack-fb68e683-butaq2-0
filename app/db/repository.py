@@ -8,9 +8,9 @@ import os
 from sqlalchemy import create_engine, delete, func, select, text
 from sqlalchemy.orm import sessionmaker
 
-from app.core.prompts import ANSWER_PROMPT, ROUTING_PROMPT
-from app.domain import Catalog, Scenario
 from app.demo_catalog import load_demo_catalog
+from multi_agent.contracts import Catalog, Scenario
+from multi_agent.prompts import ANSWER_PROMPT, ROUTING_PROMPT
 
 from .models import ScenarioRecord, SettingRecord
 

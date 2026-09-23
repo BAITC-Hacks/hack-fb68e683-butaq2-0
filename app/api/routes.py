@@ -2,41 +2,23 @@
 
 from __future__ import annotations
 
-import hmac
 import json
-import os
-from functools import lru_cache
 from time import perf_counter
 from typing import Annotated, Any
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel, Field
 
-from app.db.repository import RouterDatabase
-from app.domain import Catalog, Scenario, TurnResult
+from app.api.admin_auth import require_admin
+from app.api.dependencies import get_service
+from multi_agent.contracts import Catalog, Scenario, TurnResult
 from app.services.voice_router import RouterService
-from v2v import VoicePipeline
 
 router = APIRouter(prefix="/router", tags=["Voice Router"])
 
 
-@lru_cache
-def get_service() -> RouterService:
-    database = RouterDatabase()
-    database.seed_demo_catalog()
-    return RouterService(VoicePipeline(), database=database)
-
-
 Service = Annotated[RouterService, Depends(get_service)]
-
-
-def require_admin(x_admin_token: Annotated[str | None, Header()] = None) -> None:
-    expected = os.getenv("ROUTER_ADMIN_TOKEN")
-    if not expected:
-        raise HTTPException(503, "Set ROUTER_ADMIN_TOKEN to enable catalog editing")
-    if not x_admin_token or not hmac.compare_digest(x_admin_token, expected):
-        raise HTTPException(403, "Invalid admin token")
 
 
 Admin = Annotated[None, Depends(require_admin)]

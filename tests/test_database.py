@@ -12,7 +12,7 @@ from sqlalchemy import create_engine
 
 from app.api.routes import get_service
 from app.db.repository import RouterDatabase
-from app.domain import Catalog, Scenario
+from multi_agent.contracts import Catalog, Scenario
 from app.main import app
 from app.services.voice_router import RouterService
 from tests.test_router import StubGateway, StubPipeline, decision

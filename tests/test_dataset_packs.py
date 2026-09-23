@@ -10,7 +10,7 @@ from urllib.error import URLError
 import pytest
 
 from app.demo_catalog import DEMO_DATA_DIR
-from app.domain import Catalog
+from multi_agent.contracts import Catalog
 
 DATA_ROOT = DEMO_DATA_DIR.parent / "prod"
 PACKS = [("auto", "AUT", "AUTO"), ("health", "MED", "HEALTH"), ("travel", "TRV", "TRAVEL")]

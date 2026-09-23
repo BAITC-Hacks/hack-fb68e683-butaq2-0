@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from app.domain import Catalog
+from multi_agent.contracts import Catalog
 
 DEMO_DATA_DIR = Path(__file__).parent / "data" / "demo"
 

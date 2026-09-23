@@ -12,10 +12,26 @@ for the browser-first implementation and the subsequent SignalWire integration.
 ## Start
 
 ```bash
-cp .env.example .env
-# Set V2V_API_KEY and POSTGRES_PASSWORD in .env; ROUTER_ADMIN_TOKEN is optional for admin editing
+# If .env is absent: cp .env.example .env
+# Replace the example V2V_API_KEY, ROUTER_ADMIN_TOKEN and POSTGRES_PASSWORD.
+# For the public site set ROUTER_WEBAUTHN_ORIGIN=https://owlpeer.com.
 make up
 ```
+
+The root [`.env.example`](.env.example) lists the Router, V2V and Face ID
+settings, including transcription, routing, speech, realtime and face-recognition
+models. The local `.env` is ignored by Git; keep real keys there. Compose supplies
+`DATABASE_URL` using `POSTGRES_PASSWORD`. When running FastAPI outside Compose,
+set `DATABASE_URL` separately to point to your PostgreSQL instance.
+
+**Model settings:** `ROUTER_MODEL` and `ROUTER_CONFIDENCE_THRESHOLD` are inserted
+only when the settings table is empty. To change either on an existing deployment,
+use `/admin/settings/` (or `PATCH /router/admin/settings`); changes apply on the
+next turn. `/router/voice` uses `V2V_TRANSCRIBE_MODEL`, then the live Router model
+for both decision and answer generation, then `V2V_TTS_MODEL` and `V2V_TTS_VOICE`.
+The `V2V_TEXT_MODEL` and `V2V_REALTIME_MODEL` variables belong to the standalone
+V2V library and do not override the Router model. Restart the backend to apply
+non-database environment changes.
 
 `make down` stops the stack without deleting its data; `make logs` follows the
 logs. On the server (`129.151.210.13`), clone the repository once, configure
@@ -102,7 +118,24 @@ without changing prompts or model settings. Uploads are limited to 2 MB per file
   `model`, `confidence_threshold`.
 - `PUT/DELETE /router/admin/scenarios/{scenario_id}` — edit catalog entries;
   `POST /router/admin/catalog/import-files` — atomic bulk import. Admin calls
-  require `X-Admin-Token` matching `ROUTER_ADMIN_TOKEN`.
+  require `X-Admin-Token` matching `ROUTER_ADMIN_TOKEN`, or an authenticated admin session.
+
+## Admin console and Face ID
+
+Open `/admin/` to edit settings, scenarios and import JSON files. Initially enter
+`ROUTER_ADMIN_TOKEN`. In Overview you can enroll a face (photo or camera capture)
+or a device passkey. Enrollment always requires the router token. Subsequent
+face verification or passkey sign-in creates an 8-hour HttpOnly admin session;
+signing out revokes it. Existing token-based API clients continue to work.
+
+The local `faceid/` package creates face embeddings using InsightFace and stores
+templates in PostgreSQL (`faceid_subjects`, `faceid_embeddings`); raw reference
+photos are not retained. The first face request downloads the InsightFace model.
+For production, set `ROUTER_WEBAUTHN_ORIGIN=https://owlpeer.com` (the exact frontend
+origin). Face verification uses `FACEID_MATCH_THRESHOLD` (default 0.42); adjust
+it for your enrollment population. A still image can be spoofed: for stronger
+protection use device passkeys, or enable `FACEID_OPENAI_ASSIST=true` for the
+optional image quality check. Camera access and passkeys require HTTPS or localhost.
 
 Edits are read from PostgreSQL **on the next turn**, without restarting or
 rebuilding. Default prompts and model settings are inserted only if absent.

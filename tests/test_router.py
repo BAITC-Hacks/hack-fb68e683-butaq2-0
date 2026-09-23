@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 from multi_agent.contracts import AgentFailure
 
 from app.api.routes import get_service
-from app.domain import Catalog, RoutingDecision, Scenario
+from multi_agent.contracts import Catalog, RoutingDecision, Scenario
 from app.main import app
 from app.services.voice_router import RouterService
 from v2v.pipeline import Transcript

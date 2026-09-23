@@ -21,7 +21,7 @@ from multi_agent.orchestrator import Conversation, VoiceRouterOrchestrator
 from multi_agent.sdk import SdkAgentGateway
 from pydantic import ValidationError
 
-from app.core.prompts import ANSWER_PROMPT, ROUTING_PROMPT
+from multi_agent.prompts import ANSWER_PROMPT, ROUTING_PROMPT
 from v2v import VoicePipeline
 from v2v.audio import CONTENT_TYPE_BY_FORMAT
 

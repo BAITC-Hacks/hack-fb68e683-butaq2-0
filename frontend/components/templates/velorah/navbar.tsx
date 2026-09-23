@@ -5,6 +5,7 @@ const NAV_LINKS = [
   { label: "Why Butaq", href: "/#about" },
   { label: "Voice", href: "/voice/" },
   { label: "Insights", href: "/#insights" },
+  { label: "Admin", href: "/admin/" },
 ];
 
 export function Navbar() {
