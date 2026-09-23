@@ -448,7 +448,16 @@ async def test_routing_prefix_is_stable_across_user_turns():
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("model", ["gpt-6-luna", "gpt-6-luna-2026-09-01", "gpt-4o-mini"])
+@pytest.mark.parametrize(
+    "model",
+    [
+        "gpt-6-luna",
+        "gpt-6-luna-2026-09-01",
+        "gpt-5.6-terra",
+        "gpt-5.6-terra-test-snapshot",
+        "gpt-4o-mini",
+    ],
+)
 async def test_model_reasoning_settings_reach_both_agents(model):
     transport = ResponsesTransport([
         [message(decision().model_dump_json())],
@@ -462,7 +471,7 @@ async def test_model_reasoning_settings_reach_both_agents(model):
     assert len(transport.requests) == 2
     for request in transport.requests:
         assert request["model"] == model
-        if model.startswith("gpt-6-luna"):
+        if model.startswith(("gpt-6-luna", "gpt-5.6-terra")):
             assert request["reasoning"]["effort"] == "low"
         else:
             assert request.get("reasoning") is None

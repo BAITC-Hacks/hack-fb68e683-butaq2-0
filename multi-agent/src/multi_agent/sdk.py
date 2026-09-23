@@ -128,9 +128,12 @@ class SdkAgentGateway:
 
     @staticmethod
     def _model_settings(config: RuntimeConfig) -> ModelSettings:
-        # Keep the live-tested Luna budget explicit; legacy models may not
-        # accept reasoning parameters at all.
-        if config.model == "gpt-6-luna" or config.model.startswith("gpt-6-luna-"):
+        # Preserve the low reasoning budget across the voice model migration;
+        # legacy models may not accept reasoning parameters at all.
+        if any(
+            config.model == name or config.model.startswith(name + "-")
+            for name in ("gpt-6-luna", "gpt-5.6-terra")
+        ):
             return ModelSettings(reasoning=Reasoning(effort="low"))
         return ModelSettings()
 

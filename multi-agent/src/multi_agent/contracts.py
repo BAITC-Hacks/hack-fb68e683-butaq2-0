@@ -128,7 +128,7 @@ class TurnResult(BaseModel):
     extracted_parameters: list[ExtractedParameter] = Field(default_factory=list)
 
 
-DEFAULT_MODEL = "gpt-6-luna"
+DEFAULT_MODEL = "gpt-5.6-terra"
 
 
 class RuntimeConfig(BaseModel):

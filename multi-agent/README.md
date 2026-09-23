@@ -107,10 +107,10 @@ Execution steps, example dialogues and repeated parameter-source strings are
 omitted. For the bundled 40-scenario demo, serialized catalog size changes from
 60,985 to 21,270 characters (65.1% smaller). The static catalog now precedes the
 changing dialogue, allowing a stable prompt prefix. Character reduction is not a
-measured latency reduction. Router and Resolution now default to `gpt-6-luna`
+measured latency reduction. Router and Resolution now default to `gpt-5.6-terra`
 with `reasoning.effort=low`. Existing installations retain the DB model setting;
-changing `.env` alone does not replace it. Other configured model families keep
-SDK defaults. STT/TTS use their dedicated audio models and remain buffered;
+changing `.env` alone does not replace it. The previous `gpt-6-luna` setting also retains low reasoning for rollback.
+Other configured model families keep SDK defaults. STT/TTS use their dedicated audio models and remain buffered;
 streaming is still required to start audio before full synthesis ends.
 
 A five-turn live text replay with Luna/low resolved the mixed-language policy
@@ -135,3 +135,34 @@ clarified unspecified money, and found refund DEMO-R-4001. These are four smoke
 turns, not a latency distribution or a human microphone/listening evaluation.
 See [sanitized API results](evals/live-api-smoke.jsonl); audio bytes and credentials
 are excluded. Streaming playback, interruption and durable sessions remain open.
+
+
+## Terra migration
+
+The current shared model is `gpt-5.6-terra`, with low reasoning explicitly sent
+for both Router and Resolution. The model ID and supported effort were checked
+against [official OpenAI documentation](https://developers.openai.com/api/docs/models/gpt-5.6-terra).
+Existing persisted model settings must be updated separately from environment
+seeds. Dedicated STT/TTS models, prompts, tools and session behavior are unchanged
+by this migration. Luna results above remain historical baselines.
+
+The five-turn [Terra development replay](evals/terra-low-development-replay.jsonl)
+matched all five expected action/scenario pairs, including the policy expiry,
+ambiguous money clarification and noisy refund ID. Text-only totals were
+4.3–7.1 seconds. One language-label defect remains: the first mostly Russian
+transcript was labelled `kk`, with a Kazakh rationale and a Russian spoken reply.
+This small reused development set is not a held-out quality score, and does not
+establish a speed improvement over Luna. Offline checks: 129 passed, 9 skipped.
+
+Only the Terra migration is in the current sprint. Streaming output and then
+streaming microphone/interruption are the next two sprints, awaiting the user's
+instruction; see [SPRINTS.md](SPRINTS.md).
+
+
+Deployment verification: the backend was rebuilt and restarted, and only the
+persisted DB `model` setting was changed to `gpt-5.6-terra`. A fresh live voice
+request confirmed Terra/low, transcribed the synthesized Russian input correctly,
+routed to S01 and returned 140,160 bytes of MP3 speech. Server total: 7,389 ms
+(STT 1,069; routing 2,260; response 1,570; TTS 2,479). This one buffered request
+is not a browser playback measurement or evidence of a general speedup. See
+[sanitized Terra API smoke](evals/terra-live-api-smoke.jsonl).
