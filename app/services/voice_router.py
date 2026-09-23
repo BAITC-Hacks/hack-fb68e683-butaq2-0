@@ -4,24 +4,27 @@ from __future__ import annotations
 
 import base64
 import os
+from collections.abc import Awaitable, Callable
 from time import perf_counter
 from typing import Any
 
 from fastapi import HTTPException
 from multi_agent.contracts import (
+    DEFAULT_MODEL,
     AgentFailure,
     AgentGateway,
     Catalog,
     InvalidDecision,
+    RoutingDecision,
     RuntimeConfig,
     TurnResult,
     TurnTimeout,
 )
 from multi_agent.orchestrator import Conversation, VoiceRouterOrchestrator
+from multi_agent.prompts import ANSWER_PROMPT, ROUTING_PROMPT
 from multi_agent.sdk import SdkAgentGateway
 from pydantic import ValidationError
 
-from multi_agent.prompts import ANSWER_PROMPT, ROUTING_PROMPT
 from v2v import VoicePipeline
 from v2v.audio import CONTENT_TYPE_BY_FORMAT
 
@@ -40,8 +43,9 @@ class RouterService:
         self.catalog = catalog
         self.database = database
         self.pipeline = pipeline
+        self.stream_sessions: set[str] = set()
         self.config = RuntimeConfig(
-            model=model or os.getenv("ROUTER_MODEL", "gpt-4o-mini"),
+            model=model or os.getenv("ROUTER_MODEL", DEFAULT_MODEL),
             routing_prompt=ROUTING_PROMPT,
             answer_prompt=ANSWER_PROMPT,
             confidence_threshold=(
@@ -68,7 +72,13 @@ class RouterService:
         text: str,
         stt_ms: float = 0,
         synthesize: bool = False,
+        on_route: Callable[[RoutingDecision], Awaitable[None]] | None = None,
+        delivery_id: str | None = None,
     ) -> TurnResult:
+        if delivery_id is None and session_id in self.stream_sessions:
+            raise HTTPException(
+                409, "This session already has an active voice connection"
+            )
         text = text.strip()
         if not text:
             raise HTTPException(422, "Empty utterance")
@@ -92,7 +102,12 @@ class RouterService:
 
         try:
             result = await self.orchestrator.turn(
-                session_id=session_id, text=text, catalog=catalog, config=config
+                session_id=session_id,
+                text=text,
+                catalog=catalog,
+                config=config,
+                on_route=on_route,
+                delivery_id=delivery_id,
             )
         except (InvalidDecision, AgentFailure) as exc:
             raise HTTPException(502, str(exc)) from exc

@@ -12,10 +12,12 @@ from pydantic import BaseModel, Field
 
 from app.api.admin_auth import require_admin
 from app.api.dependencies import get_service
+from app.api.streaming import router as streaming_router
 from multi_agent.contracts import Catalog, Scenario, TurnResult
 from app.services.voice_router import RouterService
 
 router = APIRouter(prefix="/router", tags=["Voice Router"])
+router.include_router(streaming_router)
 
 
 Service = Annotated[RouterService, Depends(get_service)]

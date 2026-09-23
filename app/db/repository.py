@@ -5,12 +5,12 @@ from __future__ import annotations
 import json
 import os
 
+from multi_agent.contracts import DEFAULT_MODEL, Catalog, Scenario
+from multi_agent.prompts import ANSWER_PROMPT, ROUTING_PROMPT
 from sqlalchemy import create_engine, delete, func, select, text
 from sqlalchemy.orm import sessionmaker
 
 from app.demo_catalog import load_demo_catalog
-from multi_agent.contracts import Catalog, Scenario
-from multi_agent.prompts import ANSWER_PROMPT, ROUTING_PROMPT
 
 from .models import ScenarioRecord, SettingRecord
 
@@ -34,7 +34,7 @@ class RouterDatabase:
         defaults = {
             "routing_prompt": ROUTING_PROMPT,
             "answer_prompt": ANSWER_PROMPT,
-            "model": os.getenv("ROUTER_MODEL", "gpt-4o-mini"),
+            "model": os.getenv("ROUTER_MODEL", DEFAULT_MODEL),
             "confidence_threshold": os.getenv("ROUTER_CONFIDENCE_THRESHOLD", "0.65"),
         }
         with self.session.begin() as db:

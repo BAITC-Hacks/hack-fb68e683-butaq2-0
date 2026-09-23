@@ -1,0 +1,311 @@
+{
+  "events": [
+    {
+      "direction": "client",
+      "at": 263.0999999977648,
+      "type": "start",
+      "session_id": "4b87f088-0811-4e09-a685-bf075f658358"
+    },
+    {
+      "direction": "server",
+      "at": 1459.5,
+      "type": "ready"
+    },
+    {
+      "direction": "client",
+      "at": 5279.599999997765,
+      "type": "audio.commit",
+      "turn_id": "132e6a6e-8c68-4dcf-9f07-cd887ccd7aee"
+    },
+    {
+      "direction": "server",
+      "at": 5286.800000000745,
+      "type": "turn.started",
+      "turn_id": "132e6a6e-8c68-4dcf-9f07-cd887ccd7aee"
+    },
+    {
+      "direction": "server",
+      "at": 6022.099999997765,
+      "type": "transcript.final",
+      "turn_id": "132e6a6e-8c68-4dcf-9f07-cd887ccd7aee",
+      "text": "Какие виды страхования у вас есть?"
+    },
+    {
+      "direction": "server",
+      "at": 8339.300000000745,
+      "type": "route",
+      "turn_id": "132e6a6e-8c68-4dcf-9f07-cd887ccd7aee"
+    },
+    {
+      "direction": "server",
+      "at": 10024.099999997765,
+      "type": "reply",
+      "turn_id": "132e6a6e-8c68-4dcf-9f07-cd887ccd7aee",
+      "result": {
+        "session_id": "4b87f088-0811-4e09-a685-bf075f658358",
+        "transcript": "Какие виды страхования у вас есть?",
+        "reply": "У нас есть страхование автомобиля, имущества, путешествий, здоровья и жизни. Какой вариант вас интересует?",
+        "action": "route",
+        "scenario_id": "S01",
+        "scenario_title": "Выбор страхового продукта",
+        "confidence": 0.99,
+        "reason": "Вы спрашиваете о доступных видах страхования.",
+        "alternatives": [],
+        "pending_scenario_ids": [],
+        "timings": {
+          "stt_ms": 741.1,
+          "routing_ms": 2305.3880229999777,
+          "response_ms": 1686.693423998804,
+          "tts_ms": 0,
+          "total_ms": 4741.1
+        },
+        "audio_base64": null,
+        "audio_content_type": null,
+        "trace_id": "trace_36ce7a394b2a4f2eb992315c8b2dbb43",
+        "language": "ru",
+        "topic_transition": "continue",
+        "extracted_parameters": []
+      }
+    },
+    {
+      "direction": "client",
+      "at": 10868.800000000745,
+      "type": "playback.started",
+      "turn_id": "132e6a6e-8c68-4dcf-9f07-cd887ccd7aee",
+      "latency_ms": 5555.5693333340805
+    },
+    {
+      "direction": "server",
+      "at": 11742,
+      "type": "turn.completed",
+      "turn_id": "132e6a6e-8c68-4dcf-9f07-cd887ccd7aee",
+      "result": {
+        "session_id": "4b87f088-0811-4e09-a685-bf075f658358",
+        "transcript": "Какие виды страхования у вас есть?",
+        "reply": "У нас есть страхование автомобиля, имущества, путешествий, здоровья и жизни. Какой вариант вас интересует?",
+        "action": "route",
+        "scenario_id": "S01",
+        "scenario_title": "Выбор страхового продукта",
+        "confidence": 0.99,
+        "reason": "Вы спрашиваете о доступных видах страхования.",
+        "alternatives": [],
+        "pending_scenario_ids": [],
+        "timings": {
+          "stt_ms": 741.1,
+          "routing_ms": 2305.3880229999777,
+          "response_ms": 1686.693423998804,
+          "tts_ms": 1719.2,
+          "total_ms": 6460.8
+        },
+        "audio_base64": null,
+        "audio_content_type": null,
+        "trace_id": "trace_36ce7a394b2a4f2eb992315c8b2dbb43",
+        "language": "ru",
+        "topic_transition": "continue",
+        "extracted_parameters": []
+      },
+      "metrics": {
+        "first_audio_ms": 5373,
+        "tts_ms": 1719.2,
+        "total_ms": 6460.8
+      }
+    },
+    {
+      "direction": "client",
+      "at": 19672.5,
+      "type": "playback.completed",
+      "turn_id": "132e6a6e-8c68-4dcf-9f07-cd887ccd7aee"
+    },
+    {
+      "direction": "client",
+      "at": 32717.300000000745,
+      "type": "audio.commit",
+      "turn_id": "c94709f3-f9df-402f-9a01-54fb7dfb6817"
+    },
+    {
+      "direction": "server",
+      "at": 32718.199999999255,
+      "type": "turn.started",
+      "turn_id": "c94709f3-f9df-402f-9a01-54fb7dfb6817"
+    },
+    {
+      "direction": "server",
+      "at": 33375.800000000745,
+      "type": "transcript.final",
+      "turn_id": "c94709f3-f9df-402f-9a01-54fb7dfb6817",
+      "text": "Какие виды страхования у вас есть?"
+    },
+    {
+      "direction": "server",
+      "at": 36022.39999999851,
+      "type": "route",
+      "turn_id": "c94709f3-f9df-402f-9a01-54fb7dfb6817"
+    },
+    {
+      "direction": "server",
+      "at": 37939.599999997765,
+      "type": "reply",
+      "turn_id": "c94709f3-f9df-402f-9a01-54fb7dfb6817",
+      "result": {
+        "session_id": "4b87f088-0811-4e09-a685-bf075f658358",
+        "transcript": "Какие виды страхования у вас есть?",
+        "reply": "Доступны страхование автомобиля, имущества, путешествий, здоровья и жизни. Какой вариант вас интересует?",
+        "action": "route",
+        "scenario_id": "S01",
+        "scenario_title": "Выбор страхового продукта",
+        "confidence": 0.99,
+        "reason": "Вы спрашиваете о доступных видах страхования.",
+        "alternatives": [],
+        "pending_scenario_ids": [],
+        "timings": {
+          "stt_ms": 657.5,
+          "routing_ms": 2637.8078529996856,
+          "response_ms": 1916.7765220008732,
+          "tts_ms": 0,
+          "total_ms": 5219.8
+        },
+        "audio_base64": null,
+        "audio_content_type": null,
+        "trace_id": "trace_448b95687d284e3ab7aed18b801e8d8f",
+        "language": "ru",
+        "topic_transition": "continue",
+        "extracted_parameters": []
+      }
+    },
+    {
+      "direction": "client",
+      "at": 38822.199999999255,
+      "type": "playback.started",
+      "turn_id": "c94709f3-f9df-402f-9a01-54fb7dfb6817",
+      "latency_ms": 6065.561333331083
+    },
+    {
+      "direction": "client",
+      "at": 38985.89999999851,
+      "type": "interrupt",
+      "turn_id": "c94709f3-f9df-402f-9a01-54fb7dfb6817"
+    },
+    {
+      "direction": "server",
+      "at": 38988.300000000745,
+      "type": "turn.cancelled",
+      "turn_id": "c94709f3-f9df-402f-9a01-54fb7dfb6817"
+    },
+    {
+      "direction": "client",
+      "at": 41502.89999999851,
+      "type": "audio.commit",
+      "turn_id": "8fe7295b-714b-4c38-adaa-b4d781589790"
+    },
+    {
+      "direction": "server",
+      "at": 41503.699999999255,
+      "type": "turn.started",
+      "turn_id": "8fe7295b-714b-4c38-adaa-b4d781589790"
+    },
+    {
+      "direction": "server",
+      "at": 42184,
+      "type": "transcript.final",
+      "turn_id": "8fe7295b-714b-4c38-adaa-b4d781589790",
+      "text": "Соедините меня с оператором."
+    },
+    {
+      "direction": "server",
+      "at": 45045.800000000745,
+      "type": "route",
+      "turn_id": "8fe7295b-714b-4c38-adaa-b4d781589790"
+    },
+    {
+      "direction": "server",
+      "at": 45056.599999997765,
+      "type": "reply",
+      "turn_id": "8fe7295b-714b-4c38-adaa-b4d781589790",
+      "result": {
+        "session_id": "4b87f088-0811-4e09-a685-bf075f658358",
+        "transcript": "Соедините меня с оператором.",
+        "reply": "Пожалуйста, обратитесь к оператору службы поддержки, чтобы продолжить.",
+        "action": "handoff",
+        "scenario_id": null,
+        "scenario_title": null,
+        "confidence": 0.99,
+        "reason": "Вы явно просите соединить с оператором.",
+        "alternatives": [],
+        "pending_scenario_ids": [],
+        "timings": {
+          "stt_ms": 680.3,
+          "routing_ms": 2853.0201459980162,
+          "response_ms": 0,
+          "tts_ms": 0,
+          "total_ms": 3538.7
+        },
+        "audio_base64": null,
+        "audio_content_type": null,
+        "trace_id": "trace_96ac53d3623f4fe7a415b0b27c72b3af",
+        "language": "ru",
+        "topic_transition": "continue",
+        "extracted_parameters": []
+      }
+    },
+    {
+      "direction": "client",
+      "at": 46711.89999999851,
+      "type": "playback.started",
+      "turn_id": "8fe7295b-714b-4c38-adaa-b4d781589790",
+      "latency_ms": 5172.27133333555
+    },
+    {
+      "direction": "server",
+      "at": 47400.5,
+      "type": "turn.completed",
+      "turn_id": "8fe7295b-714b-4c38-adaa-b4d781589790",
+      "result": {
+        "session_id": "4b87f088-0811-4e09-a685-bf075f658358",
+        "transcript": "Соедините меня с оператором.",
+        "reply": "Пожалуйста, обратитесь к оператору службы поддержки, чтобы продолжить.",
+        "action": "handoff",
+        "scenario_id": null,
+        "scenario_title": null,
+        "confidence": 0.99,
+        "reason": "Вы явно просите соединить с оператором.",
+        "alternatives": [],
+        "pending_scenario_ids": [],
+        "timings": {
+          "stt_ms": 680.3,
+          "routing_ms": 2853.0201459980162,
+          "response_ms": 0,
+          "tts_ms": 2354.3,
+          "total_ms": 5893.5
+        },
+        "audio_base64": null,
+        "audio_content_type": null,
+        "trace_id": "trace_96ac53d3623f4fe7a415b0b27c72b3af",
+        "language": "ru",
+        "topic_transition": "continue",
+        "extracted_parameters": []
+      },
+      "metrics": {
+        "first_audio_ms": 4990.8,
+        "tts_ms": 2354.3,
+        "total_ms": 5893.5
+      }
+    },
+    {
+      "direction": "client",
+      "at": 51532.699999999255,
+      "type": "playback.completed",
+      "turn_id": "8fe7295b-714b-4c38-adaa-b4d781589790"
+    }
+  ],
+  "stoppedSources": 13,
+  "errors": [],
+  "phase": "Ready when you are",
+  "assertions": {
+    "audio_before_full_synthesis": true,
+    "cancelled_reply_not_acknowledged": true,
+    "first_playback_ms": 5555.5693333340805,
+    "cancel_ack_ms": 2.400000002235174,
+    "synthetic_microphone": true,
+    "physical_acoustics_tested": false
+  }
+}

@@ -17,11 +17,35 @@ Production: run `docker compose up --build` from the repository root. Next.js ex
 
 The voice workspace is at `/voice/`, linked as **Voice** in the navbar. The homepage keeps the original video landing layout. The backend automatically seeds an empty database with 40 synthetic insurance scenarios, company facts and linked mock records. Voice checks readiness before opening the microphone; there is no upload form or admin token field. A small label identifies the synthetic demo. Existing imported catalogues are preserved, and the demo is not the official starter kit.
 
-Click **Talk to Butaq**, allow microphone access, speak and pause. After 850 ms of silence the browser posts a complete MediaRecorder recording to `/router/voice`, plays the returned audio, then listens for the next turn. Silent recordings are discarded. A turn is capped at 20 seconds. This is turn-based voice interaction; the microphone is not recorded during the reply, and interrupting the robot mid-reply is not supported. **End conversation** stops tracks, playback and any pending request; **New conversation** also resets the session ID and trace. The orb moves only on detected microphone speech and respects reduced-motion preferences.
+Click **Talk to Butaq**, allow microphone access, speak and pause. AudioWorklet
+captures mono PCM and resamples it to 24 kHz. The browser streams 20 ms frames over
+`/router/stream`, retaining 200 ms of pre-roll. After 500 ms of silence it commits
+the utterance; sustained speech is capped at 20 seconds. Partial transcription
+appears while speaking. Only final transcripts enter Router → Resolution.
 
-Text fallback calls `/router/text` with `synthesize: true`. Both paths use the existing backend LLM routing and v2v pipeline; no browser intent classifier or fabricated timings are used. The frontend displays the server transcript, answer, scenario, rationale, alternatives and timings. A `handoff` decision ends microphone capture but does not connect to a real operator.
+The microphone stays active during a reply. Sustained new speech or **Interrupt**
+stops queued playback immediately and invalidates the old server turn. **Send now**
+commits an in-progress utterance. **End conversation** closes capture, playback and
+the socket; **New conversation** also resets the session. Browser echo cancellation
+is requested, but microphone/speaker feedback still needs testing on real devices.
 
-For local development, run the backend at `http://localhost:8000`; its CORS defaults allow the Next dev origin. Production uses relative URLs through Caddy. Optional `NEXT_PUBLIC_API_BASE_URL` overrides the API origin at build time. Backend credentials and a loaded scenario catalogue are required; backend failures are shown in the interface. Microphone access requires HTTPS or localhost.
+The server sends a validated routing decision, then a complete validated reply,
+then PCM audio chunks as synthesis produces them. The browser schedules each chunk
+without waiting for the final audio file. It acknowledges delivery only after the
+output timeline drains; cancelled replies never receive a completion acknowledgement.
+First text, first server audio and playback onset are separate metrics; browsers
+without output timestamps explicitly label playback time as estimated.
+
+Typed messages use the same streaming path. After a streaming failure the user can
+explicitly send a typed message through the existing buffered HTTP fallback. No
+failed request is automatically resent. A `handoff` ends capture but does not connect
+a real operator. No intent classifier runs in the browser.
+
+Validation: `npm run typecheck`, `npm run build`, and `npm run test:voice` (Node 22+).
+The deterministic tests cover resampling, VAD, chunk playback, interruption and stale
+messages; these do not replace microphone/listening checks on target devices.
+
+For local development, run the backend at `http://localhost:8000`; its CORS defaults allow the Next dev origin. Production uses relative URLs through Caddy. Optional `NEXT_PUBLIC_API_BASE_URL` overrides the API origin at build time. The backend `FRONTEND_ORIGINS` must already include the exact browser origin for WebSocket access. Backend credentials and a loaded scenario catalogue are required; backend failures are shown in the interface. Microphone access requires HTTPS or localhost.
 
 ## UI structure
 

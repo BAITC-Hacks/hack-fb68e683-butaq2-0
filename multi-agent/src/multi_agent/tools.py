@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import re
 from typing import Any
 
 from .contracts import ResolutionContext
+from .identifiers import demo_record_resource, explicit_demo_ids, normalize_demo_id
 
 # These are resource types, not scenario or utterance routing rules.
 _COLLECTIONS = {
@@ -82,27 +82,31 @@ class DemoRecordLookup:
             if resource in parameter_words
         }
         self.enabled = self.enabled and bool(self._collections)
-        user_text = "\n".join(
-            [
-                entry.get("content", "")
-                for entry in context.history
-                if entry.get("role") == "user"
-            ]
-            + [context.text]
-        )
-        self._explicit_ids = {
-            identifier.upper()
-            for identifier in re.findall(
-                r"\bDEMO-[A-Za-z0-9]+(?:-[A-Za-z0-9]+)+\b", user_text, re.IGNORECASE
-            )
-        }
+        self._explicit_ids = explicit_demo_ids(context)
+
+    def available_records(self) -> list[dict[str, Any]]:
+        """Prefetch only successful, explicitly requested, scenario-scoped reads."""
+        return [
+            result
+            for identifier in sorted(self._explicit_ids)
+            if (result := self.lookup(identifier))["status"] == "found"
+        ]
 
     def lookup(self, record_id: str) -> dict[str, Any]:
-        identifier = record_id.strip().upper()
+        identifier = normalize_demo_id(record_id)
         if not self.enabled or identifier not in self._explicit_ids:
             return {
                 "status": "denied",
-                "reason": "Supply an explicit demo identifier allowed by this scenario.",
+                "reason": "explicit_identifier_required",
+                "message": "Ask the user for a complete demo identifier; do not guess it.",
+            }
+        if demo_record_resource(identifier) not in self._collections:
+            return {
+                "status": "denied",
+                "reason": "resource_not_allowed",
+                "message": "This identifier belongs to a different resource type. "
+                "Clarify the intended operation or request its identifier.",
+                "allowed_resources": sorted(self._collections),
             }
         matches = []
         for collection in sorted(self._collections):
@@ -116,7 +120,13 @@ class DemoRecordLookup:
                 and str(record.get("id", "")).upper() == identifier
             )
         if len(matches) != 1:
-            return {"status": "not_found" if not matches else "ambiguous"}
+            return {
+                "status": "not_found" if not matches else "ambiguous",
+                "record_id": identifier,
+                "snapshot_at": self._backend.get("snapshot_at"),
+                "message": "No unique record matches this exact identifier in the "
+                "allowed resources. Ask the user to verify it; do not guess another.",
+            }
         return {
             "status": "found",
             "snapshot_at": self._backend.get("snapshot_at"),

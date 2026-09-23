@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 from time import perf_counter
 from uuid import uuid4
@@ -23,6 +24,12 @@ from .contracts import (
 )
 
 
+@dataclass(frozen=True)
+class PendingDelivery:
+    turn_id: str
+    reply: str
+
+
 @dataclass
 class Conversation:
     history: list[dict[str, str]] = field(default_factory=list)
@@ -31,6 +38,7 @@ class Conversation:
     uncertain_turns: int = 0
     parameters: list[ExtractedParameter] = field(default_factory=list)
     lock: asyncio.Lock = field(default_factory=asyncio.Lock, repr=False)
+    pending_delivery: PendingDelivery | None = None
 
     def snapshot(self, catalog: Catalog) -> Conversation:
         """Prune removed scenarios in a copy so a failed turn changes no state."""
@@ -55,6 +63,7 @@ class Conversation:
         self.pending_scenarios = updated.pending_scenarios
         self.uncertain_turns = updated.uncertain_turns
         self.parameters = updated.parameters
+        self.pending_delivery = updated.pending_delivery
 
 
 def _validate(decision: RoutingDecision, context: RoutingContext) -> None:
@@ -93,23 +102,19 @@ def _validate(decision: RoutingDecision, context: RoutingContext) -> None:
                 raise InvalidDecision(
                     "Router extracted an undeclared scenario parameter"
                 )
-    if decision.action != "route":
-        return
-    if (
-        decision.topic_transition == "resume"
-        and decision.scenario_id not in context.pending_scenarios
-    ):
-        raise InvalidDecision("A resumed scenario must already be pending")
-    if decision.topic_transition == "continue" and context.active_scenario not in (
-        None,
-        decision.scenario_id,
-    ):
-        raise InvalidDecision("Continuing cannot change the active scenario")
-    if (
-        decision.topic_transition == "switch"
-        and context.active_scenario == decision.scenario_id
-    ):
-        raise InvalidDecision("Switching must change the active scenario")
+
+
+def _normalize_transition(
+    decision: RoutingDecision, context: RoutingContext
+) -> RoutingDecision:
+    """Derive the transition from a validated scenario choice and prior state."""
+    transition = "continue"
+    if decision.action == "route" and decision.scenario_id != context.active_scenario:
+        if decision.scenario_id in context.pending_scenarios:
+            transition = "resume"
+        elif context.active_scenario is not None:
+            transition = "switch"
+    return decision.model_copy(update={"topic_transition": transition})
 
 
 def _operator_message(language: str) -> str:
@@ -136,7 +141,14 @@ class VoiceRouterOrchestrator:
         self.sessions: dict[str, Conversation] = {}
 
     async def turn(
-        self, *, session_id: str, text: str, catalog: Catalog, config: RuntimeConfig
+        self,
+        *,
+        session_id: str,
+        text: str,
+        catalog: Catalog,
+        config: RuntimeConfig,
+        on_route: Callable[[RoutingDecision], Awaitable[None]] | None = None,
+        delivery_id: str | None = None,
     ) -> TurnResult:
         text = text.strip()
         if not text:
@@ -147,14 +159,44 @@ class VoiceRouterOrchestrator:
             candidate = state.snapshot(catalog)
             try:
                 result = await asyncio.wait_for(
-                    self._execute(session_id, text, catalog, config, candidate),
+                    self._execute(
+                        session_id, text, catalog, config, candidate, on_route
+                    ),
                     timeout=config.timeout_seconds,
                 )
             except asyncio.TimeoutError as exc:
                 raise TurnTimeout("Agent turn exceeded its time budget") from exc
+            if delivery_id is not None:
+                # The browser confirms delivery only after the final sample plays.
+                # An interrupted answer must never become assumed conversation context.
+                candidate.history.pop()
+                candidate.pending_delivery = PendingDelivery(delivery_id, result.reply)
             state.commit(candidate)
         result.timings.total_ms = (perf_counter() - started) * 1000
         return result
+
+    async def confirm_delivery(self, session_id: str, turn_id: str) -> None:
+        state = self.sessions.get(session_id)
+        if state is None:
+            return
+        async with state.lock:
+            pending = state.pending_delivery
+            if pending is not None and pending.turn_id == turn_id:
+                state.history = (
+                    state.history + [{"role": "assistant", "content": pending.reply}]
+                )[-20:]
+                state.pending_delivery = None
+
+    async def interrupt_delivery(self, session_id: str, turn_id: str) -> None:
+        state = self.sessions.get(session_id)
+        if state is None:
+            return
+        async with state.lock:
+            if (
+                state.pending_delivery is not None
+                and state.pending_delivery.turn_id == turn_id
+            ):
+                state.pending_delivery = None
 
     async def _execute(
         self,
@@ -163,6 +205,7 @@ class VoiceRouterOrchestrator:
         catalog: Catalog,
         config: RuntimeConfig,
         state: Conversation,
+        on_route: Callable[[RoutingDecision], Awaitable[None]] | None = None,
     ) -> TurnResult:
         context = RoutingContext(
             catalog=catalog,
@@ -207,8 +250,9 @@ class VoiceRouterOrchestrator:
                     + "; repeated uncertainty requires operator assistance",
                 }
             )
-        if decision.action != "route":
-            decision = decision.model_copy(update={"topic_transition": "continue"})
+        decision = _normalize_transition(decision, context)
+        if on_route is not None:
+            await on_route(decision)
 
         parameters = {(item.scenario_id, item.name): item for item in state.parameters}
         parameters.update(
