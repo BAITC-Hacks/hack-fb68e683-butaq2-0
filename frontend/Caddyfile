@@ -2,7 +2,11 @@
 	root * /usr/share/caddy
 	encode zstd gzip
 
-	@backend path /router /router/* /telephony /telephony/* /health /docs /docs/* /openapi.json
+	@backend {
+		path /router /router/* /telephony /telephony/* /health /docs /docs/* /openapi.json
+		# The landing page is static; nested telephony endpoints remain API routes.
+		not path /telephony /telephony/
+	}
 	handle @backend {
 		reverse_proxy backend:8000
 	}
