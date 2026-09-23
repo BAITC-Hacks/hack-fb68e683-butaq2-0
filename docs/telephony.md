@@ -48,8 +48,10 @@ fallback still handles the path; a local restart alone does not update that serv
    - Event: **`live.transport.incoming`**.
    - Copy that webhook's signing secret into `TELEPHONY_OPENAI_WEBHOOK_SECRET`.
    A `realtime.call.incoming` subscription is not the Live callback contract.
-4. Set `TELEPHONY_ENABLED=true`, then recreate the backend. Caddy now proxies
-   `/telephony` and `/telephony/*`; rebuild frontend if upgrading an older image.
+4. Set `TELEPHONY_ENABLED=true`, then recreate the backend. Caddy proxies nested
+   `/telephony/*` API endpoints, but serves `/telephony` and `/telephony/` from
+   the static frontend. Rebuild frontend if upgrading an older image:
+   `docker compose up -d --build --no-deps frontend`.
 5. Check `GET PUBLIC_BASE_URL/telephony/health`: it must return
    `{"enabled":true}` as JSON, not frontend HTML. This proves initialization,
    not carrier/SIP/audio readiness. Call the existing number to verify audio.
