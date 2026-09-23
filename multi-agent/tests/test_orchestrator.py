@@ -169,9 +169,6 @@ async def test_explicit_clarify_and_handoff_never_switch_topics(catalog, config)
         ),
         decision(None),
         decision(action="clarify"),
-        decision(topic_transition="resume"),
-        decision("address", topic_transition="continue"),
-        decision(topic_transition="switch"),
     ],
 )
 @pytest.mark.asyncio
@@ -368,3 +365,29 @@ async def test_trace_exposes_at_most_three_validated_alternatives(catalog, confi
     )
     result = await turn(VoiceRouterOrchestrator(gateway), catalog, config)
     assert len(result.alternatives) == 3
+
+
+@pytest.mark.parametrize("model_transition", ["continue", "switch", "resume"])
+@pytest.mark.parametrize(
+    "active,pending,target,expected",
+    [
+        (None, [], "payment", "continue"),
+        ("payment", [], "payment", "continue"),
+        ("payment", [], "address", "switch"),
+        ("payment", ["address"], "address", "resume"),
+    ],
+)
+@pytest.mark.asyncio
+async def test_valid_target_normalizes_transition_without_extra_calls(
+    catalog, config, model_transition, active, pending, target, expected
+):
+    gateway = Gateway(decision(target, topic_transition=model_transition))
+    core = VoiceRouterOrchestrator(gateway)
+    core.sessions["caller"] = Conversation(
+        active_scenario=active, pending_scenarios=pending
+    )
+    result = await turn(core, catalog, config)
+    assert result.scenario_id == target
+    assert result.topic_transition == expected
+    assert gateway.resolution[0].decision.topic_transition == expected
+    assert len(gateway.routing) == len(gateway.resolution) == 1
