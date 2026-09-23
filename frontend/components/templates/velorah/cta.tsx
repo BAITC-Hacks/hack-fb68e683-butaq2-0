@@ -41,7 +41,7 @@ export function Cta() {
             href="/voice/"
             className="rounded-full border border-border px-10 py-4 text-sm text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
           >
-            Start a conversation
+            Talk to Butaq
           </a>
         </div>
       </div>
