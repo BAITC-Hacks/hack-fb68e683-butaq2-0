@@ -1,9 +1,10 @@
 # Multi-agent voice runtime
 
-The browser's `/router/stream` WebSocket and the existing `/router/voice` and
-`/router/text` fallback endpoints use one Python
-orchestrator with two OpenAI Agents SDK agents: Router and Resolution. The Router
-runs on every turn; Resolution runs only after Python accepts a route. Clarification
+Native browser voice uses `/router/live` for signaling and backend events, with
+GPT-Live carrying audio over WebRTC. Its delegated insurance requests, the
+`/router/stream` PCM transport and the existing `/router/voice` and `/router/text`
+endpoints share one Python orchestrator with two OpenAI Agents SDK agents:
+Router and Resolution. The Router runs on every delegated or explicit API turn; Resolution runs only after Python accepts a route. Clarification
 and requests for an operator do not add another agent call. Tool calls can add model
 round trips inside Resolution's bounded run.
 
@@ -14,15 +15,18 @@ The root wheel includes this package; there is no dependency on `hack-tools` or 
 an absolute developer path.
 
 ```text
-Browser PCM microphone → live STT ┐
-Text fallback ──────────────────┴→ RouterService
-                                  ↓
-                         VoiceRouterOrchestrator
-                           Router → Python policy
-                                      ↓
-                         Resolution + read-only tools
-                                      ↓
-                            validated reply + trace → streamed PCM TTS
+Browser microphone ↔ GPT-Live (WebRTC) ↔ spoken response
+                          ↓ client delegation ↑ verified commentary
+                    LiveConversation (sideband)
+                          ↓
+Text / legacy PCM → RouterService
+                          ↓
+                 VoiceRouterOrchestrator
+                    Router → Python policy
+                                ↓
+                     Resolution + read-only tools
+                                ↓
+                      validated reply + trace
 ```
 
 ## Run and check
@@ -172,7 +176,7 @@ is not a browser playback measurement or evidence of a general speedup. See
 
 ## Streaming voice and interruption
 
-`/router/stream` is the primary browser transport. A `start` event supplies a
+`/router/stream` is the PCM browser transport, retained alongside native Live. A `start` event supplies a
 session ID and mode (`voice` or `text`). The service replies `ready` after setup.
 Only one socket owns a session; concurrent HTTP turns for that session return 409.
 The strict `FRONTEND_ORIGINS` list must include the browser origin. It was not
@@ -241,3 +245,70 @@ was handled and acknowledged normally. See [browser events and assertions](evals
 These measurements do not include room acoustics, physical microphone quality,
 mobile browser checks, or the 500 ms VAD silence window. Terra remains the shared
 model and no general latency distribution or sub-second response is claimed.
+
+
+## Native GPT-Live with Terra
+
+`/router/live` exchanges a WebRTC SDP offer/answer and UI events with the browser.
+Microphone and generated speech travel on the negotiated WebRTC media tracks;
+there is no separate STT → TTS chain for this transport. The trusted backend
+attaches a sideband to the same Live session and owns all insurance delegation.
+API credentials never enter the browser. The browser data channel cannot append
+instructions or fabricated backend results.
+
+```dotenv
+MULTI_AGENT_LIVE_MODEL=gpt-live-1
+MULTI_AGENT_LIVE_VOICE=marin
+ROUTER_MODEL=gpt-5.6-terra
+```
+
+The Live frontend model is separate from the shared Router/Resolution model.
+Terra keeps its `low` reasoning setting. An existing database model setting still
+overrides the `ROUTER_MODEL` seed; changing that environment variable alone does
+not migrate a persisted selection. The Live SDK surface requires OpenAI Python
+3.19 or newer, as declared in the root package.
+
+Live decides when to delegate using its startup policy: insurance questions,
+corrections and record identifiers go to the same validated Terra decision
+service; greetings and acknowledgements can remain in Live. The backend returns
+short verified commentary for Live to speak. Commentary may be paraphrased, so
+native audio is not identical to the fully validated PCM TTS path and is not
+pre-screened before playback. Delegation policy and RU/KZ pronunciation need
+end-to-end voice evaluation; no native Live latency or quality result is claimed
+by the earlier PCM measurements.
+
+Recent Live captions reach both Terra agents as bounded
+`observed_native_voice_context`, separate from delivered conversation history.
+This helps interpret replies such as “yes” after a spoken clarification. Captions
+are generated text with unconfirmed playback: they cannot establish acceptance,
+completed actions or record access, and assistant captions cannot authorize demo
+identifiers. Backend drafts are never automatically marked as heard. Transcript
+fragments have approximate timestamps and no completed-turn event; grouping them
+around delegation is an application heuristic rather than a provider guarantee.
+
+Sessions remain in memory, `store` is false, and native audio has no per-answer
+playback-completed event. Reconnect therefore does not restore a recorded voice
+session or certify that an interrupted answer was delivered. SignalWire/SIP is
+still a separate integration.
+
+Contracts were checked against the official [Live session guide](https://developers.openai.com/api/docs/guides/live-conversations),
+[client delegation guide](https://developers.openai.com/api/docs/guides/live-delegation)
+and [trusted sideband controls](https://developers.openai.com/api/docs/guides/voice-server-controls?api=live).
+
+
+Native Live verification on localhost (2026-09-23): 22 new Python regressions
+and 17 frontend tests passed; TypeScript and production builds passed. A real
+provider/WebRTC call in Chromium used a synthetic Russian microphone input,
+routed to S01, and played the backend-grounded native response. RTP decoding
+reported nonzero audio energy and 1,360,800 received samples. End conversation
+closed the peer, stopped the microphone, paused/detached audio and closed the
+application AudioContext. Remote playback uses an HTMLAudioElement; WebAudio
+only measures levels, avoiding the observed decoder stall and duplicate sound.
+
+For that one turn, the first acknowledgement caption arrived 0.984 seconds after
+the input ended; the substantive answer caption began after 5.752 seconds.
+Backend routing/resolution took 4.113 seconds. Caption timestamps approximate
+response onset, not exact first audible sample latency. This is one development
+smoke, not a latency distribution. Physical microphones, Firefox playback,
+room-acoustic interruption and SignalWire were not verified by this check.
+See [sanitized native smoke](evals/live-native-smoke.json).

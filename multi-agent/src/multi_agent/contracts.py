@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Literal, Protocol
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -155,6 +155,25 @@ class RoutingContext:
     parameters: list[ExtractedParameter]
     trace_id: str
     session_id: str
+    voice_context: list[dict[str, str]] = field(default_factory=list, kw_only=True)
+
+    def __post_init__(self) -> None:
+        # Provider captions help interpret short follow-ups, but are not delivered
+        # history or record authorization. Copy and bound this transient snapshot.
+        remaining = 8000
+        bounded: list[dict[str, str]] = []
+        for entry in reversed(self.voice_context[-20:]):
+            if entry.get("role") not in {"user", "assistant"}:
+                continue
+            content = entry.get("content", "")
+            if not isinstance(content, str) or not content.strip():
+                continue
+            content = content[-min(2000, remaining) :]
+            bounded.append({"role": entry["role"], "content": content})
+            remaining -= len(content)
+            if remaining <= 0:
+                break
+        object.__setattr__(self, "voice_context", list(reversed(bounded)))
 
 
 @dataclass(frozen=True)

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { requestTurn, type TurnResult, type LiveRoutingDecision } from "@/lib/voice-api";
 import { VoiceStream, type VoicePhase } from "@/lib/voice-stream";
+import { VoiceLive, type LiveCaption } from "@/lib/voice-live";
 
 export type { VoicePhase } from "@/lib/voice-stream";
 
@@ -12,12 +13,14 @@ export function useVoiceSession() {
   const [turns, setTurns] = useState<TurnResult[]>([]);
   const [voiceDetected, setVoiceDetected] = useState(false);
   const [transcript, setTranscript] = useState("");
+  const [liveCaptions, setLiveCaptions] = useState<LiveCaption[]>([]);
+  const [nativeVoice, setNativeVoice] = useState(false);
   const [routingDecision, setRoutingDecision] = useState<LiveRoutingDecision | null>(null);
   const level = useRef(0);
   const phaseRef = useRef<VoicePhase>("idle");
   const epoch = useRef(0);
   const sessionId = useRef<string | null>(null);
-  const connection = useRef<VoiceStream | null>(null);
+  const connection = useRef<VoiceStream | VoiceLive | null>(null);
   const controller = useRef<AbortController | null>(null);
   const fallbackContext = useRef<AudioContext | null>(null);
   const fallbackPlayback = useRef<AudioBufferSourceNode | null>(null);
@@ -52,31 +55,46 @@ export function useVoiceSession() {
     const run = ++epoch.current;
     setError(null);
     sessionId.current ??= crypto.randomUUID();
-    const call = new VoiceStream(sessionId.current, {
-      phase: (value) => { if (epoch.current === run) changePhase(value); },
-      error: (message) => { if (epoch.current === run) setError(message); },
-      route: (decision) => { if (epoch.current === run) setRoutingDecision(decision); },
-      transcript: (text) => { if (epoch.current === run) setTranscript(text); },
-      level: (value, voiced) => {
+    setNativeVoice(mode === "voice");
+    const callbacks = {
+      phase: (value: VoicePhase) => { if (epoch.current === run) changePhase(value); },
+      error: (message: string) => { if (epoch.current === run) setError(message); },
+      route: (decision: LiveRoutingDecision | null) => { if (epoch.current === run) setRoutingDecision(decision); },
+      transcript: (text: string) => { if (epoch.current === run) setTranscript(text); },
+      level: (value: number, voiced: boolean) => {
         if (epoch.current !== run) return;
         level.current = value;
         setVoiceDetected(voiced);
       },
-      result: (result) => {
+      result: (result: TurnResult) => {
         if (epoch.current !== run) return;
         setTurns((previous) => {
           const existing = previous.findIndex((turn) => turn.turn_id === result.turn_id);
           return (existing < 0 ? [...previous, result] : previous.map((turn, index) => index === existing ? result : turn)).slice(-10);
         });
       },
-    });
+    };
+    const call = mode === "voice" ? new VoiceLive(sessionId.current, {
+      ...callbacks,
+      caption: (caption) => {
+        if (epoch.current !== run) return;
+        setLiveCaptions((previous) => {
+          const last = previous.at(-1);
+          if (last?.speaker === caption.speaker && caption.start_ms >= last.start_ms && caption.start_ms - last.end_ms < 1500) {
+            return [...previous.slice(0, -1), { ...last, text: last.text + caption.text, end_ms: caption.end_ms }];
+          }
+          return [...previous, caption].slice(-30);
+        });
+      },
+    }) : new VoiceStream(sessionId.current, callbacks);
     connection.current = call;
-    await call.start(mode, text);
+    if (call instanceof VoiceLive) await call.start();
+    else await call.start(mode, text);
   }, [changePhase]);
 
   const start = useCallback(() => open("voice"), [open]);
   const sendText = useCallback(async (text: string) => { if (text.trim()) await open("text", text.trim()); }, [open]);
-  const commit = useCallback(() => connection.current?.commit(), []);
+  const commit = useCallback(() => { if (connection.current instanceof VoiceStream) connection.current.commit(); }, []);
   const interrupt = useCallback(() => {
     if (connection.current) connection.current.interrupt();
     else stop();
@@ -123,6 +141,6 @@ export function useVoiceSession() {
     }
   }, [changePhase, stop]);
 
-  const reset = useCallback(() => { stop(); sessionId.current = null; setTurns([]); setError(null); }, [stop]);
-  return { phase, error, turns, level, voiceDetected, transcript, routingDecision, start, stop, sendText, sendTextFallback, commit, interrupt, reset };
+  const reset = useCallback(() => { stop(); sessionId.current = null; setTurns([]); setLiveCaptions([]); setError(null); }, [stop]);
+  return { phase, error, turns, level, voiceDetected, transcript, liveCaptions, nativeVoice, routingDecision, start, stop, sendText, sendTextFallback, commit, interrupt, reset };
 }

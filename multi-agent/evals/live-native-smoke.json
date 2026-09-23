@@ -1,0 +1,23 @@
+{
+  "transport": "GPT-Live WebRTC",
+  "browser": "Chromium",
+  "microphone": "synthetic recorded Russian question with continuous silence",
+  "scenario": "S01",
+  "language": "ru",
+  "transcript": "Какие виды страхования у вас есть",
+  "backend_reply": "Есть страхование автомобиля, имущества, путешествий, здоровья и жизни. Что именно хотите защитить?",
+  "spoken_caption": " Сейчас проверю доступные варианты. У нас есть страхование автомобиля, имущества, путешествий, здоровья и жизни. Уточните, пожалуйста, что именно вы хотите защитить?",
+  "backend_ms": 4112.9,
+  "first_acknowledgement_caption_after_input_ms": 984,
+  "first_answer_caption_after_input_ms": 5752,
+  "received_audio_samples": 1360800,
+  "received_audio_energy": 0.3268916225828777,
+  "audio_playing": true,
+  "stop": {
+    "peer_closed": true,
+    "microphone_stopped": true,
+    "audio_paused": true,
+    "audio_source_cleared": true,
+    "context_closed": true
+  }
+}
