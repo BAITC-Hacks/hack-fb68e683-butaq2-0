@@ -34,6 +34,8 @@ class TextRequest(BaseModel):
 
 @router.post("/text", response_model=TurnResult)
 async def text_turn(body: TextRequest, service: Service) -> TurnResult:
+    if body.session_id.startswith("phone:"):
+        raise HTTPException(422, "Reserved session namespace")
     return await service.turn(
         session_id=body.session_id, text=body.text, synthesize=body.synthesize
     )
@@ -45,6 +47,8 @@ async def voice_turn(
     audio: Annotated[UploadFile, File()],
     session_id: Annotated[str, Form(min_length=1, max_length=128)],
 ) -> TurnResult:
+    if session_id.startswith("phone:"):
+        raise HTTPException(422, "Reserved session namespace")
     if service.database is not None and service.database.count_scenarios() == 0:
         raise HTTPException(503, "No scenarios configured: import the starter-kit catalogue before starting a conversation")
     started = perf_counter()
@@ -68,6 +72,8 @@ async def scenarios(service: Service) -> list[Scenario]:
 
 @router.get("/sessions/{session_id}")
 async def session(session_id: str, service: Service) -> dict[str, Any]:
+    if session_id.startswith("phone:"):
+        raise HTTPException(404, "Use authenticated telephony trace endpoints")
     state = service.sessions.get(session_id)
     if state is None:
         raise HTTPException(404, "Unknown session")

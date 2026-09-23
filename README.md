@@ -163,6 +163,15 @@ multi-worker or persistent sessions.
 
 ## Local development and tests
 
+### Optional inbound telephony
+
+The phone adapter now shares the browser's Router → Resolution agents and active
+catalogue. It is **disabled by default**; number purchase, production proxy setup,
+and real-call verification remain TODO. Outbound calls and human transfer are not
+enabled. See [telephony setup, API and offline tests](docs/telephony.md).
+
+### Browser/backend development
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
