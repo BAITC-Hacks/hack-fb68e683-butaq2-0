@@ -1,55 +1,58 @@
-"""Integrity checks for the synthetic dataset, not claims of LLM accuracy."""
+"""Integrity and executable-workflow checks for the bundled starter kit."""
 
-import json
-import re
-
-from app.demo_catalog import DEMO_DATA_DIR, load_demo_catalog
+from app.demo_catalog import STARTER_DATA_DIR, load_demo_catalog
+from multi_agent.simulation import SUPPORTED_ACTIONS
 
 
-def test_scenarios_are_complete_and_bilingual() -> None:
+def test_starter_catalog_is_complete_bilingual_and_executable() -> None:
     catalog = load_demo_catalog()
-    assert len(catalog.scenarios) == 40
+    assert set(catalog.scenarios) == {f"SC{index:02}" for index in range(1, 41)}
+    assert catalog.slots and catalog.actions
+    referenced_actions = set()
     for scenario in catalog.scenarios.values():
         details = scenario.details
-        assert details["dataset"] == "butaq-demo-1"
-        assert details["purpose"] and details["boundaries"]
-        assert details["actions"]["executes_mutations"] is False
-        assert {e["language"] for e in details["examples"]} == {"ru", "kk"}
-        assert all(e["request"] and e["response"] for e in details["examples"])
-        assert all(ref in catalog.knowledge for ref in details["knowledge_refs"])
-        assert set(re.findall(r"S\d{2}", details["boundaries"])) <= catalog.scenarios.keys()
+        assert details["description"] and isinstance(details["not_this_if"], list)
+        assert (
+            set(details["slots"]["required"] + details["slots"]["optional"])
+            <= catalog.slots.keys()
+        )
+        assert set(details["examples"]) == {"ru", "kk"}
+        referenced_actions.update(details["actions"])
+    assert referenced_actions == set(catalog.actions) == set(SUPPORTED_ACTIONS)
 
 
-def test_mock_records_have_consistent_links_and_states() -> None:
-    data = load_demo_catalog().backend
-    groups = [value for value in data.values() if isinstance(value, list)]
-    records = {row["id"]: row for group in groups for row in group}
-    assert len(records) == sum(len(group) for group in groups)
-    assert data["synthetic"] and data["read_only"]
-    for row in records.values():
-        for key in ("customer_id", "policy_id", "application_id", "payment_id", "refund_id", "claim_id", "payout_id", "document_id", "delivery_id", "receipt_id", "duplicate_of"):
-            if row.get(key):
-                assert row[key] in records, (row["id"], key)
-        for key in ("policy_ids", "application_ids", "payment_ids"):
-            assert all(identifier in records for identifier in row.get(key, []))
-    assert records["DEMO-A-2001"]["policy_id"] is None
-    assert records["DEMO-T-3001"]["status"] == "settled"
-    assert records["DEMO-R-4001"]["status"] == "sent"
-    assert records["DEMO-R-4001"]["credited_at"] is None
-    assert records["DEMO-C-5003"]["approved_payout_kzt"] == records["DEMO-PO-7001"]["amount_kzt"]
-
-
-def test_evaluation_labels_and_dialogue_lengths() -> None:
+def test_irreversible_actions_and_scenarios_require_confirmation() -> None:
     catalog = load_demo_catalog()
-    cases = json.loads((DEMO_DATA_DIR / "dev_utterances.json").read_text())["utterances"]
-    dialogs = json.loads((DEMO_DATA_DIR / "dialogs_sample.json").read_text())["dialogs"]
-    assert len(cases) == 48
-    assert len(dialogs) == 10
-    assert {case["tests_scenario"] for case in cases if "tests_scenario" in case} == catalog.scenarios.keys()
-    assert all(1 <= len(dialog["turns"]) <= 10 for dialog in dialogs)
-    for turn in cases + [turn for dialog in dialogs for turn in dialog["turns"]]:
-        if turn["expected_action"] == "route":
-            assert turn["expected_scenario_id"] in catalog.scenarios
-        else:
-            assert turn["expected_scenario_id"] is None
-        assert set(turn.get("expected_pending", [])) <= catalog.scenarios.keys()
+    irreversible = {
+        name for name, action in catalog.actions.items() if action["irreversible"]
+    }
+    assert len(irreversible) == 9
+    confirming = [
+        scenario
+        for scenario in catalog.scenarios.values()
+        if scenario.details["requires_confirmation"]
+    ]
+    assert len(confirming) == 14
+    for scenario in confirming:
+        assert irreversible.intersection(scenario.details["actions"])
+
+
+def test_starter_annotations_cover_all_scenarios_and_languages() -> None:
+    catalog = load_demo_catalog()
+    cases = catalog.dev_utterances["utterances"]
+    dialogs = catalog.dialogs_sample["dialogs"]
+    assert len(cases) == 104 and len(dialogs) == 10
+    expected = {
+        sid for case in cases for sid in case["expected"] if sid.startswith("SC")
+    }
+    assert expected == catalog.scenarios.keys()
+    assert {case["lang"] for case in cases} == {"ru", "kk", "mixed"}
+    assert all(2 <= len(dialog["turns"]) <= 12 for dialog in dialogs)
+
+
+def test_mock_backend_remains_read_only_during_catalog_load() -> None:
+    before = (STARTER_DATA_DIR / "mock_backend.json").read_bytes()
+    first = load_demo_catalog().backend
+    second = load_demo_catalog().backend
+    assert first == second
+    assert (STARTER_DATA_DIR / "mock_backend.json").read_bytes() == before

@@ -129,6 +129,14 @@ class SdkAgentGateway:
             "routing_decision": decision.model_dump(),
             "verified_records": records,
             "available_tools": [tool.name for tool in tools],
+            "workflow": {
+                "status": context.workflow_status,
+                "collected_slots": context.collected_slots,
+                "missing_slots": context.missing_slots,
+                "confirmation_required": context.confirmation_required,
+                "action_trace": [item.model_dump() for item in context.action_trace],
+                "simulation_only": True,
+            },
         }
         output = await self._run(
             agent, payload, context, config, max_turns=config.resolution_max_turns

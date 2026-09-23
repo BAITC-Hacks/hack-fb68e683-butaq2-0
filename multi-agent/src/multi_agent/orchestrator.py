@@ -22,6 +22,13 @@ from .contracts import (
     TurnResult,
     TurnTimeout,
 )
+from .workflow import (
+    ScenarioProgress,
+    WorkflowOutcome,
+    advance_workflow,
+    confirmation_intent,
+    is_executable_scenario,
+)
 
 
 @dataclass(frozen=True)
@@ -37,6 +44,7 @@ class Conversation:
     pending_scenarios: list[str] = field(default_factory=list)
     uncertain_turns: int = 0
     parameters: list[ExtractedParameter] = field(default_factory=list)
+    workflows: dict[str, ScenarioProgress] = field(default_factory=dict)
     lock: asyncio.Lock = field(default_factory=asyncio.Lock, repr=False)
     pending_delivery: PendingDelivery | None = None
 
@@ -55,6 +63,11 @@ class Conversation:
                 for item in self.parameters
                 if item.scenario_id in valid
             ],
+            workflows={
+                sid: progress.copy()
+                for sid, progress in self.workflows.items()
+                if sid in valid
+            },
         )
 
     def commit(self, updated: Conversation) -> None:
@@ -63,6 +76,7 @@ class Conversation:
         self.pending_scenarios = updated.pending_scenarios
         self.uncertain_turns = updated.uncertain_turns
         self.parameters = updated.parameters
+        self.workflows = updated.workflows
         self.pending_delivery = updated.pending_delivery
 
 
@@ -80,7 +94,12 @@ def _validate(decision: RoutingDecision, context: RoutingContext) -> None:
     if (decision.action == "route") != (decision.scenario_id is not None):
         raise InvalidDecision("Only a route decision must specify a primary scenario")
     for item in decision.extracted_parameters:
-        declared = catalog.scenarios[item.scenario_id].details.get("parameters")
+        details = catalog.scenarios[item.scenario_id].details
+        declared = details.get("parameters")
+        if declared is None and isinstance(details.get("slots"), dict):
+            declared = list(details["slots"].get("required", [])) + list(
+                details["slots"].get("optional", [])
+            )
         if declared is not None:
             if isinstance(declared, dict):
                 entries = list(declared)
@@ -119,8 +138,10 @@ def _normalize_transition(
 
 def _operator_message(language: str) -> str:
     if language == "kk":
-        return "Жалғастыру үшін қолдау қызметінің операторына хабарласыңыз."
-    return "Пожалуйста, обратитесь к оператору службы поддержки, чтобы продолжить."
+        return "Операторға арналған контекст дайындалды; демо-нұсқада нақты қосылу орындалмайды."
+    return (
+        "Контекст для оператора подготовлен; фактического соединения в демо-версии нет."
+    )
 
 
 def _clarification_message(language: str) -> str:
@@ -229,7 +250,30 @@ class VoiceRouterOrchestrator:
         )
         timings = Timings()
         started = perf_counter()
-        decision = await self.gateway.route(context, config)
+        active_progress = state.workflows.get(state.active_scenario or "")
+        confirmation = confirmation_intent(text)
+        if (
+            state.active_scenario in catalog.scenarios
+            and active_progress is not None
+            and active_progress.awaiting_confirmation
+            and confirmation != "unknown"
+        ):
+            language = (
+                "kk"
+                if confirmation_intent(text) != "unknown"
+                and any(char in text.casefold() for char in "әіңғүұқөһ")
+                else "ru"
+            )
+            decision = RoutingDecision(
+                action="route",
+                scenario_id=state.active_scenario,
+                confidence=1,
+                reason="Explicit response to the pending confirmation",
+                customer_message="Continue the active scenario",
+                language=language,
+            )
+        else:
+            decision = await self.gateway.route(context, config)
         timings.routing_ms = (perf_counter() - started) * 1000
         _validate(decision, context)
         if (
@@ -251,7 +295,10 @@ class VoiceRouterOrchestrator:
         state.uncertain_turns = (
             state.uncertain_turns + 1 if decision.action == "clarify" else 0
         )
-        if decision.action == "clarify" and state.uncertain_turns >= 2:
+        if (
+            decision.action == "clarify"
+            and state.uncertain_turns >= config.max_uncertain_turns
+        ):
             decision = decision.model_copy(
                 update={
                     "action": "handoff",
@@ -272,6 +319,13 @@ class VoiceRouterOrchestrator:
             }
         )
         state.parameters = list(parameters.values())
+        workflow = WorkflowOutcome(
+            status="idle",
+            slots={},
+            missing=[],
+            confirmation_required=False,
+            traces=[],
+        )
         if decision.action == "route":
             pending = (
                 state.pending_scenarios
@@ -283,25 +337,47 @@ class VoiceRouterOrchestrator:
             state.pending_scenarios = list(
                 dict.fromkeys(sid for sid in pending if sid != decision.scenario_id)
             )[:5]
-            resolution = ResolutionContext(
-                catalog=catalog,
-                text=text,
-                history=state.history,
-                active_scenario=state.active_scenario,
-                pending_scenarios=state.pending_scenarios,
-                parameters=[
-                    item
-                    for item in state.parameters
-                    if item.scenario_id == decision.scenario_id
-                ],
-                trace_id=context.trace_id,
-                session_id=session_id,
-                decision=decision,
-                voice_context=context.voice_context,
-            )
-            started = perf_counter()
-            reply = await self.gateway.resolve(resolution, config)
-            timings.response_ms = (perf_counter() - started) * 1000
+            scenario = catalog.scenarios[decision.scenario_id]
+            if config.workflow_enabled and is_executable_scenario(catalog, scenario):
+                progress = state.workflows.setdefault(
+                    decision.scenario_id, ScenarioProgress()
+                )
+                workflow = advance_workflow(
+                    catalog=catalog,
+                    scenario=scenario,
+                    progress=progress,
+                    parameters=decision.extracted_parameters,
+                    text=text,
+                    language=decision.language,
+                    session_id=session_id,
+                )
+            if workflow.deterministic_reply is not None:
+                reply = workflow.deterministic_reply
+            else:
+                resolution = ResolutionContext(
+                    catalog=catalog,
+                    text=text,
+                    history=state.history,
+                    active_scenario=state.active_scenario,
+                    pending_scenarios=state.pending_scenarios,
+                    parameters=[
+                        item
+                        for item in state.parameters
+                        if item.scenario_id == decision.scenario_id
+                    ],
+                    trace_id=context.trace_id,
+                    session_id=session_id,
+                    decision=decision,
+                    workflow_status=workflow.status,
+                    collected_slots=workflow.slots,
+                    missing_slots=workflow.missing,
+                    confirmation_required=workflow.confirmation_required,
+                    action_trace=workflow.traces,
+                    voice_context=context.voice_context,
+                )
+                started = perf_counter()
+                reply = await self.gateway.resolve(resolution, config)
+                timings.response_ms = (perf_counter() - started) * 1000
             state.active_scenario = decision.scenario_id
         elif decision.action == "handoff":
             reply = _operator_message(decision.language)
@@ -337,4 +413,10 @@ class VoiceRouterOrchestrator:
             language=decision.language,
             topic_transition=decision.topic_transition,
             extracted_parameters=decision.extracted_parameters,
+            workflow_status=workflow.status,
+            collected_slots=workflow.slots,
+            missing_slots=workflow.missing,
+            confirmation_required=workflow.confirmation_required,
+            action_trace=workflow.traces,
+            completed=workflow.completed,
         )

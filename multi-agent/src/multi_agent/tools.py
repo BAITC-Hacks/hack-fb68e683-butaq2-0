@@ -28,8 +28,15 @@ def scenario_knowledge(context: ResolutionContext) -> dict[str, Any]:
     if not isinstance(knowledge, dict):
         return {}
     references = scenario.details.get("knowledge_refs", [])
+    if references is None:
+        references = []
     if not isinstance(references, list):
         return {}
+    if not references:
+        # The official starter kit is a single synthetic document and does not
+        # declare per-scenario references. It is safe to expose that document
+        # to Resolution; imported catalogues can opt into stricter references.
+        return knowledge
     selected = {
         key: knowledge[key]
         for key in references

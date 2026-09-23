@@ -72,6 +72,43 @@ def test_migration_catalog_replacement_and_live_settings(
     assert database.count_scenarios() == 39
 
 
+def test_backend_startup_seeds_all_case2_json_once(
+    database: RouterDatabase, monkeypatch
+) -> None:
+    """The application lifecycle, not a demo click, bootstraps an empty database."""
+    monkeypatch.setattr("app.api.dependencies.VoicePipeline", StubPipeline)
+    app.dependency_overrides.pop(get_service, None)
+    get_service.cache_clear()
+    try:
+        with TestClient(app) as client:
+            assert client.get("/health").json() == {"status": "ok"}
+
+        catalog = database.catalog()
+        assert len(catalog.scenarios) == 40
+        assert len(catalog.slots) == 43
+        assert len(catalog.actions) == 31
+        assert len(catalog.dev_utterances["utterances"]) == 104
+        assert len(catalog.dialogs_sample["dialogs"]) == 10
+
+        edited = catalog.scenarios["SC01"].model_copy(
+            update={"title": "Administrator edit kept across restart"}
+        )
+        database.upsert_scenario(edited)
+        get_service().database.engine.dispose()
+        get_service.cache_clear()
+
+        with TestClient(app) as client:
+            assert client.get("/health").status_code == 200
+        assert (
+            database.catalog().scenarios["SC01"].title
+            == "Administrator edit kept across restart"
+        )
+    finally:
+        if get_service.cache_info().currsize:
+            get_service().database.engine.dispose()
+        get_service.cache_clear()
+
+
 def test_admin_import_and_live_prompt_are_used_by_next_turn(
     database: RouterDatabase, monkeypatch
 ) -> None:
@@ -101,11 +138,28 @@ def test_admin_import_and_live_prompt_are_used_by_next_turn(
                         "scenarios.json",
                         b'{"scenarios":[{"scenario_id":"a","name":"Payment"}]}',
                         "application/json",
-                    )
+                    ),
+                    "dev_utterances": (
+                        "dev_utterances.json",
+                        b'{"utterances":[{"id":"u1","text":"test","expected":["a"]}]}',
+                        "application/json",
+                    ),
+                    "dialogs_sample": (
+                        "dialogs_sample.json",
+                        b'{"dialogs":[{"dialog_id":"d1","turns":[]}]}',
+                        "application/json",
+                    ),
                 },
             )
             assert uploaded.status_code == 200
             assert uploaded.json() == {"count": 1}
+            assert (
+                service.database.catalog().dev_utterances["utterances"][0]["id"] == "u1"
+            )
+            assert (
+                service.database.catalog().dialogs_sample["dialogs"][0]["dialog_id"]
+                == "d1"
+            )
             changed = client.patch(
                 "/router/admin/settings",
                 headers=headers,
@@ -133,8 +187,13 @@ def test_demo_seed_is_atomic_and_preserves_existing_edits(
 ) -> None:
     assert database.seed_demo_catalog() is True
     assert database.count_scenarios() == 40
-    assert database.catalog().knowledge["synthetic"] is True
-    assert database.catalog().backend["read_only"] is True
+    catalog = database.catalog()
+    assert catalog.knowledge["meta"]["dataset"] == "Voice Router - Saqta Insurance"
+    assert catalog.backend["meta"]["dataset"] == "Voice Router - Saqta Insurance"
+    assert len(catalog.slots) == 43
+    assert len(catalog.actions) == 31
+    assert len(catalog.dev_utterances["utterances"]) == 104
+    assert len(catalog.dialogs_sample["dialogs"]) == 10
     database.upsert_scenario(
         Scenario(id="S11", title="Edited payment flow", details={"custom": True})
     )

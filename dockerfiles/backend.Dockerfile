@@ -13,6 +13,7 @@ WORKDIR /app
 
 COPY pyproject.toml README.md alembic.ini ./
 COPY app/ ./app/
+COPY case_2/ ./case_2/
 COPY v2v/ ./v2v/
 COPY multi-agent/src/ ./multi-agent/src/
 COPY telephony/telephony/ ./telephony/telephony/

@@ -54,7 +54,10 @@ async def voice_turn(
     if session_id.startswith("phone:"):
         raise HTTPException(422, "Reserved session namespace")
     if service.database is not None and service.database.count_scenarios() == 0:
-        raise HTTPException(503, "No scenarios configured: import the starter-kit catalogue before starting a conversation")
+        raise HTTPException(
+            503,
+            "No scenarios configured: import the starter-kit catalogue before starting a conversation",
+        )
     started = perf_counter()
     transcript = await service.pipeline.transcribe(
         await audio.read(), filename=audio.filename or "audio.wav"
@@ -86,6 +89,14 @@ async def session(session_id: str, service: Service) -> dict[str, Any]:
         "active_scenario": state.active_scenario,
         "pending_scenarios": state.pending_scenarios,
         "uncertain_turns": state.uncertain_turns,
+        "workflows": {
+            scenario_id: {
+                "status": progress.status,
+                "slots": progress.slots,
+                "awaiting_confirmation": progress.awaiting_confirmation,
+            }
+            for scenario_id, progress in state.workflows.items()
+        },
     }
 
 
@@ -128,6 +139,10 @@ class CatalogImport(BaseModel):
     scenarios: list[dict[str, Any]] = Field(min_length=1)
     knowledge_base: Any = None
     mock_backend: Any = None
+    slots: Any = None
+    actions: Any = None
+    dev_utterances: Any = None
+    dialogs_sample: Any = None
 
 
 @router.post("/admin/catalog/import")
@@ -136,7 +151,13 @@ async def import_catalog(
 ) -> dict[str, int]:
     try:
         catalog = Catalog.from_payload(
-            body.scenarios, knowledge=body.knowledge_base, backend=body.mock_backend
+            body.scenarios,
+            knowledge=body.knowledge_base,
+            backend=body.mock_backend,
+            slots=body.slots,
+            actions=body.actions,
+            dev_utterances=body.dev_utterances,
+            dialogs_sample=body.dialogs_sample,
         )
     except (TypeError, ValueError) as exc:
         raise HTTPException(422, str(exc)) from exc
@@ -151,6 +172,10 @@ async def import_files(
     scenarios: Annotated[UploadFile, File()],
     knowledge_base: Annotated[UploadFile | None, File()] = None,
     mock_backend: Annotated[UploadFile | None, File()] = None,
+    slots: Annotated[UploadFile | None, File()] = None,
+    actions: Annotated[UploadFile | None, File()] = None,
+    dev_utterances: Annotated[UploadFile | None, File()] = None,
+    dialogs_sample: Annotated[UploadFile | None, File()] = None,
 ) -> dict[str, int]:
     async def decode(file: UploadFile | None) -> Any:
         if file is None:
@@ -168,6 +193,10 @@ async def import_files(
             await decode(scenarios),
             knowledge=await decode(knowledge_base),
             backend=await decode(mock_backend),
+            slots=await decode(slots),
+            actions=await decode(actions),
+            dev_utterances=await decode(dev_utterances),
+            dialogs_sample=await decode(dialogs_sample),
         )
     except (TypeError, ValueError) as exc:
         raise HTTPException(422, str(exc)) from exc

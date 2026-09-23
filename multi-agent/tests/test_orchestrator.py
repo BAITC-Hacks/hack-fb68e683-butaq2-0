@@ -119,7 +119,7 @@ async def test_low_confidence_then_handoff_never_runs_resolution(catalog, config
     second = await turn(core, catalog, config)
     assert (first.action, second.action) == ("clarify", "handoff")
     assert first.reply != second.reply
-    assert "операторына хабарласыңыз" in second.reply
+    assert "контекст дайындалды" in second.reply
     assert first.scenario_id is None and second.scenario_id is None
     assert not gateway.resolution
     assert core.sessions["caller"].active_scenario is None

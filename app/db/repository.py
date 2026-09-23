@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import os
 
 from multi_agent.contracts import DEFAULT_MODEL, Catalog, Scenario
@@ -15,8 +16,20 @@ from app.demo_catalog import load_demo_catalog
 from .models import ScenarioRecord, SettingRecord
 
 CONFIG_KEYS = frozenset(
-    {"routing_prompt", "answer_prompt", "model", "confidence_threshold"}
+    {
+        "routing_prompt",
+        "answer_prompt",
+        "model",
+        "confidence_threshold",
+        "workflow_enabled",
+        "max_uncertain_turns",
+        "simulation_mode",
+    }
 )
+LEGACY_PROMPT_HASHES = {
+    "routing_prompt": "cf3bfb1d1d963246002f3b6f48bb13170e6dd0a2bac9c853fafdf92d649ee2f7",
+    "answer_prompt": "b1b6b80a4e375a222d072129273adb2758ee5dcd284e36b02df228f6c839b87f",
+}
 
 
 class RouterDatabase:
@@ -36,11 +49,21 @@ class RouterDatabase:
             "answer_prompt": ANSWER_PROMPT,
             "model": os.getenv("ROUTER_MODEL", DEFAULT_MODEL),
             "confidence_threshold": os.getenv("ROUTER_CONFIDENCE_THRESHOLD", "0.65"),
+            "workflow_enabled": os.getenv("ROUTER_WORKFLOW_ENABLED", "true"),
+            "max_uncertain_turns": os.getenv("ROUTER_MAX_UNCERTAIN_TURNS", "2"),
+            "simulation_mode": "simulate",
         }
         with self.session.begin() as db:
             for key, value in defaults.items():
-                if db.get(SettingRecord, key) is None:
+                existing = db.get(SettingRecord, key)
+                if existing is None:
                     db.add(SettingRecord(key=key, value=value))
+                elif (
+                    key in LEGACY_PROMPT_HASHES
+                    and hashlib.sha256(existing.value.encode()).hexdigest()
+                    == LEGACY_PROMPT_HASHES[key]
+                ):
+                    existing.value = value
 
     def replace_catalog(self, catalog: Catalog) -> None:
         """Replace catalog and grounding facts in one transaction."""
@@ -53,6 +76,10 @@ class RouterDatabase:
             for key, value in (
                 ("knowledge_base", catalog.knowledge),
                 ("mock_backend", catalog.backend),
+                ("slot_definitions", {"slots": list(catalog.slots.values())}),
+                ("action_definitions", {"actions": list(catalog.actions.values())}),
+                ("dev_utterances", catalog.dev_utterances),
+                ("dialogs_sample", catalog.dialogs_sample),
             ):
                 db.merge(
                     SettingRecord(key=key, value=json.dumps(value, ensure_ascii=False))
@@ -66,9 +93,21 @@ class RouterDatabase:
             if db.scalar(select(func.count()).select_from(ScenarioRecord)):
                 return False
             catalog = load_demo_catalog()
-            db.add_all(ScenarioRecord(id=s.id, title=s.title, details=s.details) for s in catalog.scenarios.values())
-            for key, value in (("knowledge_base", catalog.knowledge), ("mock_backend", catalog.backend)):
-                db.merge(SettingRecord(key=key, value=json.dumps(value, ensure_ascii=False)))
+            db.add_all(
+                ScenarioRecord(id=s.id, title=s.title, details=s.details)
+                for s in catalog.scenarios.values()
+            )
+            for key, value in (
+                ("knowledge_base", catalog.knowledge),
+                ("mock_backend", catalog.backend),
+                ("slot_definitions", {"slots": list(catalog.slots.values())}),
+                ("action_definitions", {"actions": list(catalog.actions.values())}),
+                ("dev_utterances", catalog.dev_utterances),
+                ("dialogs_sample", catalog.dialogs_sample),
+            ):
+                db.merge(
+                    SettingRecord(key=key, value=json.dumps(value, ensure_ascii=False))
+                )
         return True
 
     def catalog(self) -> Catalog:
@@ -76,7 +115,16 @@ class RouterDatabase:
             rows = db.scalars(select(ScenarioRecord).order_by(ScenarioRecord.id)).all()
             facts = db.scalars(
                 select(SettingRecord).where(
-                    SettingRecord.key.in_(["knowledge_base", "mock_backend"])
+                    SettingRecord.key.in_(
+                        [
+                            "knowledge_base",
+                            "mock_backend",
+                            "slot_definitions",
+                            "action_definitions",
+                            "dev_utterances",
+                            "dialogs_sample",
+                        ]
+                    )
                 )
             ).all()
             if not rows:
@@ -91,6 +139,10 @@ class RouterDatabase:
                 ],
                 knowledge=json.loads(settings.get("knowledge_base", "null")),
                 backend=json.loads(settings.get("mock_backend", "null")),
+                slots=json.loads(settings.get("slot_definitions", "null")),
+                actions=json.loads(settings.get("action_definitions", "null")),
+                dev_utterances=json.loads(settings.get("dev_utterances", "null")),
+                dialogs_sample=json.loads(settings.get("dialogs_sample", "null")),
             )
 
     def count_scenarios(self) -> int:
@@ -120,12 +172,44 @@ class RouterDatabase:
                 valid = False
             if not valid:
                 raise ValueError("confidence_threshold must be between 0 and 1")
+        if "workflow_enabled" in values and values[
+            "workflow_enabled"
+        ].casefold() not in {
+            "true",
+            "false",
+        }:
+            raise ValueError("workflow_enabled must be true or false")
+        if "max_uncertain_turns" in values:
+            try:
+                max_uncertain = int(values["max_uncertain_turns"])
+            except ValueError:
+                max_uncertain = 0
+            if not 1 <= max_uncertain <= 10:
+                raise ValueError("max_uncertain_turns must be between 1 and 10")
+        if "simulation_mode" in values and values["simulation_mode"] != "simulate":
+            raise ValueError("Only the safe simulate mode is supported")
         with self.session.begin() as db:
             for key, value in values.items():
                 db.merge(SettingRecord(key=key, value=value))
         return self.settings()
 
     def upsert_scenario(self, scenario: Scenario) -> None:
+        current = self.catalog()
+        scenarios = [
+            scenario if item.id == scenario.id else item
+            for item in current.scenarios.values()
+        ]
+        if scenario.id not in current.scenarios:
+            scenarios.append(scenario)
+        Catalog(
+            scenarios,
+            knowledge=current.knowledge,
+            backend=current.backend,
+            slots={"slots": list(current.slots.values())},
+            actions={"actions": list(current.actions.values())},
+            dev_utterances=current.dev_utterances,
+            dialogs_sample=current.dialogs_sample,
+        )
         with self.session.begin() as db:
             db.merge(
                 ScenarioRecord(

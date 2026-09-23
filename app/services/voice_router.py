@@ -56,6 +56,9 @@ class RouterService:
             timeout_seconds=os.getenv("MULTI_AGENT_TIMEOUT_SECONDS", "20"),
             resolution_max_turns=os.getenv("MULTI_AGENT_RESOLUTION_MAX_TURNS", "3"),
             tracing_enabled=os.getenv("MULTI_AGENT_TRACING", "false"),
+            workflow_enabled=os.getenv("ROUTER_WORKFLOW_ENABLED", "true"),
+            max_uncertain_turns=os.getenv("ROUTER_MAX_UNCERTAIN_TURNS", "2"),
+            simulation_mode="simulate",
         )
         self.orchestrator = VoiceRouterOrchestrator(
             gateway if gateway is not None else SdkAgentGateway(lambda: pipeline.client)

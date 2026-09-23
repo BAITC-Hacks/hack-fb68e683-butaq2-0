@@ -22,6 +22,12 @@ export interface TurnResult {
   timings: { stt_ms: number; routing_ms: number; response_ms: number; tts_ms: number; total_ms: number; first_audio_ms?: number; first_text_ms?: number; playback_ms?: number };
   audio_base64: string | null;
   audio_content_type: string | null;
+  workflow_status: "idle" | "collecting" | "awaiting_confirmation" | "completed" | "cancelled" | "handoff";
+  collected_slots: Record<string, unknown>;
+  missing_slots: string[];
+  confirmation_required: boolean;
+  action_trace: { name: string; mode: "read" | "preview" | "simulate" | "handoff" | "skipped"; status: "success" | "error" | "skipped"; result: Record<string, unknown>; error: Record<string, unknown> | null }[];
+  completed: boolean;
 }
 
 export function routerUrl(path: string): string {

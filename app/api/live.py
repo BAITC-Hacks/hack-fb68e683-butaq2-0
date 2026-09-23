@@ -1,4 +1,5 @@
 """Browser signaling and UI events for the shared GPT-Live adapter."""
+
 import asyncio
 import logging
 from contextlib import suppress
@@ -15,7 +16,9 @@ logger = logging.getLogger(__name__)
 
 
 @router.websocket("/live")
-async def live_conversation(socket: WebSocket, service: Annotated[RouterService, Depends(get_service)]) -> None:
+async def live_conversation(
+    socket: WebSocket, service: Annotated[RouterService, Depends(get_service)]
+) -> None:
     if not _allowed_origin(socket.headers.get("origin")):
         await socket.close(code=1008)
         return
@@ -28,7 +31,12 @@ async def live_conversation(socket: WebSocket, service: Annotated[RouterService,
         if not isinstance(start, dict) or start.get("type") != "start":
             raise ValueError("First message must be start")
         identity, sdp = start.get("session_id"), start.get("sdp")
-        if not isinstance(identity, str) or not identity.strip() or len(identity) > 128 or identity.startswith("phone:"):
+        if (
+            not isinstance(identity, str)
+            or not identity.strip()
+            or len(identity) > 128
+            or identity.startswith("phone:")
+        ):
             raise ValueError("Invalid session_id")
         if not isinstance(sdp, str) or not sdp.startswith("v=0") or len(sdp) > 64000:
             raise ValueError("Invalid WebRTC offer")
@@ -38,8 +46,12 @@ async def live_conversation(socket: WebSocket, service: Annotated[RouterService,
             raise ValueError("No scenarios configured; import a catalog first")
         service.stream_sessions.add(identity)
         session_id = identity
-        conversation = LiveConversation(client=service.pipeline.client, service=service,
-            session_id=identity, send=socket.send_json)
+        conversation = LiveConversation(
+            client=service.pipeline.client,
+            service=service,
+            session_id=identity,
+            send=socket.send_json,
+        )
         answer = await conversation.open(sdp)
         await conversation.emit({"type": "ready", "sdp": answer})
 
@@ -53,14 +65,23 @@ async def live_conversation(socket: WebSocket, service: Annotated[RouterService,
                     await conversation.interrupt()
                 elif kind == "text":
                     text = message.get("text")
-                    if not isinstance(text, str) or not text.strip() or len(text) > 2000:
+                    if (
+                        not isinstance(text, str)
+                        or not text.strip()
+                        or len(text) > 2000
+                    ):
                         raise ValueError("Invalid typed message")
                     await conversation.say(text)
                 else:
                     raise ValueError("Unknown Live control")
 
-        tasks = [asyncio.create_task(conversation.run()), asyncio.create_task(controls())]
-        done, _ = await asyncio.wait(tasks, timeout=1200, return_when=asyncio.FIRST_COMPLETED)
+        tasks = [
+            asyncio.create_task(conversation.run()),
+            asyncio.create_task(controls()),
+        ]
+        done, _ = await asyncio.wait(
+            tasks, timeout=1200, return_when=asyncio.FIRST_COMPLETED
+        )
         for task in done:
             task.result()
     except WebSocketDisconnect:
@@ -69,9 +90,16 @@ async def live_conversation(socket: WebSocket, service: Annotated[RouterService,
         with suppress(Exception):
             await socket.send_json({"type": "error", "message": str(exc)})
     except Exception as exc:
-        logger.warning("Live connection failed", extra={"exception_type": type(exc).__name__})
+        logger.warning(
+            "Live connection failed", extra={"exception_type": type(exc).__name__}
+        )
         with suppress(Exception):
-            await socket.send_json({"type": "error", "message": "Не удалось подключить GPT-Live. Начните сеанс заново или напишите сообщение."})
+            await socket.send_json(
+                {
+                    "type": "error",
+                    "message": "Не удалось подключить GPT-Live. Начните сеанс заново или напишите сообщение.",
+                }
+            )
     finally:
         for task in tasks:
             task.cancel()

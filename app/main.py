@@ -18,16 +18,27 @@ from .phone.settings import PhoneSettings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    from .api.dependencies import get_service
+
+    # Production/Docker provides DATABASE_URL. Construct the shared service during
+    # startup so an empty database is atomically seeded before the first request.
+    # Lightweight offline tests may omit DATABASE_URL and still exercise /health.
+    service_factory = app.dependency_overrides.get(get_service)
+    service = service_factory() if service_factory else None
+    if service is None and os.getenv("DATABASE_URL"):
+        service = get_service()
     settings = PhoneSettings()
     app.state.phone = None
     cleanup = None
     if settings.enabled:
         from v2v.config import get_settings
 
-        from .api.dependencies import get_service
         from .phone.service import build_phone
+
         settings.validate_enabled(get_settings().api_key)
-        app.state.phone = build_phone(settings, get_service())
+        if service is None:
+            service = get_service()
+        app.state.phone = build_phone(settings, service)
 
         async def prune_calls():
             while True:
@@ -45,6 +56,7 @@ async def lifespan(app: FastAPI):
         if app.state.phone:
             await app.state.phone.aclose()
             app.state.phone = None
+
 
 app = FastAPI(title="Butaq V2V", lifespan=lifespan)
 app.add_middleware(

@@ -16,17 +16,92 @@ class Scenario(BaseModel):
 
 class Catalog:
     def __init__(
-        self, scenarios: list[Scenario], *, knowledge: Any = None, backend: Any = None
+        self,
+        scenarios: list[Scenario],
+        *,
+        knowledge: Any = None,
+        backend: Any = None,
+        slots: Any = None,
+        actions: Any = None,
+        dev_utterances: Any = None,
+        dialogs_sample: Any = None,
     ):
         if not scenarios or len({s.id for s in scenarios}) != len(scenarios):
             raise ValueError("Scenario catalog must have unique, non-empty IDs")
         self.scenarios = {s.id: s for s in scenarios}
         self.knowledge = knowledge
         self.backend = backend
+        self.slots = self._definitions(slots, "slots", "name")
+        self.actions = self._definitions(actions, "actions", "name")
+        self.dev_utterances = dev_utterances
+        self.dialogs_sample = dialogs_sample
+        self._validate_references()
+
+    @staticmethod
+    def _definitions(raw: Any, container: str, key: str) -> dict[str, dict[str, Any]]:
+        if raw is None:
+            return {}
+        entries = raw.get(container, raw) if isinstance(raw, dict) else raw
+        if isinstance(entries, dict):
+            entries = [dict(value, **{key: name}) for name, value in entries.items()]
+        if not isinstance(entries, list) or any(
+            not isinstance(item, dict) for item in entries
+        ):
+            raise TypeError(
+                f"{container}.json must contain a list or a '{container}' list"
+            )
+        definitions: dict[str, dict[str, Any]] = {}
+        for item in entries:
+            name = item.get(key)
+            if not isinstance(name, str) or not name.strip() or name in definitions:
+                raise ValueError(
+                    f"Every {container} entry must have a unique non-empty {key}"
+                )
+            definitions[name] = item
+        return definitions
+
+    def _validate_references(self) -> None:
+        for scenario in self.scenarios.values():
+            details = scenario.details
+            declared_slots = details.get("slots")
+            slot_names: list[str] = []
+            if isinstance(declared_slots, dict):
+                for group in ("required", "optional"):
+                    values = declared_slots.get(group, [])
+                    if not isinstance(values, list) or any(
+                        not isinstance(v, str) for v in values
+                    ):
+                        raise ValueError(
+                            f"Scenario {scenario.id} has invalid {group} slots"
+                        )
+                    slot_names.extend(values)
+            if self.slots and set(slot_names) - self.slots.keys():
+                missing = sorted(set(slot_names) - self.slots.keys())
+                raise ValueError(
+                    f"Scenario {scenario.id} references unknown slots: {', '.join(missing)}"
+                )
+
+            declared_actions = details.get("actions")
+            if isinstance(declared_actions, list):
+                if any(not isinstance(value, str) for value in declared_actions):
+                    raise ValueError(f"Scenario {scenario.id} has invalid actions")
+                if self.actions and set(declared_actions) - self.actions.keys():
+                    missing = sorted(set(declared_actions) - self.actions.keys())
+                    raise ValueError(
+                        f"Scenario {scenario.id} references unknown actions: {', '.join(missing)}"
+                    )
 
     @classmethod
     def from_payload(
-        cls, raw: Any, *, knowledge: Any = None, backend: Any = None
+        cls,
+        raw: Any,
+        *,
+        knowledge: Any = None,
+        backend: Any = None,
+        slots: Any = None,
+        actions: Any = None,
+        dev_utterances: Any = None,
+        dialogs_sample: Any = None,
     ) -> Catalog:
         entries = raw.get("scenarios", raw) if isinstance(raw, dict) else raw
         if isinstance(entries, dict):
@@ -53,7 +128,15 @@ class Catalog:
             scenarios.append(
                 Scenario(id=str(identifier), title=str(title), details=entry)
             )
-        return cls(scenarios, knowledge=knowledge, backend=backend)
+        return cls(
+            scenarios,
+            knowledge=knowledge,
+            backend=backend,
+            slots=slots,
+            actions=actions,
+            dev_utterances=dev_utterances,
+            dialogs_sample=dialogs_sample,
+        )
 
     def prompt_data(self) -> list[dict[str, Any]]:
         return [
@@ -107,6 +190,16 @@ class Timings(BaseModel):
     total_ms: float = 0
 
 
+class ActionTrace(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1)
+    mode: Literal["read", "preview", "simulate", "handoff", "skipped"]
+    status: Literal["success", "error", "skipped"]
+    result: dict[str, Any] = Field(default_factory=dict)
+    error: dict[str, Any] | None = None
+
+
 class TurnResult(BaseModel):
     session_id: str
     transcript: str
@@ -126,6 +219,19 @@ class TurnResult(BaseModel):
     language: Literal["ru", "kk", "mixed", "unknown"] = "unknown"
     topic_transition: Literal["continue", "switch", "resume"] = "continue"
     extracted_parameters: list[ExtractedParameter] = Field(default_factory=list)
+    workflow_status: Literal[
+        "idle",
+        "collecting",
+        "awaiting_confirmation",
+        "completed",
+        "cancelled",
+        "handoff",
+    ] = "idle"
+    collected_slots: dict[str, Any] = Field(default_factory=dict)
+    missing_slots: list[str] = Field(default_factory=list)
+    confirmation_required: bool = False
+    action_trace: list[ActionTrace] = Field(default_factory=list)
+    completed: bool = False
 
 
 DEFAULT_MODEL = "gpt-5.6-terra"
@@ -143,6 +249,9 @@ class RuntimeConfig(BaseModel):
     timeout_seconds: float = Field(default=20, gt=0)
     resolution_max_turns: int = Field(default=3, ge=1, le=8)
     tracing_enabled: bool = False
+    workflow_enabled: bool = True
+    max_uncertain_turns: int = Field(default=2, ge=1, le=10)
+    simulation_mode: Literal["simulate"] = "simulate"
 
 
 @dataclass(frozen=True)
@@ -179,6 +288,11 @@ class RoutingContext:
 @dataclass(frozen=True)
 class ResolutionContext(RoutingContext):
     decision: RoutingDecision
+    workflow_status: str = "idle"
+    collected_slots: dict[str, Any] = field(default_factory=dict)
+    missing_slots: list[str] = field(default_factory=list)
+    confirmation_required: bool = False
+    action_trace: list[ActionTrace] = field(default_factory=list)
 
 
 class AgentGateway(Protocol):

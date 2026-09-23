@@ -1,7 +1,7 @@
 import { routerUrl } from "@/lib/voice-api";
 
 export type Scenario = { id: string; title: string; details: Record<string, unknown> };
-export type Settings = { routing_prompt: string; answer_prompt: string; model: string; confidence_threshold: string };
+export type Settings = { routing_prompt: string; answer_prompt: string; model: string; confidence_threshold: string; workflow_enabled: string; max_uncertain_turns: string; simulation_mode: "simulate" };
 
 export async function adminRequest<T>(path: string, options: RequestInit = {}, token?: string): Promise<T> {
   const headers = new Headers(options.headers);
