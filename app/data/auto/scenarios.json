@@ -1,0 +1,1846 @@
+{
+  "version": "butaq-auto-1",
+  "synthetic": true,
+  "official_starter_kit": false,
+  "company": "Butaq Motor Demo",
+  "scenarios": [
+    {
+      "id": "AUT01",
+      "dataset": "butaq-auto-1",
+      "title": "Выбор автопродукта",
+      "purpose": "Сравнить пакеты защиты автомобиля.",
+      "boundaries": "Цена AUT02; конкретный риск AUT06.",
+      "parameters": [
+        {
+          "name": "vehicle_use",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Сравнить пакеты защиты автомобиля.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Какую защиту выбрать для семейной машины?",
+          "response": "Motor Base покрывает ДТП и стекло; Motor Plus также включает угон и парковочный ущерб."
+        },
+        {
+          "language": "kk",
+          "request": "Отбасылық көлікке қандай сақтандыру таңдаған дұрыс?",
+          "response": "Motor Base жол апаты мен әйнекті, Motor Plus қосымша ұрлық пен тұрақтағы зақымды қамтиды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT02",
+      "dataset": "butaq-auto-1",
+      "title": "Предварительная цена",
+      "purpose": "Объяснить пример тарифа, не вычисляя персональную цену.",
+      "boundaries": "Покупка AUT03; сравнение AUT01.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "vehicle_value",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить пример тарифа, не вычисляя персональную цену.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Сколько стоит Motor Plus?",
+          "response": "Для автомобиля за 8 млн ₸ пример Motor Plus — 120 000 ₸ в год; это не персональный расчёт."
+        },
+        {
+          "language": "kk",
+          "request": "Motor Plus бағасы қанша?",
+          "response": "Құны 8 млн ₸ көлікке Motor Plus үлгілік бағасы жылына 120 000 ₸; бұл жеке есеп емес."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT03",
+      "dataset": "butaq-auto-1",
+      "title": "Новый автополис",
+      "purpose": "Подготовить оформление выбранного продукта.",
+      "boundaries": "Продление AUT04; платёж уже списан AUT11.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "vehicle_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "start_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить оформление выбранного продукта.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу оформить Motor Base на новую машину.",
+          "response": "Уточним демо-автомобиль и дату начала; можно подготовить только предварительную заявку."
+        },
+        {
+          "language": "kk",
+          "request": "Жаңа көлікке Motor Base рәсімдегім келеді.",
+          "response": "Демо-көлікті және басталу күнін нақтылайық; тек өтінімнің жобасын дайындаймыз."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT04",
+      "dataset": "butaq-auto-1",
+      "title": "Продление автополиса",
+      "purpose": "Подготовить продление существующего договора.",
+      "boundaries": "Новый автомобиль AUT03; только срок AUT05.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "start_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить продление существующего договора.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Продлите AUTO-P1 с января.",
+          "response": "AUTO-P1 действует до 31 декабря 2026 года; продление можно только предварительно обсудить."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-P1 полисін қаңтардан ұзартқым келеді.",
+          "response": "AUTO-P1 2026 жылғы 31 желтоқсанға дейін жарамды; ұзартуды тек алдын ала талқылаймыз."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT05",
+      "dataset": "butaq-auto-1",
+      "title": "Проверка срока и активности",
+      "purpose": "Прочитать статус и даты конкретного полиса.",
+      "boundaries": "Продление AUT04; копия AUT14.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Прочитать статус и даты конкретного полиса.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "AUTO-P1 ещё действует?",
+          "response": "AUTO-P1 активен с 1 января по 31 декабря 2026 года на дату демо-снимка."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-P1 әлі жарамды ма?",
+          "response": "Демо-дерек бойынша AUTO-P1 2026 жылғы 1 қаңтардан 31 желтоқсанға дейін белсенді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT06",
+      "dataset": "butaq-auto-1",
+      "title": "Покрытие риска",
+      "purpose": "Проверить включённые риски выбранного пакета.",
+      "boundaries": "Исключения AUT07; сообщение о событии AUT20–AUT23.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "risk",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить включённые риски выбранного пакета.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Motor Plus покрывает угон?",
+          "response": "В демо Motor Plus включает угон, ДТП, стекло и парковочный ущерб; решение по событию требует проверки."
+        },
+        {
+          "language": "kk",
+          "request": "Motor Plus көлік ұрлығын қамти ма?",
+          "response": "Демода Motor Plus ұрлықты, жол апатын, әйнек пен тұрақтағы зақымды қамтиды; оқиға бөлек тексеріледі."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT07",
+      "dataset": "butaq-auto-1",
+      "title": "Исключения",
+      "purpose": "Разъяснить нестраховые риски без решения по убытку.",
+      "boundaries": "Общее покрытие AUT06; уже полученный отказ AUT31.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "event_type",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Разъяснить нестраховые риски без решения по убытку.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Есть защита на автомобильных гонках?",
+          "response": "Оба демо-пакета исключают соревнования, умышленный ущерб и события до начала договора."
+        },
+        {
+          "language": "kk",
+          "request": "Автожарыс кезіндегі зақым өтеле ме?",
+          "response": "Екі демо-пакет те жарысты, қасақана зақымды және шартқа дейінгі оқиғаларды алып тастайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT08",
+      "dataset": "butaq-auto-1",
+      "title": "Франшиза",
+      "purpose": "Объяснить долю клиента в конкретном покрытии.",
+      "boundaries": "Размер согласованной выплаты AUT30.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить долю клиента в конкретном покрытии.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Какая франшиза у AUTO-P1?",
+          "response": "В AUTO-P1 франшиза 50 000 ₸ на событие; размер выплаты отдельно не рассчитан."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-P1 бойынша франшиза қанша?",
+          "response": "AUTO-P1 бойынша әр оқиғаға франшиза 50 000 ₸; төлем сомасы бөлек есептеледі."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT09",
+      "dataset": "butaq-auto-1",
+      "title": "Территория действия",
+      "purpose": "Уточнить географические границы покрытия.",
+      "boundaries": "Добавление водителя AUT16; условия риска AUT06.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "destination",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Уточнить географические границы покрытия.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "AUTO-P1 действует в Грузии?",
+          "response": "Территория AUTO-P1 в демо — Казахстан; расширение на Грузию не подтверждено."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-P1 Грузияда жарамды ма?",
+          "response": "Демода AUTO-P1 аумағы — Қазақстан; Грузияға кеңейту расталмаған."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT10",
+      "dataset": "butaq-auto-1",
+      "title": "Документы для оформления",
+      "purpose": "Перечислить синтетические сведения для заявки.",
+      "boundaries": "Документы убытка AUT26; новая покупка AUT03.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Перечислить синтетические сведения для заявки.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Что нужно для оформления Motor Base?",
+          "response": "Нужны демо-данные автомобиля, выбранный пакет и дата начала; реальные документы не загружайте."
+        },
+        {
+          "language": "kk",
+          "request": "Motor Base рәсімдеуге не қажет?",
+          "response": "Демо-көлік деректері, пакет пен басталу күні қажет; нақты құжаттарды жүктемеңіз."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT11",
+      "dataset": "butaq-auto-1",
+      "title": "Списание без полиса",
+      "purpose": "Проверить оплаченный заказ без выпущенного договора.",
+      "boundaries": "Неудачный платёж без списания AUT12; дубликат AUT13.",
+      "parameters": [
+        {
+          "name": "application_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить оплаченный заказ без выпущенного договора.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "AUTO-A1 оплачен, но полиса нет.",
+          "response": "В AUTO-A1 платёж AUTO-T1 получен, выпуск ожидается; повторно платить не нужно."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-A1 ақшасы алынды, полис жоқ.",
+          "response": "AUTO-A1 бойынша AUTO-T1 төлемі түскен, полис шығарылуы күтілуде; қайта төлемеңіз."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT12",
+      "dataset": "butaq-auto-1",
+      "title": "Отказ оплаты без списания",
+      "purpose": "Разобрать платёж, отклонённый без дебета.",
+      "boundaries": "Есть списание AUT11; двойной дебет AUT13.",
+      "parameters": [
+        {
+          "name": "payment_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Разобрать платёж, отклонённый без дебета.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "AUTO-T2 отклонён, деньги остались.",
+          "response": "AUTO-T2 имеет статус declined и нулевое списание; бот не повторяет оплату."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-T2 өтпеді, ақша алынбады.",
+          "response": "AUTO-T2 мәртебесі declined, ақша алынбаған; бот төлемді қайталамайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT13",
+      "dataset": "butaq-auto-1",
+      "title": "Двойное списание",
+      "purpose": "Проверить два связанных платежа за один заказ.",
+      "boundaries": "Уже созданный возврат AUT19.",
+      "parameters": [
+        {
+          "name": "application_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить два связанных платежа за один заказ.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "За AUTO-A3 сняли дважды.",
+          "response": "AUTO-T4 помечен как дубликат AUTO-T3; связан возврат AUTO-R1, повторный возврат не создаётся."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-A3 үшін екі рет ақша алынды.",
+          "response": "AUTO-T4 — AUTO-T3 төлемінің қайталануы; AUTO-R1 қайтарымы бар, жаңасы жасалмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT14",
+      "dataset": "butaq-auto-1",
+      "title": "Копия полиса",
+      "purpose": "Показать доступность документа без реальной отправки.",
+      "boundaries": "Исправление данных AUT15; чек AUT38.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Показать доступность документа без реальной отправки.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Нужен PDF AUTO-P1.",
+          "response": "Метаданные AUTO-DOC1 доступны для AUTO-P1; реальная отправка файла в демо не выполняется."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-P1 PDF көшірмесі керек.",
+          "response": "AUTO-P1 үшін AUTO-DOC1 деректері бар; демода файл іс жүзінде жіберілмейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT15",
+      "dataset": "butaq-auto-1",
+      "title": "Исправление данных автомобиля",
+      "purpose": "Предварительно исправить описку, не заменяя автомобиль.",
+      "boundaries": "Другой автомобиль AUT17; водитель AUT16.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "field",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "corrected_value",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Предварительно исправить описку, не заменяя автомобиль.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "В AUTO-P1 ошибка в модели, исправьте.",
+          "response": "Уточним поле и правильное демо-значение; запись не изменится без реальной системы оформления."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-P1 көлік моделінде қате бар.",
+          "response": "Өріс пен дұрыс демо-мәнді нақтылайық; бұл демо жазбаны өзгертпейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT16",
+      "dataset": "butaq-auto-1",
+      "title": "Добавление водителя",
+      "purpose": "Подготовить изменение списка допущенных водителей.",
+      "boundaries": "Ошибки машины AUT15; новый полис AUT03.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "driver_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить изменение списка допущенных водителей.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Добавьте водителя AUTO-DR2 в AUTO-P1.",
+          "response": "AUTO-P1 содержит AUTO-DR1; добавление AUTO-DR2 можно только предварительно согласовать."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-P1 тізіміне AUTO-DR2 жүргізушісін қосқым келеді.",
+          "response": "AUTO-P1 тізімінде AUTO-DR1 бар; AUTO-DR2 қосуды тек алдын ала келісуге болады."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT17",
+      "dataset": "butaq-auto-1",
+      "title": "Замена автомобиля",
+      "purpose": "Обсудить замену объекта в договоре.",
+      "boundaries": "Исправление описки AUT15; самостоятельная покупка AUT03.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "vehicle_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Обсудить замену объекта в договоре.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Продал машину, хочу заменить её в AUTO-P1.",
+          "response": "Замена автомобиля не равна исправлению описки; нужны новые демо-данные и проверка специалиста."
+        },
+        {
+          "language": "kk",
+          "request": "Көлікті саттым, AUTO-P1 нысанын ауыстырғым келеді.",
+          "response": "Көлікті ауыстыру жай қатені түзету емес; жаңа демо-деректер мен маман тексеруі қажет."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT18",
+      "dataset": "butaq-auto-1",
+      "title": "Расторжение договора",
+      "purpose": "Подготовить запрос отмены без обещания возврата.",
+      "boundaries": "Готовый возврат AUT19; продление AUT04.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "reason",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить запрос отмены без обещания возврата.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу расторгнуть AUTO-P1.",
+          "response": "Можно подготовить запрос на расторжение; сумма возврата и дата прекращения не определены."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-P1 шартын тоқтатқым келеді.",
+          "response": "Шартты тоқтату өтінімін дайындауға болады; қайтарым сомасы мен тоқтау күні анықталмаған."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT19",
+      "dataset": "butaq-auto-1",
+      "title": "Статус возврата премии",
+      "purpose": "Прочитать ранее созданный возврат за оплату.",
+      "boundaries": "Первичная отмена AUT18; выплата ущерба AUT30.",
+      "parameters": [
+        {
+          "name": "refund_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Прочитать ранее созданный возврат за оплату.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Когда придёт AUTO-R1?",
+          "response": "AUTO-R1 на 60 000 ₸ отправлен 22 сентября; зачисление в демо ещё не подтверждено."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-R1 қашан түседі?",
+          "response": "60 000 ₸ көлеміндегі AUTO-R1 22 қыркүйекте жіберілген; түсуі әлі расталмаған."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT20",
+      "dataset": "butaq-auto-1",
+      "title": "ДТП без пострадавших",
+      "purpose": "Собрать сведения о новом столкновении для проекта заявления.",
+      "boundaries": "Опасность для людей AUT24; существующее дело AUT25.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "event_time",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "location",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Собрать сведения о новом столкновении для проекта заявления.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Столкнулись две машины, все целы, хочу заявить.",
+          "response": "Уточним демо-полис, время и место ДТП; реальное заявление бот не подаёт."
+        },
+        {
+          "language": "kk",
+          "request": "Екі көлік соқтығысты, зардап шеккен жоқ, өтінім бергім келеді.",
+          "response": "Демо-полисті, оқиға уақыты мен орнын нақтылайық; бот нақты өтінім бермейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT21",
+      "dataset": "butaq-auto-1",
+      "title": "Повреждение стекла",
+      "purpose": "Начать обращение о самостоятельном повреждении стекла.",
+      "boundaries": "Стекло в составе столкновения AUT20; ремонт по делу AUT29.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "event_time",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Начать обращение о самостоятельном повреждении стекла.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "На трассе камень разбил лобовое, аварии нет.",
+          "response": "Для отдельного повреждения стекла нужны демо-полис и дата; покрытие проверяется по пакету."
+        },
+        {
+          "language": "kk",
+          "request": "Тас алдыңғы әйнекті сындырды, жол апаты болған жоқ.",
+          "response": "Жеке әйнек зақымына демо-полис пен күн қажет; өтем пакет бойынша тексеріледі."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT22",
+      "dataset": "butaq-auto-1",
+      "title": "Угон автомобиля",
+      "purpose": "Подготовить страховое обращение о пропавшем автомобиле.",
+      "boundaries": "Повреждение припаркованной машины AUT23; опасность AUT24.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "event_time",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "location",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить страховое обращение о пропавшем автомобиле.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Машину угнали, хочу сообщить страховщику.",
+          "response": "Бот не заменяет обращение в местные экстренные службы; для демо-заявки уточним полис и обстоятельства."
+        },
+        {
+          "language": "kk",
+          "request": "Көлігімді ұрлап кетті, сақтандыруға хабарлағым келеді.",
+          "response": "Бот жергілікті жедел қызметке жүгінуді алмастырмайды; демо-өтінім үшін полис пен жағдайды нақтылайық."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT23",
+      "dataset": "butaq-auto-1",
+      "title": "Ущерб на парковке",
+      "purpose": "Разобрать обнаруженное повреждение стоящей машины.",
+      "boundaries": "Столкновение в движении AUT20; угон AUT22.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "event_time",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Разобрать обнаруженное повреждение стоящей машины.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Нашёл царапины на припаркованной машине.",
+          "response": "Motor Plus включает парковочный ущерб; для проекта обращения нужны полис и время обнаружения."
+        },
+        {
+          "language": "kk",
+          "request": "Тұрақтағы көлігім сызылып қалыпты.",
+          "response": "Motor Plus тұрақтағы зақымды қамтиды; өтінім жобасына полис пен байқалған уақыт қажет."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT24",
+      "dataset": "butaq-auto-1",
+      "title": "Опасность и пострадавшие",
+      "purpose": "Прекратить обычную маршрутизацию при непосредственной угрозе.",
+      "boundaries": "ДТП без травм AUT20; обычный оператор AUT40.",
+      "parameters": [],
+      "actions": {
+        "type": "handoff",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Прекратить обычную маршрутизацию при непосредственной угрозе.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain that operator connection is simulated; return action=handoff, scenario_id=null."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "После ДТП человек не отвечает.",
+          "response": "Обратитесь в местные экстренные службы сейчас; бот не вызывает помощь и не даёт медицинских назначений."
+        },
+        {
+          "language": "kk",
+          "request": "Жол апатынан кейін адам жауап бермей жатыр.",
+          "response": "Қазір жергілікті жедел қызметке хабарласыңыз; бот көмек шақырмайды және ем тағайындамайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT25",
+      "dataset": "butaq-auto-1",
+      "title": "Статус убытка",
+      "purpose": "Прочитать этап существующего страхового дела.",
+      "boundaries": "Какие документы AUT26; срок выплаты AUT30.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Прочитать этап существующего страхового дела.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Что с AUTO-C1?",
+          "response": "AUTO-C1 ожидает фотографии повреждений; решение о выплате не принято."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-C1 қай кезеңде?",
+          "response": "AUTO-C1 зақым фотоларын күтуде; төлем туралы шешім жоқ."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT26",
+      "dataset": "butaq-auto-1",
+      "title": "Недостающие документы убытка",
+      "purpose": "Перечислить недостающие материалы конкретного дела.",
+      "boundaries": "Документы покупки AUT10; общий статус AUT25.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Перечислить недостающие материалы конкретного дела.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Что донести по AUTO-C1?",
+          "response": "В AUTO-C1 отсутствуют фотографии повреждений; реальные файлы в демо загружать не нужно."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-C1 үшін не жетіспейді?",
+          "response": "AUTO-C1 үшін зақым фотолары жоқ; демоға нақты файлдарды жүктемеңіз."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT27",
+      "dataset": "butaq-auto-1",
+      "title": "Запись на осмотр",
+      "purpose": "Подготовить первую запись для оценки ущерба.",
+      "boundaries": "Перенос существующего осмотра AUT28; ремонт AUT29.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "preferred_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить первую запись для оценки ущерба.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу записаться на осмотр по AUTO-C1.",
+          "response": "Можно обсудить желаемую дату; свободные слоты не проверяются и запись не создаётся."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-C1 бойынша алғашқы тексеруге жазылғым келеді.",
+          "response": "Қалаған күнді талқылаймыз; бос уақыт тексерілмейді және жазба жасалмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT28",
+      "dataset": "butaq-auto-1",
+      "title": "Перенос осмотра",
+      "purpose": "Предварительно изменить уже существующую запись.",
+      "boundaries": "Первая запись AUT27; ремонт AUT29.",
+      "parameters": [
+        {
+          "name": "appointment_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "preferred_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Предварительно изменить уже существующую запись.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Перенесите AUTO-I1 с 25 сентября.",
+          "response": "AUTO-I1 назначен на 25 сентября в 10:00; назовите желаемое время, изменение только моделируется."
+        },
+        {
+          "language": "kk",
+          "request": "25 қыркүйектегі AUTO-I1 уақытын ауыстырайық.",
+          "response": "AUTO-I1 25 қыркүйек 10:00-ге белгіленген; қалаған уақытты айтыңыз, өзгеріс тек үлгіленеді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT29",
+      "dataset": "butaq-auto-1",
+      "title": "Статус ремонта",
+      "purpose": "Проверить этап согласованного ремонта.",
+      "boundaries": "Осмотр AUT27; денежная выплата AUT30.",
+      "parameters": [
+        {
+          "name": "repair_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить этап согласованного ремонта.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Когда закончат AUTO-REP1?",
+          "response": "AUTO-REP1 ожидает деталь в Demo Garage; подтверждённой даты окончания нет."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-REP1 жөндеуі қашан бітеді?",
+          "response": "AUTO-REP1 Demo Garage-де бөлшек күтуде; біту күні расталмаған."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT30",
+      "dataset": "butaq-auto-1",
+      "title": "Статус выплаты ущерба",
+      "purpose": "Проверить согласованную страховую выплату.",
+      "boundaries": "Возврат премии AUT19; франшиза AUT08.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить согласованную страховую выплату.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Выплату по AUTO-C3 отправили?",
+          "response": "По AUTO-C3 согласовано 180 000 ₸, AUTO-PO1 ожидает отправки; это не возврат премии."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-C3 өтемі жіберілді ме?",
+          "response": "AUTO-C3 бойынша 180 000 ₸ мақұлданған, AUTO-PO1 жіберілуді күтуде; бұл сыйлықақы қайтарымы емес."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT31",
+      "dataset": "butaq-auto-1",
+      "title": "Причина отказа",
+      "purpose": "Объяснить сохранённое основание решения.",
+      "boundaries": "Оспаривание AUT32; общие исключения AUT07.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить сохранённое основание решения.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Почему отказали в AUTO-C4?",
+          "response": "В AUTO-C4 записано: событие до начала договора; бот не пересматривает это решение."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-C4 неге қабылданбады?",
+          "response": "AUTO-C4 себебі: оқиға шарт басталғанға дейін болған; бот шешімді өзгертпейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT32",
+      "dataset": "butaq-auto-1",
+      "title": "Обжалование отказа",
+      "purpose": "Подготовить возражение против решения по делу.",
+      "boundaries": "Только причина AUT31; жалоба на сервис AUT39.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "disagreement",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить возражение против решения по делу.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Не согласен с отказом AUTO-C4, хочу оспорить.",
+          "response": "Опишите несогласие и демо-доказательства; можно подготовить текст, но не зарегистрировать апелляцию."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-C4 шешімімен келіспеймін, шағымданғым келеді.",
+          "response": "Келіспеу себебі мен демо-дәлелдерді айтыңыз; мәтін дайындалады, апелляция тіркелмейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT33",
+      "dataset": "butaq-auto-1",
+      "title": "Эвакуатор",
+      "purpose": "Подготовить запрос эвакуации неподвижной машины.",
+      "boundaries": "Помощь на месте AUT34; угроза жизни AUT24.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "location",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить запрос эвакуации неподвижной машины.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Машина не едет, нужен эвакуатор.",
+          "response": "Для Motor Plus есть демо-опция эвакуации до 50 км; бот не отправляет машину помощи."
+        },
+        {
+          "language": "kk",
+          "request": "Көлік жүрмейді, эвакуатор керек.",
+          "response": "Motor Plus-та 50 км-ге дейін демо-эвакуация бар; бот қызмет көлігін жібермейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT34",
+      "dataset": "butaq-auto-1",
+      "title": "Помощь на дороге",
+      "purpose": "Разобрать помощь без перевозки автомобиля.",
+      "boundaries": "Перевозка AUT33; ущерб ДТП AUT20.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "location",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "issue",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Разобрать помощь без перевозки автомобиля.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Аккумулятор сел, нужна помощь на месте.",
+          "response": "В Motor Plus предусмотрен демо-запуск аккумулятора; выезд в этом интерфейсе не оформляется."
+        },
+        {
+          "language": "kk",
+          "request": "Аккумулятор отырды, тұрған жерде көмек керек.",
+          "response": "Motor Plus-та аккумуляторды іске қосу демо-қызметі бар; бұл жерде шақырту жасалмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT35",
+      "dataset": "butaq-auto-1",
+      "title": "Выбор партнёрской СТО",
+      "purpose": "Найти мастерскую из демо-сети.",
+      "boundaries": "Этап уже начатого ремонта AUT29.",
+      "parameters": [
+        {
+          "name": "city",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "repair_type",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Найти мастерскую из демо-сети.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Какие СТО есть в Демо-Алматы?",
+          "response": "В демо-сети есть Demo Garage, Демо-улица 10; это вымышленная мастерская."
+        },
+        {
+          "language": "kk",
+          "request": "Демо-Алматыда қандай шеберханалар бар?",
+          "response": "Демо-желіде Демо-көше 10 мекенжайындағы Demo Garage бар; бұл ойдан шығарылған орын."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT36",
+      "dataset": "butaq-auto-1",
+      "title": "Адрес доставки полиса",
+      "purpose": "Подготовить смену адреса бумажного документа.",
+      "boundaries": "Статус отправления AUT37; данные автомобиля AUT15.",
+      "parameters": [
+        {
+          "name": "delivery_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "new_address",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить смену адреса бумажного документа.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Поменяйте AUTO-L1 на Демо-улицу 8.",
+          "response": "AUTO-L1 ещё готовится к отправке; новый адрес можно только показать в предварительном запросе."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-L1 мекенжайын Демо-көше 8 деп өзгертейік.",
+          "response": "AUTO-L1 жөнелтуге дайындалуда; жаңа мекенжай тек өтінім жобасында көрсетіледі."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT37",
+      "dataset": "butaq-auto-1",
+      "title": "Статус доставки",
+      "purpose": "Прочитать этап доставки документа.",
+      "boundaries": "Изменение адреса AUT36; PDF AUT14.",
+      "parameters": [
+        {
+          "name": "delivery_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Прочитать этап доставки документа.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Где конверт AUTO-L1?",
+          "response": "AUTO-L1 готовится к отправке, трек-номер пока отсутствует."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-L1 конверті қайда?",
+          "response": "AUTO-L1 жөнелтуге дайындалуда, бақылау нөмірі әлі жоқ."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT38",
+      "dataset": "butaq-auto-1",
+      "title": "Квитанция оплаты",
+      "purpose": "Показать сведения о чеке проведённого платежа.",
+      "boundaries": "Нет полиса AUT11; копия договора AUT14.",
+      "parameters": [
+        {
+          "name": "payment_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Показать сведения о чеке проведённого платежа.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Нужен чек AUTO-T1.",
+          "response": "Для AUTO-T1 есть метаданные AUTO-REC1 на 120 000 ₸; отправка не выполняется."
+        },
+        {
+          "language": "kk",
+          "request": "AUTO-T1 төлем түбіртегі керек.",
+          "response": "AUTO-T1 үшін 120 000 ₸ сомасына AUTO-REC1 деректері бар; жіберу орындалмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT39",
+      "dataset": "butaq-auto-1",
+      "title": "Жалоба на обслуживание",
+      "purpose": "Подготовить жалобу на качество сервиса.",
+      "boundaries": "Спор с решением по убытку AUT32; оператор AUT40.",
+      "parameters": [
+        {
+          "name": "complaint_text",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить жалобу на качество сервиса.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Жалуюсь на грубость в Demo Garage.",
+          "response": "Можно составить демо-жалобу с датой и описанием; номер реального обращения не создаётся."
+        },
+        {
+          "language": "kk",
+          "request": "Demo Garage қызметкерінің дөрекілігіне шағымданамын.",
+          "response": "Күні мен сипаттамасы бар демо-шағым дайындаймыз; нақты өтініш нөмірі жасалмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "AUT40",
+      "dataset": "butaq-auto-1",
+      "title": "Живой оператор",
+      "purpose": "Распознать прямую просьбу о человеке.",
+      "boundaries": "Жалоба без просьбы соединить AUT39; экстренный случай AUT24.",
+      "parameters": [],
+      "actions": {
+        "type": "handoff",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Распознать прямую просьбу о человеке.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain that operator connection is simulated; return action=handoff, scenario_id=null."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Соедините со специалистом по автострахованию.",
+          "response": "Могу подготовить контекст для оператора; реального соединения в демо нет."
+        },
+        {
+          "language": "kk",
+          "request": "Мені автосақтандыру маманымен байланыстырыңыз.",
+          "response": "Операторға әңгіменің мазмұнын дайындаймын; демода нақты қосылу жоқ."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    }
+  ]
+}

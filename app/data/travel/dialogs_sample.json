@@ -1,0 +1,273 @@
+{
+  "version": "butaq-travel-1",
+  "synthetic": true,
+  "dialogs": [
+    {
+      "id": "TRV-dialog-01",
+      "focus": "Смена темы RU/KK и возврат",
+      "turns": [
+        {
+          "text": "Сначала TRAVEL-A1: деньги сняты, полиса нет. Потом копию TRAVEL-P1.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV17",
+          "expected_pending": [
+            "TRV12"
+          ]
+        },
+        {
+          "text": "Алдымен TRAVEL-P1 көшірмесін көрсетіңіз.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV12",
+          "expected_pending": [
+            "TRV17"
+          ]
+        },
+        {
+          "text": "Вернёмся к оплате TRAVEL-A1.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV17"
+        }
+      ]
+    },
+    {
+      "id": "TRV-dialog-02",
+      "focus": "Возврат премии против страхового убытка",
+      "turns": [
+        {
+          "text": "Верните деньги за отмену.",
+          "expected_action": "clarify",
+          "expected_scenario_id": null
+        },
+        {
+          "text": "Хочу расторгнуть сам полис TRAVEL-P2, не подавать убыток.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV19"
+        },
+        {
+          "text": "А отдельно что со старым возвратом TRAVEL-R1?",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV20"
+        }
+      ]
+    },
+    {
+      "id": "TRV-dialog-03",
+      "focus": "Багаж: изменение обстоятельств",
+      "turns": [
+        {
+          "text": "Чемодан ещё ищут после рейса, заявляю задержку.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV23"
+        },
+        {
+          "text": "Обновление: перевозчик письменно признал его утраченным.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV24"
+        },
+        {
+          "text": "Осы жоғалу бойынша оператормен сөйлесейін.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        }
+      ]
+    },
+    {
+      "id": "TRV-dialog-04",
+      "focus": "Казахский: территория и изменение будущей поездки",
+      "turns": [
+        {
+          "text": "TRAVEL-P2 қай елге берілген?",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV06"
+        },
+        {
+          "text": "Грузия орнына Түркияға барамын, елді ауыстырайық.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV14"
+        },
+        {
+          "text": "Ұшқан жоқпын, күндерін де 10–17 қазанға өзгерткім келеді.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV13"
+        }
+      ]
+    },
+    {
+      "id": "TRV-dialog-05",
+      "focus": "Ассистанс и экстренная угроза",
+      "turns": [
+        {
+          "text": "Опасности нет, но за границей нужна помощь найти врача.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV21"
+        },
+        {
+          "text": "Ситуация изменилась, человек потерял сознание.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null,
+          "expected_pending": [],
+          "response_checks": [
+            "Обратиться к местной экстренной службе, не ждать проверки."
+          ]
+        },
+        {
+          "text": "Хочу связаться с человеком.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        }
+      ]
+    },
+    {
+      "id": "TRV-dialog-06",
+      "focus": "Отказ и пересмотр",
+      "turns": [
+        {
+          "text": "Объясните отказ TRAVEL-C3.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV31"
+        },
+        {
+          "text": "Я не согласен с датой события, хочу обжаловать.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV32"
+        },
+        {
+          "text": "Оператор керек.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        }
+      ]
+    },
+    {
+      "id": "TRV-dialog-07",
+      "focus": "Добавление участника не исполняется",
+      "turns": [
+        {
+          "text": "Включите TRAVEL-U3 в TRAVEL-P2.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV15"
+        },
+        {
+          "text": "Подтверждаю добавление TRAVEL-U3.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV15",
+          "expected_pending": [],
+          "response_checks": [
+            "Не утверждать активацию покрытия или изменение договора."
+          ]
+        },
+        {
+          "text": "Какая территория сейчас в TRAVEL-P2?",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV06",
+          "expected_pending": [],
+          "response_checks": [
+            "Грузия; предыдущие обсуждения не меняют mock-запись."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "TRV-dialog-08",
+      "focus": "Неизвестный номер и уточнение",
+      "turns": [
+        {
+          "text": "Проверьте убыток TRAVEL-C999.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV28",
+          "expected_pending": [],
+          "response_checks": [
+            "Неизвестное дело; не подменять TRAVEL-C1."
+          ]
+        },
+        {
+          "text": "Ошибся, TRAVEL-C1.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV28"
+        },
+        {
+          "text": "Қандай анықтама жетіспейді?",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV29"
+        }
+      ]
+    },
+    {
+      "id": "TRV-dialog-09",
+      "focus": "Неоднозначность и повторное уточнение",
+      "turns": [
+        {
+          "text": "Хочу изменить что-то по поездке, пока не знаю что.",
+          "expected_action": "clarify",
+          "expected_scenario_id": null
+        },
+        {
+          "text": "Не могу сказать — даты, страну или людей.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        },
+        {
+          "text": "Тогда просто купите мне билет на самолёт.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        }
+      ]
+    },
+    {
+      "id": "TRV-dialog-10",
+      "focus": "Десять реплик с прерыванием и возвратом",
+      "turns": [
+        {
+          "text": "Сравните Basic и Flex.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV01"
+        },
+        {
+          "text": "Сколько стоит пример Flex на семь дней в Турции?",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV02"
+        },
+        {
+          "text": "А медицинские расходы в Basic есть?",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV07"
+        },
+        {
+          "text": "TRAVEL-P1 бойынша франшиза қанша?",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV09"
+        },
+        {
+          "text": "Лыжи в моём TRAVEL-P1 включены?",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV10"
+        },
+        {
+          "text": "Теперь расскажите этап TRAVEL-C1.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV28"
+        },
+        {
+          "text": "Какие документы отсутствуют в TRAVEL-C1?",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV29"
+        },
+        {
+          "text": "Ал TRAVEL-C2 ақшасы жіберілді ме?",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV30"
+        },
+        {
+          "text": "Вернёмся к документам TRAVEL-C1.",
+          "expected_action": "route",
+          "expected_scenario_id": "TRV29"
+        },
+        {
+          "text": "Дальше хочу живого оператора.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        }
+      ]
+    }
+  ]
+}

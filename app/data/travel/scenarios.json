@@ -1,0 +1,1910 @@
+{
+  "version": "butaq-travel-1",
+  "synthetic": true,
+  "official_starter_kit": false,
+  "company": "Butaq Journey Demo",
+  "scenarios": [
+    {
+      "id": "TRV01",
+      "dataset": "butaq-travel-1",
+      "title": "Выбор туристического пакета",
+      "purpose": "Сравнить Travel Basic и Travel Flex.",
+      "boundaries": "Цена TRV02; конкретное покрытие TRV07.",
+      "parameters": [
+        {
+          "name": "trip_type",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Сравнить Travel Basic и Travel Flex.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Какой пакет взять в поездку?",
+          "response": "Basic включает экстренные медицинские расходы; Flex добавляет багаж и отдельные причины отмены поездки."
+        },
+        {
+          "language": "kk",
+          "request": "Сапарға қай пакетті таңдаған дұрыс?",
+          "response": "Basic шұғыл медициналық шығындарды, Flex қосымша багаж бен сапардан бас тартудың кей себептерін қамтиды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV02",
+      "dataset": "butaq-travel-1",
+      "title": "Цена поездки",
+      "purpose": "Объяснить фиксированные примеры стоимости.",
+      "boundaries": "Новая покупка TRV03; изменение дат TRV13.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "destination",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "trip_days",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить фиксированные примеры стоимости.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Сколько стоит Flex на неделю?",
+          "response": "Демо-пример семи дней в Турции: Basic 6 000 ₸, Flex 9 000 ₸; персонального расчёта нет."
+        },
+        {
+          "language": "kk",
+          "request": "Бір аптаға Flex қанша тұрады?",
+          "response": "Түркиядағы жеті күннің демо-үлгісі: Basic 6 000 ₸, Flex 9 000 ₸; жеке есеп жасалмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV03",
+      "dataset": "butaq-travel-1",
+      "title": "Новый туристический полис",
+      "purpose": "Подготовить покупку выбранного пакета до поездки.",
+      "boundaries": "Продление текущего TRV04; платёж без выпуска TRV17.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "destination",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "start_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "end_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить покупку выбранного пакета до поездки.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Оформим Travel Flex на Турцию.",
+          "response": "Назовите демо-путешественника и даты; действительный полис здесь не выпускается."
+        },
+        {
+          "language": "kk",
+          "request": "Түркияға Travel Flex рәсімдейік.",
+          "response": "Демо-саяхатшы мен күндерді айтыңыз; мұнда нақты полис шығарылмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV04",
+      "dataset": "butaq-travel-1",
+      "title": "Продление во время поездки",
+      "purpose": "Обсудить увеличение срока после начала путешествия.",
+      "boundaries": "Сдвиг ещё не начавшейся поездки TRV13; срок TRV05.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "new_end_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Обсудить увеличение срока после начала путешествия.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Я уже в Турции, продлите TRAVEL-P1.",
+          "response": "TRAVEL-P1 заканчивается 27 сентября; продление после выезда требует отдельной проверки, гарантий нет."
+        },
+        {
+          "language": "kk",
+          "request": "Түркиядамын, TRAVEL-P1 мерзімін ұзартыңыз.",
+          "response": "TRAVEL-P1 27 қыркүйекте аяқталады; сапар басталған соң ұзарту бөлек тексеріледі, кепілдік жоқ."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV05",
+      "dataset": "butaq-travel-1",
+      "title": "Проверка активности и срока",
+      "purpose": "Прочитать статус и даты туристического полиса.",
+      "boundaries": "Продление TRV04; изменение будущих дат TRV13.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Прочитать статус и даты туристического полиса.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "До какого числа TRAVEL-P1?",
+          "response": "TRAVEL-P1 активен с 20 по 27 сентября 2026 года на дату демо-снимка."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-P1 қай күнге дейін жарамды?",
+          "response": "Демо-дерек бойынша TRAVEL-P1 2026 жылғы 20–27 қыркүйекте белсенді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV06",
+      "dataset": "butaq-travel-1",
+      "title": "Страна и территория",
+      "purpose": "Проверить покрытие страны назначения.",
+      "boundaries": "Смена страны в договоре TRV14; услуга TRV07.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "destination",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить покрытие страны назначения.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "TRAVEL-P1 действует в Грузии?",
+          "response": "В TRAVEL-P1 указана только Турция; наличие Грузии в продуктовой линейке не расширяет этот полис."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-P1 Грузияда жарамды ма?",
+          "response": "TRAVEL-P1 тек Түркияны көрсетеді; өнімде Грузияның болуы осы полисті кеңейтпейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV07",
+      "dataset": "butaq-travel-1",
+      "title": "Экстренные медицинские расходы",
+      "purpose": "Разъяснить страховой риск без диагностики.",
+      "boundaries": "Нужна организация помощи сейчас TRV21; угроза жизни TRV22.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "service",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Разъяснить страховой риск без диагностики.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Есть экстренная медицинская помощь у Basic?",
+          "response": "Basic предусматривает экстренные медицинские расходы в пределах 20 000 EUR; решение по событию отдельно проверяется."
+        },
+        {
+          "language": "kk",
+          "request": "Basic шұғыл медициналық шығындарды қамти ма?",
+          "response": "Basic 20 000 EUR шегіндегі шұғыл медициналық шығындарды қамтиды; оқиға бөлек тексеріледі."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV08",
+      "dataset": "butaq-travel-1",
+      "title": "Исключения путешествий",
+      "purpose": "Объяснить общие непокрываемые обстоятельства.",
+      "boundaries": "Спортивная опция TRV10; отказ в деле TRV31.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "event_type",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить общие непокрываемые обстоятельства.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Плановое лечение за границей покрывается?",
+          "response": "Демо-пакеты исключают плановое лечение, умышленные события и убытки до начала полиса."
+        },
+        {
+          "language": "kk",
+          "request": "Шетелдегі жоспарлы ем қамтыла ма?",
+          "response": "Демо-пакеттер жоспарлы емді, қасақана оқиғаларды және полиске дейінгі шығынды алып тастайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV09",
+      "dataset": "butaq-travel-1",
+      "title": "Франшиза туристического полиса",
+      "purpose": "Объяснить долю клиента по риску.",
+      "boundaries": "Цена договора TRV02; одобренная выплата TRV30.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "risk",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить долю клиента по риску.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Какая франшиза по медицине TRAVEL-P1?",
+          "response": "Для медицинского риска TRAVEL-P1 демо-франшиза 0 EUR; это не обещание оплаты любого счёта."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-P1 медициналық франшизасы қанша?",
+          "response": "TRAVEL-P1 медициналық тәуекелінің демо-франшизасы 0 EUR; бұл кез келген шот төленеді деген сөз емес."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV10",
+      "dataset": "butaq-travel-1",
+      "title": "Спортивная опция",
+      "purpose": "Проверить наличие дополнительного спортивного покрытия.",
+      "boundaries": "Общие исключения TRV08; оформление TRV03.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "activity",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить наличие дополнительного спортивного покрытия.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Можно кататься на лыжах с TRAVEL-P1?",
+          "response": "В TRAVEL-P1 спортивная опция не подключена; покрытие лыжного спорта не подтверждено."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-P1 бойынша шаңғы тебу қамтыла ма?",
+          "response": "TRAVEL-P1 спорт опциясы қосылмаған; шаңғы тәуекелі қамтылғаны расталмаған."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV11",
+      "dataset": "butaq-travel-1",
+      "title": "Страховые условия для визы",
+      "purpose": "Показать параметры документа без обещания решения консульства.",
+      "boundaries": "Копия TRV12; оформление TRV03.",
+      "parameters": [
+        {
+          "name": "destination",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Показать параметры документа без обещания решения консульства.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "TRAVEL-P1 подойдёт для визы?",
+          "response": "Можно показать сумму, даты и территорию полиса; соответствие требованиям конкретного консульства не проверено."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-P1 визаға жарай ма?",
+          "response": "Полис сомасын, күндері мен аумағын көрсетуге болады; нақты консулдық талаптарына сәйкестік тексерілмеген."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV12",
+      "dataset": "butaq-travel-1",
+      "title": "Копия туристического полиса",
+      "purpose": "Показать доступность документа.",
+      "boundaries": "Исправление ФИО TRV16; визовые условия TRV11.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Показать доступность документа.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Пришлите копию TRAVEL-P1.",
+          "response": "Для TRAVEL-P1 есть метаданные TRAVEL-DOC1; реальная отправка файла не выполняется."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-P1 көшірмесін жіберіңіз.",
+          "response": "TRAVEL-P1 үшін TRAVEL-DOC1 деректері бар; файл нақты жіберілмейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV13",
+      "dataset": "butaq-travel-1",
+      "title": "Сдвиг дат до выезда",
+      "purpose": "Подготовить перенос периода ещё не начавшейся поездки.",
+      "boundaries": "Уже в поездке TRV04; отмена TRV19.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "start_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "end_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить перенос периода ещё не начавшейся поездки.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Сдвиньте TRAVEL-P2 на 10–17 октября, ещё не вылетал.",
+          "response": "TRAVEL-P2 ещё не начался; новые даты можно только предварительно согласовать."
+        },
+        {
+          "language": "kk",
+          "request": "Әлі ұшқан жоқпын, TRAVEL-P2 күндерін 10–17 қазанға ауыстырайық.",
+          "response": "TRAVEL-P2 әлі басталмаған; жаңа күндерді тек алдын ала келісуге болады."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV14",
+      "dataset": "butaq-travel-1",
+      "title": "Смена страны поездки",
+      "purpose": "Подготовить изменение назначения до поездки.",
+      "boundaries": "Проверка текущей территории TRV06; даты TRV13.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "destination",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить изменение назначения до поездки.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Для TRAVEL-P2 вместо Грузии будет Турция.",
+          "response": "TRAVEL-P2 оформлен на Грузию; замена страны требует проверки условий, в демо запись не меняется."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-P2 үшін Грузия орнына Түркия болады.",
+          "response": "TRAVEL-P2 Грузияға берілген; елді ауыстыру шарттарды тексеруді талап етеді, демо жазбасы өзгермейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV15",
+      "dataset": "butaq-travel-1",
+      "title": "Добавление путешественника",
+      "purpose": "Подготовить изменение списка застрахованных.",
+      "boundaries": "Новый отдельный полис TRV03; опечатка TRV16.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "traveler_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить изменение списка застрахованных.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Добавьте TRAVEL-U3 в TRAVEL-P2.",
+          "response": "Можно подготовить добавление демо-путешественника; цена и страховая защита автоматически не меняются."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-P2 тізіміне TRAVEL-U3 қосыңыз.",
+          "response": "Демо-саяхатшыны қосу жобасын дайындаймыз; баға мен сақтандыру автоматты өзгермейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV16",
+      "dataset": "butaq-travel-1",
+      "title": "Исправление данных путешественника",
+      "purpose": "Подготовить исправление описки в демо-профиле.",
+      "boundaries": "Новый путешественник TRV15; копия TRV12.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "field",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "corrected_value",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить исправление описки в демо-профиле.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "В TRAVEL-P2 ошибка в фамилии.",
+          "response": "Уточним правильное вымышленное значение; реальные паспортные данные не присылайте."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-P2 тегім қате жазылған.",
+          "response": "Дұрыс ойдан шығарылған мәнді нақтылайық; нақты паспорт деректерін жібермеңіз."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV17",
+      "dataset": "butaq-travel-1",
+      "title": "Оплата без выпущенного полиса",
+      "purpose": "Проверить успешное списание при ожидающем выпуске.",
+      "boundaries": "Возврат TRV20; срок готового полиса TRV05.",
+      "parameters": [
+        {
+          "name": "application_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить успешное списание при ожидающем выпуске.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "За TRAVEL-A1 деньги сняли, полиса нет.",
+          "response": "TRAVEL-T1 на 9 000 ₸ получен, TRAVEL-A1 ожидает выпуска; повторно платить не нужно."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-A1 ақшасы алынды, полис жоқ.",
+          "response": "9 000 ₸ TRAVEL-T1 түскен, TRAVEL-A1 шығарылуды күтуде; қайта төлеу қажет емес."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV18",
+      "dataset": "butaq-travel-1",
+      "title": "Квитанция туристической страховки",
+      "purpose": "Показать чек проведённого платежа.",
+      "boundaries": "Копия полиса TRV12; проблема выпуска TRV17.",
+      "parameters": [
+        {
+          "name": "payment_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Показать чек проведённого платежа.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Нужен чек TRAVEL-T1.",
+          "response": "Для TRAVEL-T1 доступны метаданные TRAVEL-REC1 на 9 000 ₸; отправка не выполняется."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-T1 түбіртегі керек.",
+          "response": "TRAVEL-T1 үшін 9 000 ₸ TRAVEL-REC1 деректері бар; жіберу орындалмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV19",
+      "dataset": "butaq-travel-1",
+      "title": "Отмена договора до поездки",
+      "purpose": "Подготовить отказ от страховки, а не страховой убыток за тур.",
+      "boundaries": "Компенсация стоимости сорванной поездки TRV26; готовый возврат TRV20.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "reason",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить отказ от страховки, а не страховой убыток за тур.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "TRAVEL-P2 не нужен, расторгните полис.",
+          "response": "Можно подготовить отмену полиса; сумма возврата не рассчитана и договор не прекращается в демо."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-P2 қажет емес, полистен бас тартамын.",
+          "response": "Полистен бас тарту жобасын дайындаймыз; қайтарым есептелмейді, демода шарт тоқтатылмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV20",
+      "dataset": "butaq-travel-1",
+      "title": "Статус возврата премии",
+      "purpose": "Прочитать ранее созданный возврат за полис.",
+      "boundaries": "Страховая выплата за событие TRV30; первичная отмена TRV19.",
+      "parameters": [
+        {
+          "name": "refund_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Прочитать ранее созданный возврат за полис.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Где возврат TRAVEL-R1?",
+          "response": "TRAVEL-R1 на 6 000 ₸ отправлен 22 сентября, зачисление ещё не подтверждено."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-R1 қайтарымы қайда?",
+          "response": "6 000 ₸ TRAVEL-R1 22 қыркүйекте жіберілген, түсуі әлі расталмаған."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV21",
+      "dataset": "butaq-travel-1",
+      "title": "Организация медицинского ассистанса",
+      "purpose": "Подготовить обращение за помощью за границей без клинических советов.",
+      "boundaries": "Угроза жизни TRV22; уже оплаченный счёт TRV33.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "location",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "contact_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить обращение за помощью за границей без клинических советов.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Я за границей, нужна помощь найти врача, опасности сейчас нет.",
+          "response": "Уточним демо-полис и местонахождение; в демо нет реального вызова врача или связи с ассистансом."
+        },
+        {
+          "language": "kk",
+          "request": "Шетелдемін, дәрігер табуға көмек керек, қазір қауіп жоқ.",
+          "response": "Демо-полис пен орынды нақтылайық; демода дәрігер шақыру немесе ассистансқа нақты қосылу жоқ."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV22",
+      "dataset": "butaq-travel-1",
+      "title": "Непосредственная опасность за границей",
+      "purpose": "Приоритетно направить к местным экстренным службам.",
+      "boundaries": "Неэкстренный ассистанс TRV21; обычный оператор TRV40.",
+      "parameters": [],
+      "actions": {
+        "type": "handoff",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Приоритетно направить к местным экстренным службам.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain that operator connection is simulated; return action=handoff, scenario_id=null."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "За границей человек потерял сознание.",
+          "response": "Обратитесь в местную экстренную службу сейчас; не ждите проверки полиса, бот помощь не вызывает."
+        },
+        {
+          "language": "kk",
+          "request": "Шетелде адам есінен танып қалды.",
+          "response": "Қазір жергілікті жедел қызметке хабарласыңыз; полис тексеруін күтпеңіз, бот көмек шақырмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV23",
+      "dataset": "butaq-travel-1",
+      "title": "Задержанный багаж",
+      "purpose": "Начать обращение о багаже, который ещё разыскивается.",
+      "boundaries": "Подтверждённая утрата TRV24; повреждение TRV25.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "flight_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "baggage_report",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Начать обращение о багаже, который ещё разыскивается.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Чемодан не прилетел, авиакомпания ещё ищет.",
+          "response": "В Flex демо-условие задержки — свыше 6 часов и справка перевозчика; оплата не гарантирована."
+        },
+        {
+          "language": "kk",
+          "request": "Чемодан келмеді, әуе компаниясы әлі іздеп жатыр.",
+          "response": "Flex демо-шарты бойынша кідіру 6 сағаттан асуы және тасымалдаушы анықтамасы қажет; төлемге кепілдік жоқ."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV24",
+      "dataset": "butaq-travel-1",
+      "title": "Окончательная утрата багажа",
+      "purpose": "Начать обращение после подтверждённой перевозчиком утраты.",
+      "boundaries": "Временная задержка TRV23; повреждение TRV25.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "loss_confirmation",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Начать обращение после подтверждённой перевозчиком утраты.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Авиакомпания письменно признала багаж утраченным.",
+          "response": "Для проекта заявления Flex нужна демо-справка об окончательной утрате; лимит багажа 500 EUR."
+        },
+        {
+          "language": "kk",
+          "request": "Әуе компаниясы багаждың жоғалғанын жазбаша растады.",
+          "response": "Flex өтінім жобасына түпкілікті жоғалу туралы демо-анықтама қажет; багаж лимиті 500 EUR."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV25",
+      "dataset": "butaq-travel-1",
+      "title": "Повреждённый багаж",
+      "purpose": "Разобрать полученный, но сломанный багаж.",
+      "boundaries": "Не прибыл TRV23; полностью утрачен TRV24.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "damage_report",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Разобрать полученный, но сломанный багаж.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Чемодан выдали с отломанным колесом.",
+          "response": "Для демо-обращения нужны описание повреждения и акт перевозчика; сумма пока не определена."
+        },
+        {
+          "language": "kk",
+          "request": "Чемоданды дөңгелегі сынған күйде берді.",
+          "response": "Демо-өтінімге зақым сипаттамасы мен тасымалдаушы актісі қажет; сома анықталмаған."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV26",
+      "dataset": "butaq-travel-1",
+      "title": "Отмена поездки как страховое событие",
+      "purpose": "Подготовить обращение за расходами на сорванную поездку.",
+      "boundaries": "Отмена самого полиса TRV19; прерывание начатой поездки TRV27.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "cancellation_reason",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "expense_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить обращение за расходами на сорванную поездку.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Тур сорвался, хочу компенсацию расходов, не возврат полиса.",
+          "response": "Flex рассматривает только перечисленные демо-причины отмены; расходы и основание нужно уточнить."
+        },
+        {
+          "language": "kk",
+          "request": "Тур болмай қалды, полис ақшасын емес, сапар шығынын өтегім келеді.",
+          "response": "Flex тек көрсетілген демо-себептерді қарайды; шығын мен негізді нақтылау керек."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV27",
+      "dataset": "butaq-travel-1",
+      "title": "Прерывание начатой поездки",
+      "purpose": "Подготовить обращение о досрочном возвращении.",
+      "boundaries": "Поездка не началась TRV26; изменение будущих дат TRV13.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "return_reason",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "expense_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить обращение о досрочном возвращении.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Уже отдыхаю, приходится возвращаться раньше.",
+          "response": "Flex предусматривает проверку причин досрочного возвращения; возмещение не гарантируется."
+        },
+        {
+          "language": "kk",
+          "request": "Демалыстамын, ертерек қайтуға тура келді.",
+          "response": "Flex ерте қайту себептерін тексеруді қарастырады; өтемге кепілдік жоқ."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV28",
+      "dataset": "butaq-travel-1",
+      "title": "Статус туристического убытка",
+      "purpose": "Прочитать этап уже созданного страхового обращения.",
+      "boundaries": "Недостающие материалы TRV29; выплата TRV30.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Прочитать этап уже созданного страхового обращения.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Что с TRAVEL-C1?",
+          "response": "TRAVEL-C1 ожидает справку перевозчика о длительности задержки багажа."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-C1 қай кезеңде?",
+          "response": "TRAVEL-C1 багаж кідіру ұзақтығы туралы тасымалдаушы анықтамасын күтуде."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV29",
+      "dataset": "butaq-travel-1",
+      "title": "Документы туристического убытка",
+      "purpose": "Перечислить недостающие материалы конкретного обращения.",
+      "boundaries": "Статус TRV28; документы для покупки TRV03.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Перечислить недостающие материалы конкретного обращения.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Что ещё приложить к TRAVEL-C1?",
+          "response": "Не хватает справки о длительности задержки; реальные документы в эту демо-систему не загружайте."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-C1 үшін тағы не тіркеу керек?",
+          "response": "Кідіру ұзақтығы туралы анықтама жоқ; нақты құжаттарды бұл демоға жүктемеңіз."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV30",
+      "dataset": "butaq-travel-1",
+      "title": "Статус страховой выплаты",
+      "purpose": "Проверить отправку уже одобренного возмещения.",
+      "boundaries": "Возврат полиса TRV20; решение по делу TRV28.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить отправку уже одобренного возмещения.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Выплатили ли по TRAVEL-C2?",
+          "response": "TRAVEL-C2 одобрено на 35 000 ₸; TRAVEL-PO1 ожидает отправки, зачисления нет."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-C2 төлемі жіберілді ме?",
+          "response": "TRAVEL-C2 бойынша 35 000 ₸ мақұлданған; TRAVEL-PO1 жіберілуді күтуде, түсуі жоқ."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV31",
+      "dataset": "butaq-travel-1",
+      "title": "Основание отказа",
+      "purpose": "Объяснить записанную причину отказа.",
+      "boundaries": "Оспаривание TRV32; общие исключения TRV08.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить записанную причину отказа.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Почему отказали TRAVEL-C3?",
+          "response": "В TRAVEL-C3 указано: событие за пределами дат полиса; бот не пересматривает решение."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-C3 неге қабылданбады?",
+          "response": "TRAVEL-C3 себебі: оқиға полис күндерінен тыс болған; бот шешімді қайта қарамайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV32",
+      "dataset": "butaq-travel-1",
+      "title": "Обжалование решения",
+      "purpose": "Подготовить возражение по туристическому убытку.",
+      "boundaries": "Узнать причину TRV31; жалоба на сервис TRV39.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "disagreement",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить возражение по туристическому убытку.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу оспорить отказ TRAVEL-C3.",
+          "response": "Можно составить описание несогласия; реальная апелляция не регистрируется."
+        },
+        {
+          "language": "kk",
+          "request": "TRAVEL-C3 бас тартуына шағымданғым келеді.",
+          "response": "Келіспеу сипаттамасын дайындауға болады; нақты апелляция тіркелмейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV33",
+      "dataset": "butaq-travel-1",
+      "title": "Возмещение оплаченного лечения",
+      "purpose": "Подготовить заявление по уже оплаченному медицинскому счёту.",
+      "boundaries": "Организовать помощь TRV21; общий риск TRV07.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "expense_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "service_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить заявление по уже оплаченному медицинскому счёту.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "За границей сам оплатил врача, хочу возмещение.",
+          "response": "Уточним демо-полис, дату и ссылку на вымышленный счёт; расходы не признаются автоматически."
+        },
+        {
+          "language": "kk",
+          "request": "Шетелде дәрігерді өзім төледім, өтем сұраймын.",
+          "response": "Демо-полис, күн және ойдан шығарылған шот сілтемесін нақтылайық; шығын автоматты қабылданбайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV34",
+      "dataset": "butaq-travel-1",
+      "title": "Задержка рейса",
+      "purpose": "Разобрать длительную задержку вылета.",
+      "boundaries": "Отмена всей поездки TRV26; багаж TRV23.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "flight_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "delay_hours",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Разобрать длительную задержку вылета.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Вылет задержали на девять часов.",
+          "response": "Flex предусматривает демо-рассмотрение задержек от 8 часов со справкой перевозчика; выплата не гарантирована."
+        },
+        {
+          "language": "kk",
+          "request": "Ұшу тоғыз сағатқа кешікті.",
+          "response": "Flex тасымалдаушы анықтамасымен 8 сағаттан асқан кідіруді қарайды; төлемге кепілдік жоқ."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV35",
+      "dataset": "butaq-travel-1",
+      "title": "Пропущенная стыковка",
+      "purpose": "Проверить обращение из-за нарушения маршрута пересадки.",
+      "boundaries": "Только задержка одного вылета TRV34; отмена тура TRV26.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "itinerary_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "cause",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить обращение из-за нарушения маршрута пересадки.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Из-за первого рейса не успел на пересадку.",
+          "response": "Для Flex нужны единый демо-маршрут и причина пропуска; самостоятельные билеты автоматически не покрываются."
+        },
+        {
+          "language": "kk",
+          "request": "Алғашқы рейс кешігіп, келесі ұшаққа үлгермедім.",
+          "response": "Flex үшін бірыңғай демо-маршрут пен себеп қажет; бөлек билеттер автоматты қамтылмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV36",
+      "dataset": "butaq-travel-1",
+      "title": "Утрата проездных документов",
+      "purpose": "Объяснить страховую административную помощь без выдачи документов.",
+      "boundaries": "Утрата багажа TRV24; экстренная угроза TRV22.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "location",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "document_type",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить страховую административную помощь без выдачи документов.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Потерял паспорт в поездке.",
+          "response": "За заменой документа обратитесь в соответствующее консульство; бот не оформляет паспорт, расходы требуют проверки."
+        },
+        {
+          "language": "kk",
+          "request": "Сапарда паспортымды жоғалттым.",
+          "response": "Құжатты ауыстыру үшін тиісті консулдыққа жүгініңіз; бот паспорт бермейді, шығын бөлек тексеріледі."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV37",
+      "dataset": "butaq-travel-1",
+      "title": "Медицинская транспортировка",
+      "purpose": "Разъяснить порядок страхового согласования перевозки.",
+      "boundaries": "Обычный ассистанс TRV21; опасность сейчас TRV22.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "referral_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "location",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Разъяснить порядок страхового согласования перевозки.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Клиника обсуждает перевозку домой, как согласовать?",
+          "response": "Медицинскую необходимость определяют специалисты; демо требует согласования ассистанса и не организует перевозку."
+        },
+        {
+          "language": "kk",
+          "request": "Емхана үйге тасымалдауды талқылап жатыр, қалай келісеміз?",
+          "response": "Медициналық қажеттілікті мамандар анықтайды; демо ассистанс келісімін талап етеді, тасымалдауды ұйымдастырмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV38",
+      "dataset": "butaq-travel-1",
+      "title": "Контакты и часы ассистанса",
+      "purpose": "Узнать демонстрационные каналы помощи без запроса вызова.",
+      "boundaries": "Нужна помощь сейчас TRV21; оператор TRV40.",
+      "parameters": [],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Узнать демонстрационные каналы помощи без запроса вызова.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Где контакты ассистанса?",
+          "response": "Демо-ассистанс обозначен как круглосуточный; адрес help@journey.example.invalid вымышленный и не обслуживается."
+        },
+        {
+          "language": "kk",
+          "request": "Ассистанс байланысы қайда?",
+          "response": "Демо-ассистанс тәулік бойы деп көрсетілген; help@journey.example.invalid ойдан шығарылған, қызмет көрсетпейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV39",
+      "dataset": "butaq-travel-1",
+      "title": "Жалоба на сервис",
+      "purpose": "Подготовить жалобу на обслуживание поездки.",
+      "boundaries": "Пересмотр отказа TRV32; прямой оператор TRV40.",
+      "parameters": [
+        {
+          "name": "complaint_text",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить жалобу на обслуживание поездки.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу пожаловаться на долгое ожидание ассистанса.",
+          "response": "Можно подготовить демо-жалобу; реального регистрационного номера и обратного звонка не будет."
+        },
+        {
+          "language": "kk",
+          "request": "Ассистансты ұзақ күткеніме шағымданғым келеді.",
+          "response": "Демо-шағым дайындаймыз; нақты тіркеу нөмірі мен кері қоңырау болмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "TRV40",
+      "dataset": "butaq-travel-1",
+      "title": "Оператор по путешествиям",
+      "purpose": "Распознать прямую просьбу о человеке.",
+      "boundaries": "Обычные контакты TRV38; экстренная помощь TRV22.",
+      "parameters": [],
+      "actions": {
+        "type": "handoff",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Распознать прямую просьбу о человеке.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain that operator connection is simulated; return action=handoff, scenario_id=null."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Соедините с живым оператором.",
+          "response": "Могу подготовить контекст разговора для оператора; реального соединения в демо нет."
+        },
+        {
+          "language": "kk",
+          "request": "Тірі оператормен байланыстырыңыз.",
+          "response": "Әңгіме мазмұнын операторға дайындаймын; демода нақты қосылу жоқ."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    }
+  ]
+}

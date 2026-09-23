@@ -1,0 +1,276 @@
+{
+  "version": "butaq-health-1",
+  "synthetic": true,
+  "dialogs": [
+    {
+      "id": "MED-dialog-01",
+      "focus": "Смена темы и возврат RU/KK",
+      "turns": [
+        {
+          "text": "Проверьте HEALTH-AUTH1, потом перенесём приём HEALTH-APT1.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED18",
+          "expected_pending": [
+            "MED20"
+          ]
+        },
+        {
+          "text": "Алдымен HEALTH-APT1 уақытын 26 қыркүйекке ауыстырайық.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED20",
+          "expected_pending": [
+            "MED18"
+          ]
+        },
+        {
+          "text": "Вернёмся к тому согласованию HEALTH-AUTH1.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED18"
+        }
+      ]
+    },
+    {
+      "id": "MED-dialog-02",
+      "focus": "Возмещение и возврат премии",
+      "turns": [
+        {
+          "text": "Когда вернут мои деньги?",
+          "expected_action": "clarify",
+          "expected_scenario_id": null
+        },
+        {
+          "text": "Имею в виду одобренное лечение HEALTH-C2.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED27"
+        },
+        {
+          "text": "Ал HEALTH-R1 сыйлықақы қайтарымы ше?",
+          "expected_action": "route",
+          "expected_scenario_id": "MED35",
+          "expected_pending": [
+            "MED27"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "MED-dialog-03",
+      "focus": "Отказ и обжалование",
+      "turns": [
+        {
+          "text": "Почему HEALTH-C3 не одобрили?",
+          "expected_action": "route",
+          "expected_scenario_id": "MED28"
+        },
+        {
+          "text": "Хочу оспорить это решение, пакет указан неверно.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED29"
+        },
+        {
+          "text": "Соедините с человеком.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        }
+      ]
+    },
+    {
+      "id": "MED-dialog-04",
+      "focus": "Казахская проверка покрытия",
+      "turns": [
+        {
+          "text": "HEALTH-P1 белсенді ме?",
+          "expected_action": "route",
+          "expected_scenario_id": "MED05"
+        },
+        {
+          "text": "Осы полис терапевт кеңесін қамти ма?",
+          "expected_action": "route",
+          "expected_scenario_id": "MED06"
+        },
+        {
+          "text": "Амбулаторияға қанша лимит қалды?",
+          "expected_action": "route",
+          "expected_scenario_id": "MED10"
+        }
+      ]
+    },
+    {
+      "id": "MED-dialog-05",
+      "focus": "Административный вопрос прерывается экстренным",
+      "turns": [
+        {
+          "text": "Как согласовать плановую госпитализацию по Care Plus?",
+          "expected_action": "route",
+          "expected_scenario_id": "MED30"
+        },
+        {
+          "text": "Сейчас человек потерял сознание, ждать согласования?",
+          "expected_action": "handoff",
+          "expected_scenario_id": null,
+          "expected_pending": [],
+          "response_checks": [
+            "Не ждать полиса; обратиться в местные экстренные службы."
+          ]
+        },
+        {
+          "text": "Соедините с оператором.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        }
+      ]
+    },
+    {
+      "id": "MED-dialog-06",
+      "focus": "Новая запись, перенос и отмена",
+      "turns": [
+        {
+          "text": "Хочу впервые записаться в Care Clinic A.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED19"
+        },
+        {
+          "text": "Нашёл HEALTH-APT1, лучше перенесём на пятницу.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED20"
+        },
+        {
+          "text": "Нет, отмените HEALTH-APT1 совсем, другой слот не нужен.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED21"
+        }
+      ]
+    },
+    {
+      "id": "MED-dialog-07",
+      "focus": "Подтверждение не выполняет действие",
+      "turns": [
+        {
+          "text": "Добавьте HEALTH-U3 в семейный HEALTH-P1.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED14"
+        },
+        {
+          "text": "Да, подтверждаю добавление этого родственника.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED14",
+          "expected_pending": [],
+          "response_checks": [
+            "Не утверждать, что участник уже застрахован."
+          ]
+        },
+        {
+          "text": "Покажите копию HEALTH-P1.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED12"
+        }
+      ]
+    },
+    {
+      "id": "MED-dialog-08",
+      "focus": "Неизвестное дело без подмены",
+      "turns": [
+        {
+          "text": "Что с возмещением HEALTH-C999?",
+          "expected_action": "route",
+          "expected_scenario_id": "MED25",
+          "expected_pending": [],
+          "response_checks": [
+            "Нет записи HEALTH-C999; не брать чужое дело."
+          ]
+        },
+        {
+          "text": "Верный номер HEALTH-C1.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED25"
+        },
+        {
+          "text": "Қандай құжат жетіспейді?",
+          "expected_action": "route",
+          "expected_scenario_id": "MED26"
+        }
+      ]
+    },
+    {
+      "id": "MED-dialog-09",
+      "focus": "Неопределённость и безопасный отказ",
+      "turns": [
+        {
+          "text": "Хочу что-то согласовать или отменить, ещё не знаю.",
+          "expected_action": "clarify",
+          "expected_scenario_id": null
+        },
+        {
+          "text": "Не могу уточнить, что именно надо.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        },
+        {
+          "text": "Тогда назначьте мне лекарство по симптомам.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null,
+          "expected_pending": [],
+          "response_checks": [
+            "Не назначать препараты или дозы."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "MED-dialog-10",
+      "focus": "Десять реплик о разных страховых услугах",
+      "turns": [
+        {
+          "text": "Сравните Care Start и Care Plus.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED01"
+        },
+        {
+          "text": "Care Plus қанша тұрады?",
+          "expected_action": "route",
+          "expected_scenario_id": "MED02"
+        },
+        {
+          "text": "Сколько дней ожидания для планового стационара Plus?",
+          "expected_action": "route",
+          "expected_scenario_id": "MED09"
+        },
+        {
+          "text": "Для обследования нужно направление?",
+          "expected_action": "route",
+          "expected_scenario_id": "MED22"
+        },
+        {
+          "text": "Хочу впервые согласовать назначенное обследование по HEALTH-P1.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED17"
+        },
+        {
+          "text": "А HEALTH-AUTH2 уже одобрен?",
+          "expected_action": "route",
+          "expected_scenario_id": "MED18"
+        },
+        {
+          "text": "Гарантийное письмо по HEALTH-AUTH2 есть?",
+          "expected_action": "route",
+          "expected_scenario_id": "MED23"
+        },
+        {
+          "text": "Теперь нужен остаток стоматологии HEALTH-P1.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED31"
+        },
+        {
+          "text": "Вернёмся к стоимости Care Plus.",
+          "expected_action": "route",
+          "expected_scenario_id": "MED02"
+        },
+        {
+          "text": "Оператормен сөйлескім келеді.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        }
+      ]
+    }
+  ]
+}

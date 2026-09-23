@@ -1,0 +1,255 @@
+{
+  "version": "butaq-health-1",
+  "synthetic": true,
+  "read_only": true,
+  "snapshot_at": "2026-09-23T09:00:00+05:00",
+  "customers": [
+    {
+      "id": "HEALTH-U1",
+      "display_name": "Мед Демо А",
+      "preferred_language": "ru",
+      "policy_ids": [
+        "HEALTH-P1"
+      ],
+      "application_ids": [
+        "HEALTH-A1"
+      ],
+      "email": "care-a@example.invalid"
+    },
+    {
+      "id": "HEALTH-U2",
+      "display_name": "Мед Демо Ә",
+      "preferred_language": "kk",
+      "policy_ids": [
+        "HEALTH-P2"
+      ],
+      "application_ids": [
+        "HEALTH-A2"
+      ],
+      "email": "care-b@example.invalid"
+    },
+    {
+      "id": "HEALTH-U3",
+      "display_name": "Мед Демо Б",
+      "preferred_language": "mixed",
+      "policy_ids": [],
+      "application_ids": [],
+      "email": "care-c@example.invalid"
+    }
+  ],
+  "policies": [
+    {
+      "id": "HEALTH-P1",
+      "customer_id": "HEALTH-U1",
+      "product": "care_plus",
+      "status": "active",
+      "start_date": "2026-01-01",
+      "end_date": "2026-12-31",
+      "premium_kzt": 180000,
+      "document_id": "HEALTH-DOC1",
+      "benefits": {
+        "outpatient": {
+          "limit_kzt": 500000,
+          "used_kzt": 120000,
+          "remaining_kzt": 380000
+        },
+        "dental": {
+          "limit_kzt": 50000,
+          "used_kzt": 10000,
+          "remaining_kzt": 40000
+        }
+      }
+    },
+    {
+      "id": "HEALTH-P2",
+      "customer_id": "HEALTH-U2",
+      "product": "care_start",
+      "status": "active",
+      "start_date": "2026-07-01",
+      "end_date": "2027-06-30",
+      "premium_kzt": 90000,
+      "installments": [
+        {
+          "date": "2026-07-01",
+          "amount_kzt": 22500,
+          "status": "paid"
+        },
+        {
+          "date": "2026-10-01",
+          "amount_kzt": 22500,
+          "status": "scheduled"
+        },
+        {
+          "date": "2027-01-01",
+          "amount_kzt": 22500,
+          "status": "scheduled"
+        },
+        {
+          "date": "2027-04-01",
+          "amount_kzt": 22500,
+          "status": "scheduled"
+        }
+      ]
+    }
+  ],
+  "applications": [
+    {
+      "id": "HEALTH-A1",
+      "customer_id": "HEALTH-U1",
+      "product": "care_plus",
+      "status": "issuance_pending",
+      "policy_id": null,
+      "payment_ids": [
+        "HEALTH-T1"
+      ]
+    },
+    {
+      "id": "HEALTH-A2",
+      "customer_id": "HEALTH-U2",
+      "product": "care_start",
+      "status": "cancelled",
+      "policy_id": null,
+      "payment_ids": [
+        "HEALTH-T2"
+      ]
+    }
+  ],
+  "payments": [
+    {
+      "id": "HEALTH-T1",
+      "application_id": "HEALTH-A1",
+      "amount_kzt": 180000,
+      "status": "settled"
+    },
+    {
+      "id": "HEALTH-T2",
+      "application_id": "HEALTH-A2",
+      "amount_kzt": 15000,
+      "status": "refund_sent",
+      "refund_id": "HEALTH-R1"
+    }
+  ],
+  "refunds": [
+    {
+      "id": "HEALTH-R1",
+      "payment_id": "HEALTH-T2",
+      "amount_kzt": 15000,
+      "status": "sent",
+      "sent_at": "2026-09-22T15:00:00+05:00",
+      "credited_at": null
+    }
+  ],
+  "clinics": [
+    {
+      "id": "HEALTH-NET1",
+      "name": "Care Clinic A",
+      "city": "Демо-Алматы",
+      "address": "Демо-көше 20",
+      "specialties": [
+        "терапевт",
+        "диагностическое отделение"
+      ],
+      "real_service": false
+    }
+  ],
+  "authorizations": [
+    {
+      "id": "HEALTH-AUTH1",
+      "policy_id": "HEALTH-P1",
+      "clinic_id": "HEALTH-NET1",
+      "service": "плановое обследование",
+      "status": "clarification_needed",
+      "missing_fields": [
+        "service_code"
+      ],
+      "guarantee_letter_id": null
+    },
+    {
+      "id": "HEALTH-AUTH2",
+      "policy_id": "HEALTH-P1",
+      "clinic_id": "HEALTH-NET1",
+      "service": "консультация специалиста",
+      "status": "approved",
+      "guarantee_letter_id": "HEALTH-GL1"
+    }
+  ],
+  "appointments": [
+    {
+      "id": "HEALTH-APT1",
+      "policy_id": "HEALTH-P1",
+      "clinic_id": "HEALTH-NET1",
+      "authorization_id": "HEALTH-AUTH2",
+      "starts_at": "2026-09-24T11:00:00+05:00",
+      "status": "scheduled"
+    }
+  ],
+  "claims": [
+    {
+      "id": "HEALTH-C1",
+      "policy_id": "HEALTH-P1",
+      "type": "outpatient_reimbursement",
+      "status": "documents_pending",
+      "missing_documents": [
+        "itemized_invoice"
+      ],
+      "approved_payout_kzt": null
+    },
+    {
+      "id": "HEALTH-C2",
+      "policy_id": "HEALTH-P1",
+      "type": "outpatient_reimbursement",
+      "status": "approved",
+      "approved_payout_kzt": 18000,
+      "payout_id": "HEALTH-PO1"
+    },
+    {
+      "id": "HEALTH-C3",
+      "policy_id": "HEALTH-P2",
+      "type": "noncovered_service",
+      "status": "rejected",
+      "reason": "Услуга отсутствует в демо-пакете",
+      "appeal_registered": false
+    }
+  ],
+  "payouts": [
+    {
+      "id": "HEALTH-PO1",
+      "claim_id": "HEALTH-C2",
+      "amount_kzt": 18000,
+      "status": "payment_pending",
+      "sent_at": null
+    }
+  ],
+  "employers": [
+    {
+      "id": "HEALTH-EMP1",
+      "name": "Demo Employer",
+      "real_company": false
+    }
+  ],
+  "memberships": [
+    {
+      "id": "HEALTH-M1",
+      "customer_id": "HEALTH-U3",
+      "employer_id": "HEALTH-EMP1",
+      "status": "confirmation_pending",
+      "coverage_active": false
+    }
+  ],
+  "documents": [
+    {
+      "id": "HEALTH-DOC1",
+      "policy_id": "HEALTH-P1",
+      "type": "digital_card",
+      "status": "metadata_only",
+      "download_url": null
+    },
+    {
+      "id": "HEALTH-GL1",
+      "authorization_id": "HEALTH-AUTH2",
+      "type": "guarantee_letter",
+      "status": "metadata_only",
+      "sent_to_clinic": false
+    }
+  ]
+}

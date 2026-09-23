@@ -1,0 +1,286 @@
+{
+  "version": "butaq-auto-1",
+  "synthetic": true,
+  "dialogs": [
+    {
+      "id": "AUT-dialog-01",
+      "focus": "Смена темы RU/KK и возврат",
+      "turns": [
+        {
+          "text": "AUTO-A1 оплачен, полиса нет. Потом нужно поменять адрес доставки AUTO-L1.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT11",
+          "expected_pending": [
+            "AUT36"
+          ]
+        },
+        {
+          "text": "Алдымен AUTO-L1 мекенжайын Демо-көше 8 деп өзгертейік.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT36",
+          "expected_pending": [
+            "AUT11"
+          ],
+          "response_checks": [
+            "Не утверждать, что адрес изменён."
+          ]
+        },
+        {
+          "text": "Теперь вернёмся к той оплате заявки AUTO-A1.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT11",
+          "expected_pending": [],
+          "response_checks": [
+            "Платёж AUTO-T1 получен; не предлагать повторную оплату."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AUT-dialog-02",
+      "focus": "Различить возврат премии и возмещение ущерба",
+      "turns": [
+        {
+          "text": "Когда перечислят мои деньги?",
+          "expected_action": "clarify",
+          "expected_scenario_id": null
+        },
+        {
+          "text": "Речь о возврате AUTO-R1 за двойное списание.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT19"
+        },
+        {
+          "text": "Ал AUTO-C3 бойынша залал өтемі ше?",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT30",
+          "expected_pending": [
+            "AUT19"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AUT-dialog-03",
+      "focus": "Отказ, обжалование и человек",
+      "turns": [
+        {
+          "text": "Объясните отказ AUTO-C4.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT31"
+        },
+        {
+          "text": "Дата события неверна, хочу пересмотр этого отказа.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT32",
+          "expected_pending": [],
+          "response_checks": [
+            "Не регистрировать апелляцию."
+          ]
+        },
+        {
+          "text": "Оператормен сөйлесейін.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null,
+          "expected_pending": [],
+          "response_checks": [
+            "Не утверждать реальное соединение."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AUT-dialog-04",
+      "focus": "Казахский: срок и продление",
+      "turns": [
+        {
+          "text": "AUTO-P1 полисім қашан аяқталады?",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT05"
+        },
+        {
+          "text": "Оны 2027 жылғы 1 қаңтардан ұзартқым келеді.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT04"
+        },
+        {
+          "text": "Жоқ, әзірге тек PDF көшірмесін көрсетіңіз.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT14"
+        }
+      ]
+    },
+    {
+      "id": "AUT-dialog-05",
+      "focus": "Безопасность при ДТП",
+      "turns": [
+        {
+          "text": "Хочу заявить столкновение, люди не пострадали.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT20"
+        },
+        {
+          "text": "Уточняю: рядом человек потерял сознание.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null,
+          "expected_pending": [],
+          "response_checks": [
+            "Местные экстренные службы, не ждать оформления."
+          ]
+        },
+        {
+          "text": "Мне нужен человек, соедините.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        }
+      ]
+    },
+    {
+      "id": "AUT-dialog-06",
+      "focus": "Соседние сценарии стекла и парковочного ущерба",
+      "turns": [
+        {
+          "text": "На стоянке кто-то помял дверь, автомобиля никто не угнал.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT23"
+        },
+        {
+          "text": "А отдельно вчера от камня треснуло только лобовое стекло.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT21"
+        },
+        {
+          "text": "Вернёмся к повреждению двери на парковке.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT23"
+        }
+      ]
+    },
+    {
+      "id": "AUT-dialog-07",
+      "focus": "Осмотр: создание, перенос, подтверждение без исполнения",
+      "turns": [
+        {
+          "text": "По AUTO-C1 впервые хочу выбрать время осмотра.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT27"
+        },
+        {
+          "text": "Нашёл уже существующую запись AUTO-I1, перенесите её на 26 сентября.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT28"
+        },
+        {
+          "text": "Подтверждаю перенос AUTO-I1 на 26 сентября.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT28",
+          "expected_pending": [],
+          "response_checks": [
+            "Явно сообщить: запись остаётся прежней; только проект."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AUT-dialog-08",
+      "focus": "Неизвестный идентификатор и уточнение",
+      "turns": [
+        {
+          "text": "Какой статус у AUTO-C999?",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT25",
+          "expected_pending": [],
+          "response_checks": [
+            "Нет записи AUTO-C999; не использовать AUTO-C1 вместо неё."
+          ]
+        },
+        {
+          "text": "Ошибся, интересует AUTO-C1.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT25"
+        },
+        {
+          "text": "Какие фотографии там отсутствуют?",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT26"
+        }
+      ]
+    },
+    {
+      "id": "AUT-dialog-09",
+      "focus": "Повторная неоднозначность",
+      "turns": [
+        {
+          "text": "Хочу изменить данные, но пока не скажу какие.",
+          "expected_action": "clarify",
+          "expected_scenario_id": null
+        },
+        {
+          "text": "Какие-то данные, не знаю чего именно.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null,
+          "expected_pending": [],
+          "response_checks": [
+            "Повторная неопределённость; не угадывать."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "AUT-dialog-10",
+      "focus": "Десять реплик: объяснения, новый запрос и возврат",
+      "turns": [
+        {
+          "text": "Чем отличаются Motor Base и Motor Plus?",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT01"
+        },
+        {
+          "text": "А какова примерная цена Plus для машины за восемь миллионов?",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT02"
+        },
+        {
+          "text": "Plus ұрлықты қамти ма?",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT06"
+        },
+        {
+          "text": "В моём AUTO-P1 какая франшиза?",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT08"
+        },
+        {
+          "text": "А территория AUTO-P1 включает Грузию?",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT09"
+        },
+        {
+          "text": "Теперь хочу узнать стадию AUTO-C1.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT25"
+        },
+        {
+          "text": "Что ещё нужно приложить к AUTO-C1?",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT26"
+        },
+        {
+          "text": "Ал AUTO-C3 төлемі жіберілді ме?",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT30"
+        },
+        {
+          "text": "Вернёмся к недостающим документам AUTO-C1.",
+          "expected_action": "route",
+          "expected_scenario_id": "AUT26"
+        },
+        {
+          "text": "Спасибо, теперь хочу поговорить с человеком.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        }
+      ]
+    }
+  ]
+}

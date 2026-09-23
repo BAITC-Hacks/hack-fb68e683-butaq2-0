@@ -1,0 +1,175 @@
+{
+  "version": "butaq-travel-1",
+  "synthetic": true,
+  "read_only": true,
+  "snapshot_at": "2026-09-23T09:00:00+05:00",
+  "customers": [
+    {
+      "id": "TRAVEL-U1",
+      "display_name": "Тур Демо А",
+      "preferred_language": "ru",
+      "policy_ids": [
+        "TRAVEL-P1"
+      ],
+      "application_ids": [
+        "TRAVEL-A1"
+      ],
+      "email": "trip-a@example.invalid"
+    },
+    {
+      "id": "TRAVEL-U2",
+      "display_name": "Тур Демо Ә",
+      "preferred_language": "kk",
+      "policy_ids": [
+        "TRAVEL-P2"
+      ],
+      "application_ids": [
+        "TRAVEL-A2"
+      ],
+      "email": "trip-b@example.invalid"
+    },
+    {
+      "id": "TRAVEL-U3",
+      "display_name": "Тур Демо Б",
+      "preferred_language": "mixed",
+      "policy_ids": [],
+      "application_ids": [],
+      "email": "trip-c@example.invalid"
+    }
+  ],
+  "policies": [
+    {
+      "id": "TRAVEL-P1",
+      "customer_id": "TRAVEL-U1",
+      "product": "travel_flex",
+      "status": "active",
+      "start_date": "2026-09-20",
+      "end_date": "2026-09-27",
+      "premium_kzt": 9000,
+      "territory": [
+        "Турция"
+      ],
+      "sports_endorsement": false,
+      "medical_deductible_eur": 0,
+      "document_id": "TRAVEL-DOC1"
+    },
+    {
+      "id": "TRAVEL-P2",
+      "customer_id": "TRAVEL-U2",
+      "product": "travel_basic",
+      "status": "not_started",
+      "start_date": "2026-10-01",
+      "end_date": "2026-10-08",
+      "premium_kzt": 6000,
+      "territory": [
+        "Грузия"
+      ],
+      "sports_endorsement": false
+    }
+  ],
+  "applications": [
+    {
+      "id": "TRAVEL-A1",
+      "customer_id": "TRAVEL-U1",
+      "product": "travel_flex",
+      "status": "issuance_pending",
+      "policy_id": null,
+      "payment_ids": [
+        "TRAVEL-T1"
+      ]
+    },
+    {
+      "id": "TRAVEL-A2",
+      "customer_id": "TRAVEL-U2",
+      "product": "travel_basic",
+      "status": "cancelled",
+      "policy_id": null,
+      "payment_ids": [
+        "TRAVEL-T2"
+      ]
+    }
+  ],
+  "payments": [
+    {
+      "id": "TRAVEL-T1",
+      "application_id": "TRAVEL-A1",
+      "amount_kzt": 9000,
+      "status": "settled",
+      "receipt_id": "TRAVEL-REC1"
+    },
+    {
+      "id": "TRAVEL-T2",
+      "application_id": "TRAVEL-A2",
+      "amount_kzt": 6000,
+      "status": "refund_sent",
+      "refund_id": "TRAVEL-R1"
+    }
+  ],
+  "refunds": [
+    {
+      "id": "TRAVEL-R1",
+      "payment_id": "TRAVEL-T2",
+      "amount_kzt": 6000,
+      "status": "sent",
+      "sent_at": "2026-09-22T15:00:00+05:00",
+      "credited_at": null
+    }
+  ],
+  "claims": [
+    {
+      "id": "TRAVEL-C1",
+      "policy_id": "TRAVEL-P1",
+      "type": "baggage_delay",
+      "status": "documents_pending",
+      "missing_documents": [
+        "carrier_delay_duration_certificate"
+      ],
+      "event_date": "2026-09-20",
+      "approved_payout_kzt": null
+    },
+    {
+      "id": "TRAVEL-C2",
+      "policy_id": "TRAVEL-P1",
+      "type": "baggage_damage",
+      "status": "approved",
+      "approved_payout_kzt": 35000,
+      "payout_id": "TRAVEL-PO1",
+      "event_date": "2026-09-21"
+    },
+    {
+      "id": "TRAVEL-C3",
+      "policy_id": "TRAVEL-P1",
+      "type": "flight_delay",
+      "status": "rejected",
+      "event_date": "2026-09-19",
+      "reason": "Событие за пределами дат полиса",
+      "appeal_registered": false
+    }
+  ],
+  "payouts": [
+    {
+      "id": "TRAVEL-PO1",
+      "claim_id": "TRAVEL-C2",
+      "amount_kzt": 35000,
+      "status": "payment_pending",
+      "sent_at": null
+    }
+  ],
+  "documents": [
+    {
+      "id": "TRAVEL-DOC1",
+      "policy_id": "TRAVEL-P1",
+      "type": "policy_pdf",
+      "status": "metadata_only",
+      "download_url": null
+    },
+    {
+      "id": "TRAVEL-REC1",
+      "payment_id": "TRAVEL-T1",
+      "type": "receipt",
+      "amount_kzt": 9000,
+      "status": "metadata_only",
+      "download_url": null
+    }
+  ]
+}

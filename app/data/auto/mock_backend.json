@@ -1,0 +1,270 @@
+{
+  "version": "butaq-auto-1",
+  "synthetic": true,
+  "read_only": true,
+  "snapshot_at": "2026-09-23T09:00:00+05:00",
+  "customers": [
+    {
+      "id": "AUTO-U1",
+      "display_name": "Авто Демо А",
+      "preferred_language": "ru",
+      "policy_ids": [
+        "AUTO-P1"
+      ],
+      "application_ids": [
+        "AUTO-A1"
+      ],
+      "email": "auto-a@example.invalid"
+    },
+    {
+      "id": "AUTO-U2",
+      "display_name": "Авто Демо Ә",
+      "preferred_language": "kk",
+      "policy_ids": [],
+      "application_ids": [
+        "AUTO-A2"
+      ],
+      "email": "auto-b@example.invalid"
+    },
+    {
+      "id": "AUTO-U3",
+      "display_name": "Авто Демо Б",
+      "preferred_language": "mixed",
+      "policy_ids": [
+        "AUTO-P2"
+      ],
+      "application_ids": [
+        "AUTO-A3"
+      ],
+      "email": "auto-c@example.invalid"
+    }
+  ],
+  "policies": [
+    {
+      "id": "AUTO-P1",
+      "customer_id": "AUTO-U1",
+      "product": "motor_plus",
+      "status": "active",
+      "start_date": "2026-01-01",
+      "end_date": "2026-12-31",
+      "premium_kzt": 120000,
+      "insured_value_kzt": 8000000,
+      "deductible_kzt": 50000,
+      "territory": [
+        "Казахстан"
+      ],
+      "vehicle": "Demo Sedan 2022",
+      "driver_ids": [
+        "AUTO-DR1"
+      ],
+      "document_id": "AUTO-DOC1"
+    },
+    {
+      "id": "AUTO-P2",
+      "customer_id": "AUTO-U3",
+      "product": "motor_base",
+      "status": "active",
+      "start_date": "2026-09-20",
+      "end_date": "2027-09-19",
+      "premium_kzt": 60000,
+      "deductible_kzt": 50000,
+      "vehicle": "Demo Hatchback 2021",
+      "driver_ids": [
+        "AUTO-DR2"
+      ]
+    }
+  ],
+  "drivers": [
+    {
+      "id": "AUTO-DR1",
+      "customer_id": "AUTO-U1",
+      "display_name": "Демо-водитель А"
+    },
+    {
+      "id": "AUTO-DR2",
+      "customer_id": "AUTO-U3",
+      "display_name": "Демо-водитель Б"
+    }
+  ],
+  "applications": [
+    {
+      "id": "AUTO-A1",
+      "customer_id": "AUTO-U1",
+      "product": "motor_plus",
+      "status": "issuance_pending",
+      "policy_id": null,
+      "payment_ids": [
+        "AUTO-T1"
+      ]
+    },
+    {
+      "id": "AUTO-A2",
+      "customer_id": "AUTO-U2",
+      "product": "motor_base",
+      "status": "payment_failed",
+      "policy_id": null,
+      "payment_ids": [
+        "AUTO-T2"
+      ]
+    },
+    {
+      "id": "AUTO-A3",
+      "customer_id": "AUTO-U3",
+      "product": "motor_base",
+      "status": "issued",
+      "policy_id": "AUTO-P2",
+      "payment_ids": [
+        "AUTO-T3",
+        "AUTO-T4"
+      ]
+    }
+  ],
+  "payments": [
+    {
+      "id": "AUTO-T1",
+      "application_id": "AUTO-A1",
+      "status": "settled",
+      "amount_kzt": 120000,
+      "debited_kzt": 120000,
+      "receipt_id": "AUTO-REC1"
+    },
+    {
+      "id": "AUTO-T2",
+      "application_id": "AUTO-A2",
+      "status": "declined",
+      "amount_kzt": 60000,
+      "debited_kzt": 0
+    },
+    {
+      "id": "AUTO-T3",
+      "application_id": "AUTO-A3",
+      "status": "settled",
+      "amount_kzt": 60000,
+      "debited_kzt": 60000
+    },
+    {
+      "id": "AUTO-T4",
+      "application_id": "AUTO-A3",
+      "status": "duplicate",
+      "amount_kzt": 60000,
+      "debited_kzt": 60000,
+      "duplicate_of": "AUTO-T3",
+      "refund_id": "AUTO-R1"
+    }
+  ],
+  "refunds": [
+    {
+      "id": "AUTO-R1",
+      "payment_id": "AUTO-T4",
+      "amount_kzt": 60000,
+      "status": "sent",
+      "sent_at": "2026-09-22T15:00:00+05:00",
+      "credited_at": null
+    }
+  ],
+  "claims": [
+    {
+      "id": "AUTO-C1",
+      "policy_id": "AUTO-P1",
+      "type": "collision",
+      "status": "documents_pending",
+      "missing_documents": [
+        "damage_photos"
+      ],
+      "approved_payout_kzt": null
+    },
+    {
+      "id": "AUTO-C2",
+      "policy_id": "AUTO-P1",
+      "type": "glass",
+      "status": "inspection_scheduled",
+      "appointment_id": "AUTO-I1"
+    },
+    {
+      "id": "AUTO-C3",
+      "policy_id": "AUTO-P1",
+      "type": "parking_damage",
+      "status": "approved",
+      "approved_payout_kzt": 180000,
+      "payout_id": "AUTO-PO1"
+    },
+    {
+      "id": "AUTO-C4",
+      "policy_id": "AUTO-P2",
+      "type": "collision",
+      "status": "rejected",
+      "event_date": "2026-09-19",
+      "reason": "Событие до начала договора",
+      "appeal_registered": false
+    },
+    {
+      "id": "AUTO-C5",
+      "policy_id": "AUTO-P1",
+      "type": "collision",
+      "status": "repair",
+      "repair_id": "AUTO-REP1"
+    }
+  ],
+  "appointments": [
+    {
+      "id": "AUTO-I1",
+      "claim_id": "AUTO-C2",
+      "status": "scheduled",
+      "starts_at": "2026-09-25T10:00:00+05:00"
+    }
+  ],
+  "payouts": [
+    {
+      "id": "AUTO-PO1",
+      "claim_id": "AUTO-C3",
+      "amount_kzt": 180000,
+      "status": "payment_pending",
+      "sent_at": null
+    }
+  ],
+  "repairs": [
+    {
+      "id": "AUTO-REP1",
+      "claim_id": "AUTO-C5",
+      "garage_id": "AUTO-NET1",
+      "status": "waiting_for_part",
+      "completion_date": null
+    }
+  ],
+  "garages": [
+    {
+      "id": "AUTO-NET1",
+      "name": "Demo Garage",
+      "city": "Демо-Алматы",
+      "address": "Демо-улица 10",
+      "real_service": false
+    }
+  ],
+  "documents": [
+    {
+      "id": "AUTO-DOC1",
+      "policy_id": "AUTO-P1",
+      "type": "policy_pdf",
+      "status": "metadata_only",
+      "download_url": null
+    },
+    {
+      "id": "AUTO-REC1",
+      "payment_id": "AUTO-T1",
+      "type": "receipt",
+      "amount_kzt": 120000,
+      "status": "metadata_only",
+      "download_url": null
+    }
+  ],
+  "deliveries": [
+    {
+      "id": "AUTO-L1",
+      "document_id": "AUTO-DOC1",
+      "status": "preparing",
+      "address": "Демо-улица 1",
+      "tracking_number": null,
+      "address_change_allowed": true
+    }
+  ]
+}

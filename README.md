@@ -42,6 +42,23 @@ The backend waits for PostgreSQL and applies
 Alembic migrations before serving requests. Database data survives restarts in
 the `postgres-data` volume.
 
+### ARM Docker compatibility
+
+The backend image sets `OPENSSL_armcap=0` to avoid a reproduced native OpenSSL
+crash (`Illegal instruction`, exit 132) while importing `cryptography` on ARM
+Docker VMs. This selects portable implementations instead of ARM CPU extensions;
+TLS and certificate verification remain enabled, with a possible crypto performance
+cost. It does not pin an older cryptography release or change database contents.
+See [OpenSSL's CPU capability override](https://docs.openssl.org/master/man3/OPENSSL_armcap/).
+The image build also checks that the complete application imports successfully.
+
+If an existing container still exits with 132, rebuild and recreate it:
+
+```bash
+docker compose up -d --build backend frontend
+docker compose ps
+```
+
 An empty database automatically receives **40 synthetic insurance scenarios**,
 a knowledge base and linked mock records from `app/data/demo/` on first API use.
 Open `/voice/` and speak or type; no file upload or admin token is needed for the demo.

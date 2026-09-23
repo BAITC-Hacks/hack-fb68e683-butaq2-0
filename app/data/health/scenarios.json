@@ -1,0 +1,1836 @@
+{
+  "version": "butaq-health-1",
+  "synthetic": true,
+  "official_starter_kit": false,
+  "company": "Butaq Care Demo",
+  "scenarios": [
+    {
+      "id": "MED01",
+      "dataset": "butaq-health-1",
+      "title": "Выбор медицинского пакета",
+      "purpose": "Сравнить административные условия добровольного страхования.",
+      "boundaries": "Цена MED02; конкретная услуга MED06.",
+      "parameters": [
+        {
+          "name": "coverage_needs",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Сравнить административные условия добровольного страхования.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Чем отличаются Care Start и Care Plus?",
+          "response": "Care Start включает амбулаторную помощь; Care Plus добавляет плановый стационар после согласования."
+        },
+        {
+          "language": "kk",
+          "request": "Care Start пен Care Plus айырмасы қандай?",
+          "response": "Care Start амбулаторияны қамтиды; Care Plus келісілген жоспарлы стационарды қосады."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED02",
+      "dataset": "butaq-health-1",
+      "title": "Стоимость пакета",
+      "purpose": "Объяснить фиксированные примеры премии.",
+      "boundaries": "Оформление MED03; доплата за услугу MED08.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить фиксированные примеры премии.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Сколько стоит Care Plus?",
+          "response": "Пример Care Plus — 180 000 ₸ в год, Care Start — 90 000 ₸; персонального расчёта нет."
+        },
+        {
+          "language": "kk",
+          "request": "Care Plus қанша тұрады?",
+          "response": "Care Plus үлгісі жылына 180 000 ₸, Care Start — 90 000 ₸; жеке есеп жасалмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED03",
+      "dataset": "butaq-health-1",
+      "title": "Оформление медполиса",
+      "purpose": "Подготовить заявку на выбранный медицинский продукт.",
+      "boundaries": "Продление MED04; родственник MED14.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "start_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить заявку на выбранный медицинский продукт.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу оформить Care Plus с октября.",
+          "response": "Уточним демо-клиента и дату начала; полис и медицинский доступ здесь не активируются."
+        },
+        {
+          "language": "kk",
+          "request": "Қазаннан Care Plus рәсімдегім келеді.",
+          "response": "Демо-клиент пен басталу күнін нақтылайық; бұл жерде полис пен медициналық қолжетімділік ашылмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED04",
+      "dataset": "butaq-health-1",
+      "title": "Продление медполиса",
+      "purpose": "Подготовить продление действующего договора.",
+      "boundaries": "Только срок MED05; новая покупка MED03.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "start_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить продление действующего договора.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу продлить HEALTH-P1.",
+          "response": "HEALTH-P1 заканчивается 31 декабря 2026 года; продление возможно только как проект запроса."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-P1 полисін ұзартқым келеді.",
+          "response": "HEALTH-P1 2026 жылғы 31 желтоқсанда аяқталады; ұзарту тек өтінім жобасы ретінде дайындалады."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED05",
+      "dataset": "butaq-health-1",
+      "title": "Статус медполиса",
+      "purpose": "Прочитать активность и период страхования.",
+      "boundaries": "Продление MED04; ожидание отдельной услуги MED09.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Прочитать активность и период страхования.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "HEALTH-P1 уже активен?",
+          "response": "HEALTH-P1 активен на дату снимка с 1 января по 31 декабря 2026 года."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-P1 белсенді ме?",
+          "response": "Демо-күнде HEALTH-P1 2026 жылғы 1 қаңтардан 31 желтоқсанға дейін белсенді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED06",
+      "dataset": "butaq-health-1",
+      "title": "Покрытие медицинской услуги",
+      "purpose": "Сверить услугу с условиями пакета, не оценивать здоровье.",
+      "boundaries": "Согласование MED17; исключения MED07.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "service",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Сверить услугу с условиями пакета, не оценивать здоровье.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Покрывает HEALTH-P1 консультацию терапевта?",
+          "response": "Care Plus включает консультации в демо-сети; конкретный доступ зависит от лимита и условий записи."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-P1 терапевт кеңесін қамти ма?",
+          "response": "Care Plus демо-желідегі кеңесті қамтиды; нақты қолжетімділік лимит пен жазылу шарттарына байланысты."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED07",
+      "dataset": "butaq-health-1",
+      "title": "Исключения медстрахования",
+      "purpose": "Разъяснить исключённые услуги и ограничения.",
+      "boundaries": "Конкретное решение MED28; общее покрытие MED06.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "service",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Разъяснить исключённые услуги и ограничения.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Эстетические операции включены?",
+          "response": "Демо-пакеты исключают эстетические процедуры без страхового покрытия; клиническую необходимость бот не определяет."
+        },
+        {
+          "language": "kk",
+          "request": "Эстетикалық операциялар қамтыла ма?",
+          "response": "Демо-пакеттер эстетикалық рәсімдерді қамтымайды; клиникалық қажеттілікті бот анықтамайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED08",
+      "dataset": "butaq-health-1",
+      "title": "Доплата и доля клиента",
+      "purpose": "Объяснить долю клиента по условиям пакета.",
+      "boundaries": "Остаток лимита MED10; стоимость договора MED02.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "service",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить долю клиента по условиям пакета.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Какая доплата у Care Start за приём?",
+          "response": "В демо Care Start доля клиента за покрытый амбулаторный приём — 10%; итоговый счёт не рассчитывается."
+        },
+        {
+          "language": "kk",
+          "request": "Care Start қабылдауына өзім қанша төлеймін?",
+          "response": "Демода Care Start қамтылған амбулаторлық қабылдауда клиент үлесі 10%; соңғы шот есептелмейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED09",
+      "dataset": "butaq-health-1",
+      "title": "Период ожидания",
+      "purpose": "Объяснить отсрочку доступа к отдельной услуге.",
+      "boundaries": "Активность всего договора MED05; статус заявки MED18.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "service",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить отсрочку доступа к отдельной услуге.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Есть ожидание по плановому стационару Care Plus?",
+          "response": "В демо для планового стационара Care Plus задано 30 дней ожидания с начала договора."
+        },
+        {
+          "language": "kk",
+          "request": "Care Plus жоспарлы стационарына күту мерзімі бар ма?",
+          "response": "Демода Care Plus жоспарлы стационарына шарт басталғаннан 30 күн күту мерзімі берілген."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED10",
+      "dataset": "butaq-health-1",
+      "title": "Остаток страхового лимита",
+      "purpose": "Прочитать учтённое использование бюджета полиса.",
+      "boundaries": "Доплата MED08; возмещение MED25.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "benefit",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Прочитать учтённое использование бюджета полиса.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Сколько осталось на амбулаторию HEALTH-P1?",
+          "response": "В HEALTH-P1 лимит 500 000 ₸, учтено 120 000 ₸, остаток 380 000 ₸ на дату снимка."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-P1 амбулатория лимитінен қанша қалды?",
+          "response": "HEALTH-P1 лимиті 500 000 ₸, жұмсалғаны 120 000 ₸, демо-қалдық 380 000 ₸."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED11",
+      "dataset": "butaq-health-1",
+      "title": "Поиск клиники в сети",
+      "purpose": "Найти вымышленную партнёрскую клинику по городу.",
+      "boundaries": "Запись MED19; вне сети MED32.",
+      "parameters": [
+        {
+          "name": "city",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "specialty",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Найти вымышленную партнёрскую клинику по городу.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Есть партнёрская клиника в Демо-Алматы?",
+          "response": "В демо-сети есть Care Clinic A по адресу Демо-көше 20; это не реальная медицинская организация."
+        },
+        {
+          "language": "kk",
+          "request": "Демо-Алматыда серіктес емхана бар ма?",
+          "response": "Демо-желіде Демо-көше 20 мекенжайындағы Care Clinic A бар; бұл нақты емхана емес."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED12",
+      "dataset": "butaq-health-1",
+      "title": "Электронная карта и полис",
+      "purpose": "Показать доступность страхового документа.",
+      "boundaries": "Исправление данных MED13; вход MED37.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Показать доступность страхового документа.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Где электронная карта HEALTH-P1?",
+          "response": "Для HEALTH-P1 есть метаданные HEALTH-DOC1; действительная медицинская карта не выдаётся."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-P1 электрондық картасы қайда?",
+          "response": "HEALTH-P1 үшін HEALTH-DOC1 деректері бар; жарамды медициналық карта берілмейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED13",
+      "dataset": "butaq-health-1",
+      "title": "Исправление анкетных данных",
+      "purpose": "Подготовить коррекцию демо-профиля.",
+      "boundaries": "Добавить члена семьи MED14; копия MED12.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "field",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "corrected_value",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить коррекцию демо-профиля.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "В HEALTH-P1 опечатка в имени.",
+          "response": "Уточним поле и исправленное вымышленное значение; реальные удостоверения присылать не нужно."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-P1 атым қате жазылған.",
+          "response": "Өріс пен түзетілген ойдан шығарылған мәнді нақтылайық; нақты куәлікті жібермеңіз."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED14",
+      "dataset": "butaq-health-1",
+      "title": "Добавление члена семьи",
+      "purpose": "Подготовить включение нового застрахованного.",
+      "boundaries": "Новый самостоятельный договор MED03; работодатель MED36.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "member_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить включение нового застрахованного.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Добавьте HEALTH-U3 к семейному пакету.",
+          "response": "Добавление HEALTH-U3 можно предварительно обсудить; премия и дата доступа не подтверждены."
+        },
+        {
+          "language": "kk",
+          "request": "Отбасылық пакетке HEALTH-U3 қосқым келеді.",
+          "response": "HEALTH-U3 қосуды алдын ала талқылаймыз; сыйлықақы мен қолжетімділік күні расталмаған."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED15",
+      "dataset": "butaq-health-1",
+      "title": "Платёж списан, полиса нет",
+      "purpose": "Проверить оплаченный договор, ожидающий выпуска.",
+      "boundaries": "Возврат MED35; срок действующего полиса MED05.",
+      "parameters": [
+        {
+          "name": "application_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить оплаченный договор, ожидающий выпуска.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "За HEALTH-A1 заплатил, карты нет.",
+          "response": "HEALTH-T1 на 180 000 ₸ получен; HEALTH-A1 ожидает выпуска, повторная оплата не нужна."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-A1 төледім, карта жоқ.",
+          "response": "180 000 ₸ HEALTH-T1 түскен; HEALTH-A1 шығарылуды күтуде, қайта төлеу қажет емес."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED16",
+      "dataset": "butaq-health-1",
+      "title": "Рассрочка страховой премии",
+      "purpose": "Прочитать график платежей без оплаты.",
+      "boundaries": "Разовый списанный платёж MED15; возврат MED35.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Прочитать график платежей без оплаты.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Когда следующий взнос HEALTH-P2?",
+          "response": "Следующий демо-взнос HEALTH-P2 — 22 500 ₸ 1 октября 2026 года; списание не выполняется."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-P2 келесі жарнасы қашан?",
+          "response": "HEALTH-P2 келесі демо-жарнасы 2026 жылғы 1 қазанда 22 500 ₸; ақша алынбайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED17",
+      "dataset": "butaq-health-1",
+      "title": "Новое согласование услуги",
+      "purpose": "Подготовить запрос на страховое согласование назначения.",
+      "boundaries": "Статус созданного MED18; медицинский совет MED39.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "service",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "referral_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить запрос на страховое согласование назначения.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Нужно согласовать назначенное обследование.",
+          "response": "Назовите демо-полис, услугу и ссылку на вымышленное направление; бот не назначает обследование."
+        },
+        {
+          "language": "kk",
+          "request": "Тағайындалған тексеруді сақтандырумен келісу керек.",
+          "response": "Демо-полис, қызмет пен ойдан шығарылған жолдама сілтемесін айтыңыз; бот тексеру тағайындамайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED18",
+      "dataset": "butaq-health-1",
+      "title": "Статус согласования",
+      "purpose": "Прочитать этап существующего согласования.",
+      "boundaries": "Новый запрос MED17; гарантийное письмо MED23.",
+      "parameters": [
+        {
+          "name": "authorization_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Прочитать этап существующего согласования.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Что с HEALTH-AUTH1?",
+          "response": "HEALTH-AUTH1 ожидает уточнения кода услуги от демо-клиники; согласования ещё нет."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-AUTH1 мәртебесі қандай?",
+          "response": "HEALTH-AUTH1 демо-емханадан қызмет кодын нақтылауды күтуде; келісім әлі жоқ."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED19",
+      "dataset": "butaq-health-1",
+      "title": "Запись в клинику",
+      "purpose": "Подготовить первую запись без обещания свободного слота.",
+      "boundaries": "Поиск сети MED11; перенос MED20.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "clinic_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "preferred_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить первую запись без обещания свободного слота.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Запишите меня в Care Clinic A.",
+          "response": "Уточним услугу и желаемую дату; расписание не проверяется, запись не создаётся."
+        },
+        {
+          "language": "kk",
+          "request": "Мені Care Clinic A қабылдауына жазыңыз.",
+          "response": "Қызмет пен қалаған күнді нақтылайық; кесте тексерілмейді, жазба жасалмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED20",
+      "dataset": "butaq-health-1",
+      "title": "Перенос приёма",
+      "purpose": "Подготовить изменение существующей записи.",
+      "boundaries": "Первичная запись MED19; отмена MED21.",
+      "parameters": [
+        {
+          "name": "appointment_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "preferred_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить изменение существующей записи.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Перенесите HEALTH-APT1 на пятницу.",
+          "response": "HEALTH-APT1 стоит на 24 сентября 11:00; изменение можно только предварительно описать."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-APT1 уақытын жұмаға ауыстырайық.",
+          "response": "HEALTH-APT1 24 қыркүйек 11:00-ге белгіленген; өзгерісті тек алдын ала сипаттаймыз."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED21",
+      "dataset": "butaq-health-1",
+      "title": "Отмена приёма",
+      "purpose": "Подготовить отмену без прекращения полиса.",
+      "boundaries": "Перенос MED20; расторжение договора MED34.",
+      "parameters": [
+        {
+          "name": "appointment_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить отмену без прекращения полиса.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Отмените HEALTH-APT1, новый слот не нужен.",
+          "response": "Можно подготовить отмену HEALTH-APT1; действительная запись и полис в демо не меняются."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-APT1 қабылдауынан бас тартамын, басқа уақыт керек емес.",
+          "response": "HEALTH-APT1 бас тарту жобасын дайындаймыз; нақты жазба мен полис өзгермейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED22",
+      "dataset": "butaq-health-1",
+      "title": "Направление для услуги",
+      "purpose": "Разъяснить наличие административного требования направления.",
+      "boundaries": "Получить назначение MED39; согласование MED17.",
+      "parameters": [
+        {
+          "name": "service",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Разъяснить наличие административного требования направления.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Нужно ли направление для обследования в Care Plus?",
+          "response": "Для планового обследования демо-условия требуют направление и согласование; бот направление не выписывает."
+        },
+        {
+          "language": "kk",
+          "request": "Care Plus тексеруіне жолдама керек пе?",
+          "response": "Жоспарлы тексеруге демо-шарт бойынша жолдама мен келісім қажет; бот жолдама бермейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED23",
+      "dataset": "butaq-health-1",
+      "title": "Гарантийное письмо",
+      "purpose": "Проверить документ по одобренному согласованию.",
+      "boundaries": "Статус согласования MED18; копия полиса MED12.",
+      "parameters": [
+        {
+          "name": "authorization_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить документ по одобренному согласованию.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Есть гарантийное письмо по HEALTH-AUTH2?",
+          "response": "HEALTH-AUTH2 одобрено, метаданные письма HEALTH-GL1 доступны; клинике оно не отправляется."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-AUTH2 кепілдік хаты бар ма?",
+          "response": "HEALTH-AUTH2 мақұлданған, HEALTH-GL1 хат деректері бар; емханаға жіберілмейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED24",
+      "dataset": "butaq-health-1",
+      "title": "Возмещение расходов",
+      "purpose": "Подготовить новое заявление после самостоятельной оплаты услуги.",
+      "boundaries": "Существующий запрос MED25; документы MED26.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "service_date",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "expense_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить новое заявление после самостоятельной оплаты услуги.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Сам оплатил приём, хочу подать на возмещение.",
+          "response": "Уточним демо-полис и расход; реальное заявление не создаётся и возмещение не гарантируется."
+        },
+        {
+          "language": "kk",
+          "request": "Қабылдауды өзім төледім, өтемге өтінім бергім келеді.",
+          "response": "Демо-полис пен шығынды нақтылайық; нақты өтінім жасалмайды, өтемге кепілдік жоқ."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED25",
+      "dataset": "butaq-health-1",
+      "title": "Статус заявления на возмещение",
+      "purpose": "Проверить рассмотрение ранее созданного обращения.",
+      "boundaries": "Отправка уже согласованных денег MED27; новая заявка MED24.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить рассмотрение ранее созданного обращения.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Что с HEALTH-C1?",
+          "response": "HEALTH-C1 ждёт детализацию счёта; решение и сумма возмещения ещё не определены."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-C1 қалай қаралып жатыр?",
+          "response": "HEALTH-C1 шоттың егжей-тегжейін күтуде; шешім мен өтем сомасы анықталмаған."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED26",
+      "dataset": "butaq-health-1",
+      "title": "Документы для возмещения",
+      "purpose": "Перечислить недостающие сведения в конкретном деле.",
+      "boundaries": "Этап рассмотрения MED25; направление MED22.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Перечислить недостающие сведения в конкретном деле.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Что ещё нужно для HEALTH-C1?",
+          "response": "В HEALTH-C1 отсутствует детализация счёта по услугам; реальные медицинские документы сюда не загружайте."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-C1 үшін тағы не керек?",
+          "response": "HEALTH-C1 қызметтер бойынша шот деректерін күтуде; нақты медициналық құжаттарды мұнда жүктемеңіз."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED27",
+      "dataset": "butaq-health-1",
+      "title": "Статус перечисления возмещения",
+      "purpose": "Проверить отправку уже одобренной суммы.",
+      "boundaries": "Рассмотрение MED25; возврат премии MED35.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить отправку уже одобренной суммы.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "По HEALTH-C2 деньги перечислили?",
+          "response": "HEALTH-C2 одобрено на 18 000 ₸; HEALTH-PO1 ожидает отправки."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-C2 ақшасы аударылды ма?",
+          "response": "HEALTH-C2 бойынша 18 000 ₸ мақұлданған; HEALTH-PO1 жіберілуді күтуде."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED28",
+      "dataset": "butaq-health-1",
+      "title": "Причина отказа в возмещении",
+      "purpose": "Объяснить записанную причину без клинических выводов.",
+      "boundaries": "Оспаривание MED29; общие исключения MED07.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить записанную причину без клинических выводов.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Почему отказали по HEALTH-C3?",
+          "response": "В HEALTH-C3 указано: услуга отсутствует в демо-пакете; это не медицинская оценка необходимости."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-C3 неге қабылданбады?",
+          "response": "HEALTH-C3 себебі: қызмет демо-пакетке кірмейді; бұл медициналық қажеттіліктің бағасы емес."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED29",
+      "dataset": "butaq-health-1",
+      "title": "Обжалование страхового решения",
+      "purpose": "Подготовить возражение против отказа.",
+      "boundaries": "Только объяснение MED28; сервисная жалоба MED38.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "disagreement",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить возражение против отказа.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу обжаловать HEALTH-C3.",
+          "response": "Можно подготовить описание несогласия; пересмотр и регистрацию обращения бот не выполняет."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-C3 шешіміне шағымданғым келеді.",
+          "response": "Келіспеу мәтінін дайындауға болады; бот қайта қарамайды және өтінішті тіркемейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED30",
+      "dataset": "butaq-health-1",
+      "title": "Плановая госпитализация",
+      "purpose": "Разъяснить страховой путь согласования стационара.",
+      "boundaries": "Неотложная угроза MED40; общий запрос согласования MED17.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "referral_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Разъяснить страховой путь согласования стационара.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Как согласовать плановую госпитализацию?",
+          "response": "Care Plus требует направление, согласование и проверку периода ожидания; показания определяет врач."
+        },
+        {
+          "language": "kk",
+          "request": "Жоспарлы стационарды қалай келісемін?",
+          "response": "Care Plus жолдама, келісім және күту мерзімін тексеруді талап етеді; көрсетілімді дәрігер анықтайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED31",
+      "dataset": "butaq-health-1",
+      "title": "Стоматологический лимит",
+      "purpose": "Проверить отдельную стоматологическую опцию пакета.",
+      "boundaries": "Общий амбулаторный остаток MED10; медицинские советы MED39.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить отдельную стоматологическую опцию пакета.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Сколько стоматологии доступно в HEALTH-P1?",
+          "response": "В HEALTH-P1 демо-лимит стоматологии 50 000 ₸, использовано 10 000 ₸, остаток 40 000 ₸."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-P1 стоматологиясына қанша қолжетімді?",
+          "response": "HEALTH-P1 стоматология лимиті 50 000 ₸, пайдаланылғаны 10 000 ₸, қалдығы 40 000 ₸."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED32",
+      "dataset": "butaq-health-1",
+      "title": "Обращение вне партнёрской сети",
+      "purpose": "Объяснить ограничения обращения в стороннюю клинику.",
+      "boundaries": "Поиск партнёра MED11; уже оплаченный расход MED24.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "clinic_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить ограничения обращения в стороннюю клинику.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Можно пойти в клинику не из вашей сети?",
+          "response": "Демо-условия требуют предварительного согласования вне сети; компенсация автоматически не обещается."
+        },
+        {
+          "language": "kk",
+          "request": "Сіздің желіге кірмейтін емханаға баруға бола ма?",
+          "response": "Демо-шарт желіден тыс алдын ала келісуді талап етеді; өтем автоматты түрде уәде етілмейді."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED33",
+      "dataset": "butaq-health-1",
+      "title": "Лекарственное покрытие",
+      "purpose": "Объяснить наличие лекарственной опции без назначения препаратов.",
+      "boundaries": "Медицинское назначение MED39; услуга клиники MED06.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "medicine_benefit",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить наличие лекарственной опции без назначения препаратов.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Care Plus оплачивает лекарства?",
+          "response": "В этих демо-пакетах отдельного лекарственного покрытия нет; препараты и дозировки бот не рекомендует."
+        },
+        {
+          "language": "kk",
+          "request": "Care Plus дәрі шығынын өтей ме?",
+          "response": "Бұл демо-пакеттерде бөлек дәрілік өтем жоқ; бот дәрі мен мөлшер ұсынбайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED34",
+      "dataset": "butaq-health-1",
+      "title": "Расторжение медполиса",
+      "purpose": "Подготовить отмену страхового договора.",
+      "boundaries": "Отмена приёма MED21; существующий возврат MED35.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "reason",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить отмену страхового договора.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу расторгнуть HEALTH-P2.",
+          "response": "Можно подготовить запрос; дата прекращения доступа и возврат требуют отдельной проверки."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-P2 шартын тоқтатқым келеді.",
+          "response": "Өтінім жобасын дайындауға болады; қолжетімділіктің тоқтау күні мен қайтарым бөлек тексеріледі."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED35",
+      "dataset": "butaq-health-1",
+      "title": "Статус возврата премии",
+      "purpose": "Проверить ранее оформленный возврат платежа за договор.",
+      "boundaries": "Возмещение лечения MED27; расторжение MED34.",
+      "parameters": [
+        {
+          "name": "refund_id",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить ранее оформленный возврат платежа за договор.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Где HEALTH-R1?",
+          "response": "HEALTH-R1 на 15 000 ₸ отправлен 22 сентября; зачисление не подтверждено."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-R1 қайтарымы қайда?",
+          "response": "15 000 ₸ HEALTH-R1 22 қыркүйекте жіберілген; түсуі расталмаған."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED36",
+      "dataset": "butaq-health-1",
+      "title": "Корпоративный список",
+      "purpose": "Проверить включение демо-сотрудника в программу работодателя.",
+      "boundaries": "Семейный полис MED14; новый личный MED03.",
+      "parameters": [
+        {
+          "name": "member_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        },
+        {
+          "name": "employer_ref",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Проверить включение демо-сотрудника в программу работодателя.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Есть HEALTH-U3 в программе Demo Employer?",
+          "response": "HEALTH-U3 ожидает подтверждения в списке Demo Employer; страховое покрытие не активировано."
+        },
+        {
+          "language": "kk",
+          "request": "HEALTH-U3 Demo Employer бағдарламасында бар ма?",
+          "response": "HEALTH-U3 Demo Employer тізімінде растауды күтуде; сақтандыру белсенді емес."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED37",
+      "dataset": "butaq-health-1",
+      "title": "Доступ в кабинет",
+      "purpose": "Объяснить безопасные шаги при проблеме входа.",
+      "boundaries": "Копия полиса MED12; изменение профиля MED13.",
+      "parameters": [
+        {
+          "name": "issue",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Объяснить безопасные шаги при проблеме входа.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain facts from the referenced knowledge and record; do not promise an outcome."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Не могу войти в кабинет Care.",
+          "response": "Не сообщайте пароль и SMS-код; демо не сбрасывает доступ, можно описать ошибку без секретов."
+        },
+        {
+          "language": "kk",
+          "request": "Care кабинетіне кіре алмаймын.",
+          "response": "Құпиясөз бен SMS-кодты айтпаңыз; демо қолжетімділікті қалпына келтірмейді, қатені құпиясыз сипаттаңыз."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED38",
+      "dataset": "butaq-health-1",
+      "title": "Жалоба на сервис",
+      "purpose": "Подготовить жалобу на административное обслуживание.",
+      "boundaries": "Пересмотр выплаты MED29; клинический спор или совет MED39.",
+      "parameters": [
+        {
+          "name": "complaint_text",
+          "required_for_action": true,
+          "source": "Reuse explicit values from dialogue; otherwise ask. Use synthetic identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "preview_change",
+        "requires_confirmation": true,
+        "executes_mutations": false,
+        "steps": [
+          "Подготовить жалобу на административное обслуживание.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Collect parameters and show a preview; confirmation does not execute any real action."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Клиника долго не отвечает на запись, хочу пожаловаться.",
+          "response": "Можно подготовить демо-жалобу на обслуживание; реальная регистрация не выполняется."
+        },
+        {
+          "language": "kk",
+          "request": "Емхана жазылуға жауап бермейді, шағымданғым келеді.",
+          "response": "Қызметке қатысты демо-шағым дайындауға болады; нақты тіркеу жасалмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED39",
+      "dataset": "butaq-health-1",
+      "title": "Оператор или медицинский совет вне компетенции",
+      "purpose": "Передать запрос человеку при прямой просьбе или требовании диагноза.",
+      "boundaries": "Непосредственная угроза MED40; покрытие MED06.",
+      "parameters": [],
+      "actions": {
+        "type": "handoff",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Передать запрос человеку при прямой просьбе или требовании диагноза.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain that operator connection is simulated; return action=handoff, scenario_id=null."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Поставьте мне диагноз по симптомам.",
+          "response": "Бот не ставит диагноз и не назначает лечение; обратитесь к медицинскому специалисту, реального соединения здесь нет."
+        },
+        {
+          "language": "kk",
+          "request": "Белгілерім бойынша диагноз қойыңыз.",
+          "response": "Бот диагноз қоймайды және ем тағайындамайды; медицина маманына жүгініңіз, мұнда нақты байланыс жоқ."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    },
+    {
+      "id": "MED40",
+      "dataset": "butaq-health-1",
+      "title": "Неотложная угроза здоровью",
+      "purpose": "Приоритетно направить к местной экстренной помощи без диагностики.",
+      "boundaries": "Плановый стационар MED30; неэкстренный совет MED39.",
+      "parameters": [],
+      "actions": {
+        "type": "handoff",
+        "requires_confirmation": false,
+        "executes_mutations": false,
+        "steps": [
+          "Приоритетно направить к местной экстренной помощи без диагностики.",
+          "Read only matching identified mock records; unknown or ambiguous IDs require clarification.",
+          "Explain that operator connection is simulated; return action=handoff, scenario_id=null."
+        ]
+      },
+      "knowledge_refs": [
+        "company",
+        "products",
+        "procedures",
+        "safety"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Человек потерял сознание, что со страховкой?",
+          "response": "Сейчас обратитесь в местную экстренную службу; не ждите проверки полиса, бот помощь не вызывает."
+        },
+        {
+          "language": "kk",
+          "request": "Адам есінен танды, сақтандыруды тексеріңіз.",
+          "response": "Қазір жергілікті жедел қызметке хабарласыңыз; полис тексеруін күтпеңіз, бот көмек шақырмайды."
+        }
+      ],
+      "routing_notes": "Examples are illustrative, never exact-match rules. Missing action parameters do not change a clear intent. Clarify ambiguous intent, preserve secondary topics, switch and resume using history."
+    }
+  ]
+}
