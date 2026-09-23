@@ -61,6 +61,8 @@ async def voice_turn(
     audio: Annotated[UploadFile, File()],
     session_id: Annotated[str, Form(min_length=1, max_length=128)],
 ) -> TurnResult:
+    if service.database is not None and service.database.count_scenarios() == 0:
+        raise HTTPException(503, "No scenarios configured: import the starter-kit catalogue before starting a conversation")
     started = perf_counter()
     transcript = await service.pipeline.transcribe(
         await audio.read(), filename=audio.filename or "audio.wav"

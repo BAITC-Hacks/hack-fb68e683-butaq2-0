@@ -27,15 +27,15 @@ export function Cta() {
         <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
           Butaq is our Voice Router concept: an LLM decision layer for natural
           conversations, with clear explanations and human support when it matters.
-          This preview presents the experience; live AI routing is not connected yet.
+          Start a voice conversation and follow each routing decision as it happens.
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
           <a
-            href="#routing"
+            href="/voice/"
             className="liquid-glass rounded-full px-10 py-4 text-sm text-foreground transition-transform hover:scale-[1.03]"
           >
-            Explore the approach
+            Talk to Butaq
           </a>
           <a
             href="#insights"

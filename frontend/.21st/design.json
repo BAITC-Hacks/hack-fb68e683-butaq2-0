@@ -1,9 +1,9 @@
 {
   "version": 1,
   "project": {
-    "name": "hirael-velorah-v1",
+    "name": "Butaq",
     "productType": "voice AI contact-center simulator",
-    "stack": ["static HTML", "CSS", "browser Web Speech API"]
+    "stack": ["Next.js", "TypeScript", "Tailwind CSS", "OGL", "MediaRecorder"]
   },
   "sources": {
     "tokens": [],
@@ -13,7 +13,7 @@
   },
   "design": {
     "colorMode": "dark",
-    "colors": { "canvas": "#07140f", "surface": "#10241c", "accent": "#c7f169" },
+    "colors": { "canvas": "#000000", "surface": "#0f0f0f", "accent": "#ffffff" },
     "typography": {},
     "spacing": {},
     "radius": {},
@@ -30,7 +30,7 @@
     "must": [],
     "avoid": []
   },
-  "decisions": ["A supervisor-grade dark dashboard is used instead of the source landing page. Lime highlights distinguish live status, confidence and performance data; speech stays the primary action.", "The simulator exposes route selection, rationale, alternatives and stage timings after each real text or browser microphone input."],
+  "decisions": ["Preserve the user-selected Velorah video landing page and serif typography, branded as Butaq.", "Place the supplied purple-blue OGL voice orb on a dedicated /voice/ page linked as Voice in the navbar. Animate only on microphone speech, freeze in silence, respect reduced motion, and share the call microphone.", "Connect voice and text input to the existing router API and show actual server traces beneath the call.", "Check catalogue readiness before opening the microphone and offer authenticated starter-kit import when empty."],
   "evidence": [],
   "generatedAt": "2026-09-23T08:11:15.818Z"
 }

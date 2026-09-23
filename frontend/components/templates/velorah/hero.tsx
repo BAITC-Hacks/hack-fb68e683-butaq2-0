@@ -54,17 +54,12 @@ export function Hero({
         </h1>
 
         <p className="animate-fade-rise-delay mt-8 max-w-2xl text-base leading-relaxed text-white sm:text-lg">
-          Meet Butaq, a voice AI concept for conversations that don&apos;t follow
+          Meet Butaq, a voice AI for conversations that don&apos;t follow
           a script. Built around LLM routing, Russian and Kazakh, and the context
           behind every request.
         </p>
 
-        <a
-          href="#routing"
-          className="animate-fade-rise-delay-2 liquid-glass mt-12 cursor-pointer rounded-full px-14 py-5 text-base text-foreground transition-transform hover:scale-[1.03]"
-        >
-          Explore Butaq
-        </a>
+        <a href="/voice/" className="animate-fade-rise-delay-2 liquid-glass mt-12 rounded-full px-14 py-5 text-base text-foreground transition-transform hover:scale-[1.03]">Talk to Butaq</a>
       </div>
     </section>
   );

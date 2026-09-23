@@ -1,16 +1,16 @@
 import { Wordmark } from "./primitives";
 
 const NAV_LINKS = [
-  { label: "Home", href: "#home" },
-  { label: "Why Butaq", href: "#about" },
-  { label: "How it works", href: "#routing" },
-  { label: "Insights", href: "#insights" },
+  { label: "Home", href: "/#home" },
+  { label: "Why Butaq", href: "/#about" },
+  { label: "Voice", href: "/voice/" },
+  { label: "Insights", href: "/#insights" },
 ];
 
 export function Navbar() {
   return (
     <nav className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-8 py-6">
-      <Wordmark className="text-3xl" />
+      <a href="/" aria-label="Butaq home"><Wordmark className="text-3xl" /></a>
 
       <div className="hidden items-center gap-10 text-sm text-white md:flex">
         {NAV_LINKS.map((link) => (
@@ -25,10 +25,10 @@ export function Navbar() {
       </div>
 
       <a
-        href="#routing"
+        href="/voice/"
         className="liquid-glass rounded-full px-6 py-2.5 text-sm text-foreground transition-transform hover:scale-[1.03]"
       >
-        Explore Butaq
+        Talk to Butaq
       </a>
     </nav>
   );
