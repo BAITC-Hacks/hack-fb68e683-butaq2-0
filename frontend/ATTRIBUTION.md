@@ -29,3 +29,11 @@ The Voice background uses only the video from Mindloop's `hero.tsx`, by Mohammad
 - Original media: https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260325_120549_0cd82c36-56b3-4dd9-b190-069cfc3a623f.mp4
 - Local assets: `public/media/voice-mindloop.mp4` (optimized, audio removed) and its still frame `voice-mindloop.jpg`.
 - Template licence retained at `licenses/hirael-mindloop-MIT.txt`.
+
+## Telephony background
+
+The Telephony page uses only the flower animation from Asme's `philosophy.tsx`, by Mohammad Shehadeh, from the repository and commit above. The template copy and sections are not included.
+
+- Original media: https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260307_083826_e938b29f-a43a-41ec-a153-3d4730578ab8.mp4
+- Local assets: `public/media/telephony-asme.mp4` and its still frame `telephony-asme.jpg`.
+- Template licence retained at `licenses/hirael-asme-MIT.txt`.
