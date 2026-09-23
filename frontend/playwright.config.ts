@@ -7,7 +7,11 @@ export default defineConfig({
   fullyParallel: false,
   reporter: "line",
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? "http://127.0.0.1:3000",
+    // Keep the browser host aligned with routerUrl() and ROUTER_WEBAUTHN_ORIGIN.
+    // Mixing 127.0.0.1 and localhost turns the admin session cookie into a
+    // cross-site cookie, so authenticated browser QA would fail for the wrong
+    // reason even though the token login itself succeeded.
+    baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3000",
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
   },

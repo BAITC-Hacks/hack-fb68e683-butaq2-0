@@ -199,6 +199,8 @@ test("voice sends live PCM before commit, plays chunks early, and speech cancels
     socket.emit({ type: "reply", turn_id: first, result: result() });
     assert.equal(events.routes.at(-1), null);
     assert.ok(events.results.at(-1).timings.first_text_ms >= 0);
+    assert.equal(events.results.at(-1).workflow_status, "idle");
+    assert.deepEqual(events.results.at(-1).collected_slots, {});
     socket.emit({ type: "audio.delta", turn_id: first, audio: pcmToBase64(speech()), sample_rate: 24000 });
     await outputThrough(context, context.sources[0].startedAt + 0.001);
     assert.equal(events.phases.at(-1), "speaking");

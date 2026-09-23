@@ -1,5 +1,5 @@
 import { PcmPlayback, SpeechGate, VOICE_SAMPLE_RATE, pcmToBase64 } from "./voice-audio";
-import { routerUrl, type TurnResult, type LiveRoutingDecision } from "./voice-api";
+import { normalizeTurnResult, routerUrl, type TurnResult, type LiveRoutingDecision } from "./voice-api";
 
 export type VoicePhase = "idle" | "connecting" | "listening" | "processing" | "speaking";
 type Mode = "voice" | "text";
@@ -282,7 +282,7 @@ export class VoiceStream {
       case "reply":
         if (message.result) {
           turn.firstTextMs ??= performance.now() - turn.committedAt;
-          turn.result = { ...message.result, turn_id: turn.id };
+          turn.result = normalizeTurnResult({ ...message.result, turn_id: turn.id });
           this.callbacks.route(null);
           this.publishResult(turn);
         }
@@ -296,7 +296,7 @@ export class VoiceStream {
         this.clearResponseTimer();
         turn.serverCompleted = true;
         if (message.result) {
-          turn.result = { ...message.result, turn_id: turn.id };
+          turn.result = normalizeTurnResult({ ...message.result, turn_id: turn.id });
           const metrics = message.metrics;
           if (metrics) turn.result.timings = { ...turn.result.timings, ...metrics };
         }

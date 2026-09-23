@@ -1,4 +1,4 @@
-import { routerUrl, type LiveRoutingDecision, type TurnResult } from "./voice-api";
+import { normalizeTurnResult, routerUrl, type LiveRoutingDecision, type TurnResult } from "./voice-api";
 import type { VoicePhase } from "./voice-stream";
 
 export interface LiveCaption {
@@ -215,7 +215,7 @@ export class VoiceLive {
               case "working": this.working.add(message.turn_id); break;
               case "working.done": this.working.delete(message.turn_id); break;
               case "route": this.callbacks.route(message.decision); break;
-              case "result": this.working.delete(message.result.turn_id); this.callbacks.result(message.result); this.callbacks.route(null); break;
+              case "result": this.working.delete(message.result.turn_id); this.callbacks.result(normalizeTurnResult(message.result)); this.callbacks.route(null); break;
               case "task.error": this.working.delete(message.turn_id); this.callbacks.error(message.message ?? "Could not complete this request. Please try again."); break;
               case "error": this.fail(message.message ?? "Voice service failed."); break;
               case "closed": this.stop(); break;

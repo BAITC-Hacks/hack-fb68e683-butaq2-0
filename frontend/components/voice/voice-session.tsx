@@ -58,7 +58,7 @@ export function VoiceSession() {
             {current.alternatives.length ? current.alternatives.map((item, index) => <p key={index} className="mb-2 text-xs text-white/70">{item.scenario_id}: {item.reason}</p>) : <p className="text-xs text-white/50">None returned</p>}
             {current.pending_scenario_ids.length > 0 && <p className="mt-3 text-xs text-white/60">Pending: {current.pending_scenario_ids.join(", ")}</p>}
             <dl className="mt-4 grid grid-cols-2 gap-2 border-t border-white/15 pt-4 text-xs">
-              {Object.entries(current.timings).map(([key, value]) => <div key={key}><dt className="text-white/50">{{ stt_ms: "Recognition", routing_ms: "Routing", response_ms: "Response", tts_ms: "Voice synthesis", total_ms: "Server total", first_audio_ms: "First audio from server", first_text_ms: "First reply text", playback_ms: current.playback_estimated ? "First audio playback (estimated)" : "First audio playback" }[key] ?? key}</dt><dd className="mt-1 tabular-nums">{Math.round(value ?? 0)} ms</dd></div>)}
+              {Object.entries(current.timings).map(([key, value]) => <div key={key}><dt className="text-white/50">{{ stt_ms: "Recognition", routing_ms: "Routing", response_ms: "Response", tts_ms: "Voice synthesis", total_ms: "Server total", first_audio_ms: "First audio from server", first_text_ms: "First reply text", playback_ms: current.playback_estimated ? "First audio playback (estimated)" : "First audio playback" }[key] ?? key}</dt><dd className="mt-1 tabular-nums">{typeof value === "number" && value > 0 ? `${Math.round(value)} ms` : "—"}</dd></div>)}
             </dl>
           </div>
         </div>

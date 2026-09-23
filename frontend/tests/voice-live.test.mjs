@@ -84,6 +84,8 @@ test("Live negotiates audio without sending credentials and keeps actual caption
   await tick();
   assert.equal(events.captions[0].text, "Spoken");
   assert.equal(events.results[0].reply, "Draft");
+  assert.equal(events.results[0].workflow_status, "idle");
+  assert.deepEqual(events.results[0].action_trace, []);
   live.interrupt();
   assert.equal(socket.sent.at(-1).type, "interrupt");
   live.stop();
