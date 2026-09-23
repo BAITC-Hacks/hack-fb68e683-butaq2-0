@@ -51,6 +51,12 @@ from telephony import (
 from tests.test_router import StubGateway, StubPipeline, catalog, decision
 
 
+@pytest.fixture(autouse=True)
+def disable_configured_phone_for_offline_tests(monkeypatch):
+    """Tests opt into fake phone services regardless of the developer's .env."""
+    monkeypatch.setenv("TELEPHONY_ENABLED", "false")
+
+
 def settings(**changes):
     values = {"_env_file": None, "public_base_url": "https://phone.example.com", "openai_project_id": "proj_test",
               "signalwire_space": "test.signalwire.com", "signalwire_project_id": "project-test",
@@ -134,7 +140,7 @@ async def test_topic_switch_uses_shared_state_and_only_new_user_text():
     traces = rt.dialogues[cid].trace.turns
     assert [t.result.scenario_id for t in traces] == ["payment", "address", "payment"]
     assert [t.transcript for t in traces] == [f.text for f in fragments]
-    assert len(rt.service.sessions[rt.conversation_id(cid)].history) == 6
+    assert len(rt.service.sessions[rt.conversation_id(cid)].history) == 3
 
 
 @pytest.mark.parametrize("language", ["ru", "kk"])
@@ -147,7 +153,7 @@ async def test_handoff_is_honest_and_does_not_transfer(language):
     result = rt.dialogues[cid].trace.turns[0].result
     assert result.action == "handoff"
     assert ("қолжетімсіз" if language == "kk" else "недоступно") in result.reply
-    assert rt.service.sessions[result.session_id].history[-1]["content"] == result.reply
+    assert rt.service.sessions[result.session_id].history == [{"role": "user", "content": "Оператор"}]
     assert len(rt.service.orchestrator.gateway.calls) == 1
 
 
@@ -434,7 +440,7 @@ async def test_new_delegation_cancels_old_work_and_close_blocks_more_work():
     await executor.wait("d2")
     assert attempts == ["Оплата.", "Оплата. Нет, сначала адрес"]
     assert [e["delegation_id"] for e in connection.sent] == ["d2"]
-    assert len(rt.service.sessions[rt.conversation_id(cid)].history) == 2
+    assert len(rt.service.sessions[rt.conversation_id(cid)].history) == 1
     await coordinator.request_close()
     await coordinator.process(transcript("Ещё вопрос", start=200, end=280))
     await coordinator.process(delegation("d3", 300))
@@ -477,7 +483,7 @@ async def test_fragment_after_offset_is_not_used_until_next_request():
     rt = runtime([decision("payment"), "Ответ"])
     cid = uuid4()
     rt.open(cid)
-    ctx = context(cid, TranscriptFragment(speaker="user", text="Төлем", start_ms=80, end_ms=150))
+    ctx = context(cid, TranscriptFragment(speaker="user", text="Төлем", start_ms=120, end_ms=150))
     await updates(rt, request(cid, "early", 100), ctx)
     assert not rt.service.orchestrator.gateway.calls
     await updates(rt, request(cid, "ready", 200), ctx)
@@ -520,3 +526,134 @@ def test_graph_rejects_unbounded_transcript():
     from telephony.session_graph import InvalidLiveEvent
     with pytest.raises(InvalidLiveEvent, match="size limit"):
         LiveSessionGraph().route(transcript("x" * 64001))
+
+
+async def test_signed_http_webhooks_connect_real_runner_to_shared_router_and_release_call(monkeypatch):
+    """Both signatures and SIP linkage are real; model and media transport are offline."""
+    monkeypatch.setenv("ROUTER_ADMIN_TOKEN", "test-admin")
+    config = settings()
+    rt = runtime([decision("payment"), "Проверенный ответ по оплате"])
+    connection = QueueConnection()
+    attachments = []
+
+    @asynccontextmanager
+    async def attach(session_id):
+        attachments.append(session_id)
+        yield connection
+
+    sdk = AsyncOpenAI(api_key="sk-test")
+    actions = SimpleNamespace(accept=AsyncMock(), reject=AsyncMock(), hangup=AsyncMock())
+    controller = OpenAILiveTelephony(config, client=SimpleNamespace(
+        webhooks=sdk.webhooks, live=SimpleNamespace(sessions=actions)))
+    live_state = InMemoryLiveStateStore()
+    runner = LiveSessionRunner(gateway=SimpleNamespace(attach=attach), runtime=rt,
+                              live_state=live_state, live_calls=controller,
+                              settings=config, replace_delegations=True)
+    phone = phone_service(rt, runner=runner)
+    phone.live_calls = controller
+    params = {"AccountSid": "project-test", "CallSid": "carrier-webhook",
+              "CallStatus": "ringing", "Direction": "inbound",
+              "From": "+15550001111", "To": "+15550002222"}
+    voice_path = "/telephony/webhooks/signalwire/voice"
+    try:
+        async with httpx.AsyncClient(transport=httpx.ASGITransport(app=api(phone)), base_url="http://internal") as client:
+            # Forwarded host headers cannot alter the canonical signature URL.
+            response = await client.post(voice_path, data=params, headers={
+                **signed(config, voice_path, params), "X-Forwarded-Host": "untrusted.example"})
+            assert response.status_code == 200
+            uri = ElementTree.fromstring(response.text).find("Dial/Sip").text
+            assert uri.startswith("sip:proj_test@sip.api.openai.com;transport=tls?")
+            query = parse_qs(urlsplit(uri).query)
+            call = (await phone.list_calls(CallQuery())).items[0]
+            assert query["X-Telephony-Call-Id"] == [str(call.call_id)]
+            token = query["X-Butaq-Bridge-Token"][0]
+            body = json.dumps({"id": "evt_http", "type": "live.transport.incoming", "created_at": 1,
+                               "data": {"type": "sip", "session_id": "live-webhook", "sip_headers": [
+                                   {"name": "X-Telephony-Call-Id", "value": str(call.call_id)},
+                                   {"name": "X-Butaq-Bridge-Token", "value": token}]}}).encode()
+            timestamp = str(int(time.time()))
+            signature = base64.b64encode(hmac.new(b"test-secret", b"evt_http." + timestamp.encode() + b"." + body, hashlib.sha256).digest()).decode()
+            headers = {"webhook-id": "evt_http", "webhook-timestamp": timestamp,
+                       "webhook-signature": "v1," + signature, "Content-Type": "application/json"}
+            assert (await client.post("/telephony/webhooks/openai", content=body + b" ", headers=headers)).status_code == 403
+            actions.accept.assert_not_awaited()
+            for _ in range(2):
+                assert (await client.post("/telephony/webhooks/openai", content=body, headers=headers)).status_code == 204
+            actions.accept.assert_awaited_once()
+            accepted = actions.accept.call_args
+            assert accepted.args == ("live-webhook",)
+            assert accepted.kwargs["session"]["delegation"] == {"type": "client"}
+            assert accepted.kwargs["session"]["model"] == "gpt-live-1"
+            await connection.queue.put(transcript("Полис төледім, но статус не изменился"))
+            await connection.queue.put(delegation())
+            await asyncio.wait_for(connection.spoken.wait(), timeout=2)
+            assert attachments == ["live-webhook"]
+            assert connection.sent[0]["content"] == "Проверенный ответ по оплате"
+            assert rt.service.pipeline.spoken == []
+            trace_response = await client.get(f"/telephony/calls/{call.call_id}/trace", headers={"X-Admin-Token": "test-admin"})
+            assert trace_response.status_code == 200
+            trace = trace_response.json()
+            assert trace["conversation_id"] == f"phone:{call.call_id}"
+            assert trace["turns"][0]["result"]["scenario_id"] == "payment"
+            assert trace["turns"][0]["result"]["language"] == "mixed"
+            assert token not in trace_response.text
+            status_path = "/telephony/webhooks/signalwire/status"
+            completed = params | {"CallStatus": "completed"}
+            for _ in range(2):
+                assert (await client.post(status_path, data=completed,
+                                         headers=signed(config, status_path, completed))).status_code == 204
+            await asyncio.wait_for(connection.exited.wait(), timeout=2)
+            assert not runner._sessions
+            assert rt.conversation_id(call.call_id) not in rt.service.sessions
+            assert await live_state.load_context(call.call_id) is None
+            assert call.state is CallState.COMPLETED
+    finally:
+        await phone.aclose()
+        await sdk.close()
+
+
+async def test_phone_native_question_context_explains_confirmation_without_authorizing_caption_id():
+    from multi_agent.sdk import SdkAgentGateway
+
+    rt = runtime([decision("payment"), "Назовите номер полиса"])
+    cid = uuid4()
+    rt.open(cid)
+    await updates(rt, request(cid), context(cid,
+        TranscriptFragment(speaker="assistant", text="Проверить DEMO-P-1001 полисін?", start_ms=0, end_ms=20),
+        TranscriptFragment(speaker="user", text="да", start_ms=30, end_ms=80)))
+    for _, ctx, _ in rt.service.orchestrator.gateway.calls:
+        assert ctx.text == "да"
+        assert ctx.voice_context == [
+            {"role": "assistant", "content": "Проверить DEMO-P-1001 полисін?"},
+            {"role": "user", "content": "да"},
+        ]
+        assert SdkAgentGateway._conversation(ctx)["explicit_demo_ids"] == []
+    assert rt.service.sessions[rt.conversation_id(cid)].history == [{"role": "user", "content": "да"}]
+    assert rt.service.sessions[rt.conversation_id(cid)].pending_delivery is None
+
+
+async def test_phone_preserves_provider_order_for_equal_timestamps_and_uses_straddling_fragment():
+    rt = runtime([decision("payment"), "Ответ"])
+    cid = uuid4()
+    rt.open(cid)
+    first = TranscriptFragment(speaker="user", text="Я ", start_ms=0, end_ms=50)
+    second = TranscriptFragment(speaker="user", text="оплатил ", start_ms=0, end_ms=50)
+    last = TranscriptFragment(speaker="user", text="полис", start_ms=80, end_ms=150)
+    await updates(rt, request(cid, offset=100), context(cid, first, second, first, last))
+    assert rt.dialogues[cid].trace.turns[0].transcript == "Я оплатил полис"
+    assert rt.service.orchestrator.gateway.calls[0][1].text == "Я оплатил полис"
+
+
+async def test_phone_long_cyrillic_reply_is_split_into_safe_native_commentary_chunks():
+    reply = "Срок действия полиса көрсетілген. " * 60
+    rt = runtime([decision("payment"), reply])
+    cid = uuid4()
+    rt.open(cid)
+    result = await updates(rt, request(cid), context(cid,
+        TranscriptFragment(speaker="user", text="Полис", start_ms=0, end_ms=80)))
+    chunks = [value.text for value in result if isinstance(value, CommentaryUpdate)]
+    assert len(chunks) > 1
+    assert all(len(chunk.encode("utf-8")) <= 480 for chunk in chunks)
+    assert " ".join(chunks) == reply.strip()
+    assert rt.service.pipeline.spoken == []
+    assert rt.service.sessions[rt.conversation_id(cid)].history == [{"role": "user", "content": "Полис"}]

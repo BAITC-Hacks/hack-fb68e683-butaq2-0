@@ -1,6 +1,7 @@
 """Single-process, inbound-only call ownership and bounded trace retention."""
 
 import asyncio
+import logging
 from contextlib import suppress
 from dataclasses import replace
 from time import monotonic
@@ -25,6 +26,8 @@ from telephony import (
 from .carrier import SignalWireProvider
 from .runtime import ButaqPhoneRuntime
 from .settings import PhoneSettings
+
+logger = logging.getLogger(__name__)
 
 
 class PhoneCallRepository(InMemoryCallRepository):
@@ -73,7 +76,8 @@ class InboundPhoneService(Telephony):
                 await self.live_calls.accept(incoming.session_id)
                 await self._apply(call, CallState.CONNECTED, source="openai")
                 await self.runner.start(call, on_finalized=self.finalize_live_session)
-            except Exception:  # noqa: BLE001 - record failed SIP acceptance without leaking credentials
+            except Exception as exc:  # noqa: BLE001 - record failure without leaking credentials
+                logger.warning("Phone Live start failed for %s (%s)", call.call_id, type(exc).__name__)
                 with suppress(Exception):
                     await self.live_calls.hangup(incoming.session_id)
                 with suppress(Exception):
@@ -174,7 +178,7 @@ def build_phone(settings: PhoneSettings, service: RouterService) -> InboundPhone
     gateway = OpenAILiveGateway(settings, client=client)
     runtime = ButaqPhoneRuntime(service, settings)
     state = InMemoryLiveStateStore()
-    runner = LiveSessionRunner(gateway=gateway, runtime=runtime, live_state=state, live_calls=controller, settings=settings, replace_delegations=True)
+    runner = LiveSessionRunner(gateway=gateway, runtime=runtime, live_state=state, live_calls=controller, settings=settings, replace_delegations=True, delegation_grace_seconds=0.3)
     phone = InboundPhoneService(settings, runtime=runtime, provider=SignalWireProvider(settings), runner=runner, live_calls=controller, live_state=state)
     phone.live = client  # InboundPhoneService.aclose owns the shared SDK client.
     return phone

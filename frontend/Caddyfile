@@ -2,7 +2,7 @@
 	root * /usr/share/caddy
 	encode zstd gzip
 
-	@backend path /router /router/* /health /docs /docs/* /openapi.json
+	@backend path /router /router/* /telephony /telephony/* /health /docs /docs/* /openapi.json
 	handle @backend {
 		reverse_proxy backend:8000
 	}

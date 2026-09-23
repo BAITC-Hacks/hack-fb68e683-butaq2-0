@@ -83,6 +83,8 @@ async def _carrier_event(request: Request, phone: InboundPhoneService):
     return phone.provider.verify_webhook(await _body(request, phone), request.headers, url)
 
 
+# Compatibility aliases preserve the existing hack-tools number callbacks.
+@router.post("/webhooks/twilio/voice", include_in_schema=False)
 @router.post("/webhooks/signalwire/voice")
 async def incoming(request: Request, phone: Phone):
     event = await _carrier_event(request, phone)
@@ -98,6 +100,7 @@ async def incoming(request: Request, phone: Phone):
     return Response(content=body, media_type=content_type)
 
 
+@router.post("/webhooks/twilio/status", status_code=204, include_in_schema=False)
 @router.post("/webhooks/signalwire/status", status_code=204)
 async def status(request: Request, phone: Phone):
     await phone.process_provider_event(await _carrier_event(request, phone))

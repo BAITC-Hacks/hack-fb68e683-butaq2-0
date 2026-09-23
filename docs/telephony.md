@@ -1,144 +1,150 @@
-# Butaq inbound telephony — prepared, not deployed
+# SignalWire → GPT-Live → Butaq multi-agent
 
-The backend now connects the vendored `telephony` package to the **same Router →
-Resolution agents and active catalogue** used by `/router/text` and `/router/voice`.
-No number has been purchased; no live carrier/audio call has been verified.
-The official insurance dataset is not imported by this change.
+Incoming calls use the same `RouterService`, active database catalogue, Router,
+Resolution and read-only tools as browser conversations. Phone speech uses
+GPT-Live (`gpt-live-1`); business reasoning keeps the configured Terra model.
 
 ```text
-US +1 number (TODO) → SignalWire cXML → OpenAI SIP / GPT-Live
-                                            ↓ client delegation
-                                  ButaqPhoneRuntime
-                                            ↓
-                                  RouterService.turn
-                                            ↓
-                                Router → Resolution
-                                            ↓
-                              verified reply + trace
+SignalWire number → signed cXML voice webhook → SIP/TLS → GPT-Live
+                                                           ↕ sideband
+                                                    ButaqPhoneRuntime
+                                                           ↓
+                                                 shared RouterService
+                                                 Router → Resolution
+                                                           ↓
+                                                verified commentary → speech
 ```
 
-GPT-Live supplies phone transcription/speech. The backend does not run browser
-STT/TTS again. The voice prompt requires delegation for every business request;
-greetings can be answered directly. Live delegation timing is model-controlled,
-not an exact end-of-utterance signal: actual coverage must be checked on real calls.
-The adapter uses new, deduplicated user transcript fragments ending at or before
-the delegation timestamp. A newer delegation cancels unfinished older work and
-reuses its uncommitted speech. Completed turns remain in the shared dialogue state.
+The application accepts inbound calls only. Operator transfer and outbound calls
+are not implemented. Asking for an operator remains a handoff decision, with an
+honest spoken explanation; it does not dial anybody. Caller ID does not authorize
+record access. The current tools use synthetic insurance data.
 
-## Current scope and controls
+## Configure the existing number
 
-- Inbound only. **No outbound, transfer, cancellation API, or operator queue.**
-- `handoff` remains visible in the trace, but the spoken reply honestly states
-  that specialist connection is unavailable. It does not dial or notify anyone.
-- All business tools remain the existing read-only tools. Caller ID is not identity verification.
-- cXML callbacks require the SignalWire **signing key**, not the API token.
-  OpenAI callbacks require its separate webhook secret. Signature validation uses
-  the configured public HTTPS origin, never caller-supplied forwarded headers.
-- The SIP bridge includes a per-call random capability. A call ID by itself cannot
-  link a session. Direct, uncorrelated OpenAI SIP invitations are rejected.
-- Call IDs, carrier IDs and Live session IDs remain correlated. Duplicate callback
-  delivery cannot start another agent runner. API responses mask phone numbers.
-- Hangup cancels agent work and removes its dialogue state. A carrier termination
-  failure is marked unconfirmed/failed, not a successful hangup.
-- One API process only. Restart loses call state; no Redis/Postgres phone persistence.
-- No audio recording. Completed turn traces are held **in memory** for 15 minutes,
-  at most 100 completed calls (periodic cleanup every 10 seconds). No durable transcript storage.
-- Defaults: 5 concurrent calls, 600 seconds per call, 50 routing turns per call,
-  20-second phone delegation timeout. The runner and cleanup loop enforce duration limits.
+Public origin for this deployment: `https://owlpeer.com`.
 
-## Configuration — leave disabled until number setup
+- SignalWire Voice POST: `https://owlpeer.com/telephony/webhooks/signalwire/voice`
+- SignalWire Status POST: `https://owlpeer.com/telephony/webhooks/signalwire/status`
+- OpenAI webhook: `https://owlpeer.com/telephony/webhooks/openai`
+- OpenAI event: `live.transport.incoming`
 
-`TELEPHONY_ENABLED=false` is the default. No carrier credentials are required while
-disabled. `/telephony/health` reports `{"enabled": false}`; webhooks return 503.
-This does not disable browser voice or text.
+These URLs require the updated app and Caddy config on the server serving the
+public domain. An HTML response from `/telephony/health` means the old frontend
+fallback still handles the path; a local restart alone does not update that server.
 
-For a later deployment, supply these variables **on the backend only**:
+1. Set the backend environment values below, using the same public HTTPS origin
+   for signatures and callbacks. An ngrok tunnel must forward to this backend
+   (`localhost:8000`) or to its Caddy proxy (`localhost:3000`). Keep that tunnel
+   running; if its hostname changes, update both `.env` and provider callbacks.
+2. In SignalWire, select **Compatibility/cXML** handling for the number:
+   - Voice URL: `PUBLIC_BASE_URL/telephony/webhooks/signalwire/voice`, **POST**.
+   - Status callback: `PUBLIC_BASE_URL/telephony/webhooks/signalwire/status`, **POST**.
+   The existing hack-tools `/telephony/webhooks/twilio/voice` and `/status` paths
+   are supported aliases. They use the same SignalWire signing-key verification.
+   An already configured voice URL on that path does not need to change.
+3. In the OpenAI project owning the SIP destination, configure:
+   - Webhook URL: `PUBLIC_BASE_URL/telephony/webhooks/openai`.
+   - Event: **`live.transport.incoming`**.
+   - Copy that webhook's signing secret into `TELEPHONY_OPENAI_WEBHOOK_SECRET`.
+   A `realtime.call.incoming` subscription is not the Live callback contract.
+4. Set `TELEPHONY_ENABLED=true`, then recreate the backend. Caddy now proxies
+   `/telephony` and `/telephony/*`; rebuild frontend if upgrading an older image.
+5. Check `GET PUBLIC_BASE_URL/telephony/health`: it must return
+   `{"enabled":true}` as JSON, not frontend HTML. This proves initialization,
+   not carrier/SIP/audio readiness. Call the existing number to verify audio.
 
-| Variable | Purpose |
+The voice webhook returns the SIP destination automatically; do not replace it
+with a direct, uncorrelated SIP route. SignalWire uses
+`sip:PROJECT_ID@sip.api.openai.com;transport=tls`, plus per-call linkage headers.
+The Twilio-specific `sips:` convention caused incompatible SignalWire parsing.
+OpenAI Live requires SRTP media as well as TLS signaling; actual negotiation and
+Live SIP availability for the project must be confirmed with a carrier call.
+
+## Backend environment
+
+| Variable | Value/source |
 | --- | --- |
-| `TELEPHONY_ENABLED` | Set `true` only after configuration |
-| `TELEPHONY_PUBLIC_BASE_URL` | Exact public HTTPS origin, e.g. `https://owlpeer.com` |
-| `TELEPHONY_SIGNALWIRE_SPACE` | Hostname such as `your-space.signalwire.com` |
+| `TELEPHONY_ENABLED` | `true` to initialize the phone adapter |
+| `TELEPHONY_PUBLIC_BASE_URL` | Exact public HTTPS origin, without a path |
+| `TELEPHONY_SIGNALWIRE_SPACE` | `your-space.signalwire.com` |
 | `TELEPHONY_SIGNALWIRE_PROJECT_ID` | SignalWire project/account ID |
 | `TELEPHONY_SIGNALWIRE_API_TOKEN` | API token with Voice permissions |
-| `TELEPHONY_SIGNALWIRE_SIGNING_KEY` | Separate callback signing key |
-| `TELEPHONY_OPENAI_PROJECT_ID` | OpenAI SIP destination project |
-| `TELEPHONY_OPENAI_WEBHOOK_SECRET` | Secret from the OpenAI webhook configuration |
-| `TELEPHONY_OPENAI_API_KEY` | Optional override; otherwise use existing `V2V_API_KEY` |
-| `TELEPHONY_LIVE_MODEL` | Defaults to the library's `gpt-live-1`; project access unverified |
-| `ROUTER_ADMIN_TOKEN` | Existing administrator authentication |
+| `TELEPHONY_SIGNALWIRE_SIGNING_KEY` | Separate project callback Signing Key |
+| `TELEPHONY_OPENAI_PROJECT_ID` | OpenAI project targeted by SIP |
+| `TELEPHONY_OPENAI_WEBHOOK_SECRET` | Secret for the OpenAI webhook above |
+| `TELEPHONY_OPENAI_API_KEY` | Optional phone project key; defaults to `V2V_API_KEY` |
+| `TELEPHONY_LIVE_MODEL` / `TELEPHONY_VOICE` | `gpt-live-1` / `marin` |
 
-Limits can be overridden using `TELEPHONY_MAX_CONCURRENT_CALLS`,
-`TELEPHONY_MAX_CALL_SECONDS`, `TELEPHONY_MAX_TURNS_PER_CALL`,
-`TELEPHONY_DELEGATION_TIMEOUT_SECONDS`, `TELEPHONY_RETENTION_SECONDS`, and
-`TELEPHONY_MAX_RETAINED_CALLS`. Setting retention to zero removes terminal traces
-on the next cleanup pass. No credentials or production configuration were edited.
+For the existing hack-tools SignalWire setup, map `TELEPHONY_TWILIO_ACCOUNT_SID`,
+`TELEPHONY_TWILIO_AUTH_TOKEN` and `TELEPHONY_TWILIO_SIGNING_KEY` to the three
+SignalWire settings above; the host in `TELEPHONY_TWILIO_API_BASE_URL` supplies
+`TELEPHONY_SIGNALWIRE_SPACE`. Do not copy the generic phone backend prompt or
+backend-model setting: Butaq already supplies its own multi-agent runtime.
+Credentials stay in the ignored backend `.env`; they are never browser settings.
 
-## HTTP interface
+```bash
+docker compose up -d --build backend frontend
+curl http://localhost:8000/telephony/health
+```
 
-Unauthenticated **but signature-verified** provider callbacks:
+## What to check in a call
 
-- `POST /telephony/webhooks/signalwire/voice` — form-encoded cXML answer callback.
-- `POST /telephony/webhooks/signalwire/status` — form-encoded call-status callback.
-- `POST /telephony/webhooks/openai` — signed `live.transport.incoming` SIP invitation.
+Say each utterance separately and wait for the voice reply:
 
-Administrator endpoints use the existing `X-Admin-Token` or admin session cookie
-(including existing Origin protection for cookie-authenticated mutations):
+1. «Какие виды страхования у вас есть?» — catalogue routing and native speech.
+2. «Когда заканчивается полис демо П один ноль ноль один?» — demo policy lookup.
+3. «А он сейчас активен?» — previous policy context without repeating its ID.
+4. «Осы полис туралы қазақша айтып берші.» — language change with context.
+5. Interrupt a long answer with «Стоп, теперь проверь возврат DEMO-R-4001».
+6. Hang up. The call must become terminal and release the active agent work.
+
+Administrator endpoints require the existing `X-Admin-Token` or admin cookie:
 
 - `GET /telephony/calls`
 - `GET /telephony/calls/{call_id}`
 - `GET /telephony/calls/{call_id}/trace`
 - `POST /telephony/calls/{call_id}/hangup`
 
-Trace includes each processed user request, the backend reply, scenario ID,
-rationale, alternatives, language, routing/resolution times, and errors. Replies
-are backend-approved text, not an exact transcript of GPT-Live's paraphrased audio.
-`speech_end_to_audio_ms` is `null`: no first-audio latency has been measured.
-`TurnResult` STT/TTS values remain zero because those separate stages did not run;
-do not present them as measured phone recognition/synthesis latencies.
-There is no new supervisor frontend in this slice; traces are accessible via API/docs.
-The public browser endpoints reject the reserved `phone:` conversation namespace.
+Trace includes scenario, language, backend reply, routing/resolution timings and
+errors. Generated replies are not proof of what the caller heard. Native Live
+has no per-answer playback-completed event; STT/TTS timing fields are zero for
+unused separate stages, and `speech_end_to_audio_ms` remains unmeasured.
 
-## Install and run offline tests
+If the call fails, inspect `docker compose logs --tail=100 backend` and provider
+webhook delivery logs. A 403 indicates rejected signature/account verification;
+503 means the phone adapter is disabled. A SIP start failure records
+`live_start_failed` and logs the exception class without provider secrets.
+Check the exact public URL, webhook event, correct project/key, then SIP media
+negotiation. Never disable signature checks to make a callback pass.
 
-Use Python 3.12 and the existing project environment:
+## Runtime boundaries and verification
+
+- Phone and browser share decision logic; phone sessions use reserved `phone:` IDs.
+- A 300 ms cancellable grace lets late transcript fragments arrive before taking
+  the delegation context snapshot. It is a heuristic, not an utterance-final API.
+- Observed voice captions supply context to both agents; generated replies are
+  not marked as heard. New delegations cancel unfinished old work.
+- Signed callbacks and a random per-call SIP capability prevent arbitrary session
+  linkage. Duplicate incoming callbacks cannot accept/start the same call twice.
+- Defaults: 5 simultaneous calls, 600 seconds, 50 backend turns per call.
+- One backend process; active calls are in memory. Restart drops call state.
+- No audio recording. Terminal traces remain in memory for 15 minutes, up to
+  100 completed calls. Restart clears them. Browser public APIs cannot read them.
+
+Offline verification: **32 app phone tests and 90 library tests passed**, including
+signed carrier/OpenAI HTTP callbacks → SIP correlation → shared Router → verified
+commentary → hangup cleanup. Those tests use fake carrier/media/model providers;
+they do not prove a real telephone call or SRTP audio works.
 
 ```bash
-pip install -e '.[dev,telephony]'
-python -m pytest -q
+TELEPHONY_ENABLED=false python -m pytest tests/test_phone.py -q
+# Run separately: the library has its own tests package.
+(cd telephony && TELEPHONY_ENABLED=false PYTHONPATH=. python -m pytest -q)
 ```
 
-Run the vendored library's suite separately because it also defines a `tests` package:
-
-```bash
-cd telephony
-PYTHONPATH=. python -m pytest -q
-```
-
-Tests use fake carriers, signed synthetic webhooks and deterministic agent outputs.
-They do not buy numbers, dial, or make paid model requests. PostgreSQL integration
-tests still need the existing `TEST_DATABASE_URL` test database configuration.
-The backend Dockerfile now includes the package and its optional SDK dependencies.
-
-## Deployment TODO — requires separate approval and a purchased number
-
-1. Buy a SignalWire +1 number and select **Compatibility/cXML** handling (not SWML).
-2. Configure the voice and status callback URLs above, using POST.
-3. Configure OpenAI Live SIP incoming webhooks and verify project/model access.
-4. Add `/telephony` and `/telephony/*` to the backend path matcher in Caddy;
-   pass the configuration above to the backend container. Production Caddy/Compose
-   files were deliberately left unchanged. Without this proxy change, the domain
-   will serve frontend HTML for telephone callback paths.
-5. Confirm HTTPS reachability, the exact callback origin/signatures, and the generated
-   `sips:` bridge's TLS/SRTP compatibility with the purchased number/carrier setup.
-6. Enable telephony and place an explicitly authorized inbound test call. Verify RU,
-   KK, mixed speech, topic switching, interruption, traces, and actual disconnect.
-   Measure routing and first-audio latency independently. Unit tests cannot prove audio works.
-
-Human/operator transfer remains a separate future task.
-
-References used for the adapters:
-[OpenAI client delegation](https://developers.openai.com/api/docs/guides/live-delegation),
-[OpenAI SIP](https://developers.openai.com/api/docs/guides/voice-sip),
-[SignalWire webhook validation](https://signalwire.com/docs/server-sdks/reference/python/core/security/validate-webhook-signature),
-[SignalWire Compatibility calls](https://signalwire.com/docs/compatibility-api/rest/calls/list-all-calls).
+Provider contracts:
+[OpenAI Live SIP](https://developers.openai.com/api/docs/guides/voice-sip?api=live),
+[Live delegation](https://developers.openai.com/api/docs/guides/live-delegation),
+[SignalWire SIP cXML](https://signalwire.com/docs/compatibility-api/cxml/reference/voice/sip),
+[SignalWire webhook verification](https://signalwire.com/docs/compatibility-api/guides/webhook-security).

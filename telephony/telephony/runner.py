@@ -39,7 +39,11 @@ class LiveSessionRunner:
         live_calls: LiveCallController | None = None,
         settings: TelephonySettings | None = None,
         replace_delegations: bool = False,
+        delegation_grace_seconds: float = 0,
     ) -> None:
+        if not 0 <= delegation_grace_seconds <= 1:
+            raise ValueError("delegation_grace_seconds must be between 0 and 1")
+        self._delegation_grace_seconds = delegation_grace_seconds
         self._gateway = gateway
         self._runtime = runtime
         self._live_state = live_state
@@ -140,6 +144,7 @@ class LiveSessionRunner:
                         delegations=DelegationExecutor(
                             self._runtime,
                             max_append_tokens=self._settings.max_append_tokens,
+                            context_grace_seconds=self._delegation_grace_seconds,
                         ),
                         context=context,
                         connection=connection,

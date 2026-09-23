@@ -47,7 +47,9 @@ class SignalWireProvider:
 
     def answer_response(self, call: Call) -> tuple[str, str]:
         token = self._tokens.setdefault(call.call_id, secrets.token_urlsafe(32))
-        uri = self.settings.openai_sips_dial_uri
+        # SignalWire cXML requires sip:, while Twilio's sips: convention fails
+        # with this carrier. TLS signaling is explicit; SIP negotiates SRTP.
+        uri = self.settings.openai_sip_origination_uri
         if not uri:
             raise ValueError("OpenAI SIP project not configured")
         uri += "?" + urlencode({LINKED_CALL_HEADER: str(call.call_id), BRIDGE_TOKEN_HEADER: token})

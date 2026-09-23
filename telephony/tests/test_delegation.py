@@ -178,3 +178,49 @@ async def test_session_close_cancels_active_delegations():
     )
     assert executor.active_delegation_ids == frozenset()
     assert connection.sent == []
+
+
+async def test_grace_collects_late_transcript_without_blocking_session_events():
+    runtime = RecordingRuntime()
+    connection = RecordingConnection()
+    executor = DelegationExecutor(runtime, context_grace_seconds=0.02)
+    coordinator = LiveSessionCoordinator(
+        graph=LiveSessionGraph(), delegations=executor,
+        context=context(), connection=connection,
+    )
+    await coordinator.process({
+        "type": "session.delegation.created", "offset_ms": 100,
+        "delegation": {"id": "late-transcript", "target": "client"},
+    })
+    await asyncio.sleep(0)
+    assert runtime.requests == []
+    await coordinator.process({
+        "type": "session.input_transcript.delta", "delta": "late but eligible",
+        "start_ms": 50, "end_ms": 120,
+    })
+    await coordinator.process({
+        "type": "session.input_transcript.delta", "delta": "future speech",
+        "start_ms": 200, "end_ms": 250,
+    })
+    await executor.wait("late-transcript")
+    assert [part.text for part in runtime.contexts[0].transcript] == ["late but eligible"]
+
+
+async def test_close_cancels_grace_without_starting_backend_work():
+    runtime = RecordingRuntime()
+    connection = RecordingConnection()
+    executor = DelegationExecutor(runtime, context_grace_seconds=0.02)
+    coordinator = LiveSessionCoordinator(
+        graph=LiveSessionGraph(), delegations=executor,
+        context=context(), connection=connection,
+    )
+    await coordinator.process({
+        "type": "session.delegation.created", "offset_ms": 100,
+        "delegation": {"id": "cancel-before-backend", "target": "client"},
+    })
+    await asyncio.sleep(0)
+    await coordinator.request_close()
+    await asyncio.sleep(0.03)
+    assert runtime.requests == []
+    assert executor.active_delegation_ids == frozenset()
+    assert connection.sent == [{"type": "session.close"}]

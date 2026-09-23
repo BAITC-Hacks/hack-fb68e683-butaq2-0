@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from contextlib import suppress
 from dataclasses import dataclass, replace
 from typing import Any, Literal
@@ -39,9 +39,12 @@ class LiveFinalizationResult:
 class DelegationExecutor:
     """Supervise backend agent tasks and return validated updates to GPT-Live."""
 
-    def __init__(self, runtime: AgentRuntime, *, max_append_tokens: int = 500) -> None:
+    def __init__(self, runtime: AgentRuntime, *, max_append_tokens: int = 500, context_grace_seconds: float = 0) -> None:
         if max_append_tokens < 1 or max_append_tokens > 500:
             raise ValueError("max_append_tokens must be between 1 and 500")
+        if not 0 <= context_grace_seconds <= 1:
+            raise ValueError("context_grace_seconds must be between 0 and 1")
+        self._context_grace_seconds = context_grace_seconds
         self._runtime = runtime
         self._max_append_tokens = max_append_tokens
         self._tasks: dict[str, asyncio.Task[AgentUpdate]] = {}
@@ -53,7 +56,7 @@ class DelegationExecutor:
     async def start(
         self,
         delegation: LiveDelegation,
-        context: CallContext,
+        context: CallContext | Callable[[], CallContext],
         connection: LiveConnection,
     ) -> asyncio.Task[AgentUpdate]:
         """Start or replace one delegation task."""
@@ -103,19 +106,24 @@ class DelegationExecutor:
     async def _execute(
         self,
         delegation: LiveDelegation,
-        context: CallContext,
+        context: CallContext | Callable[[], CallContext],
         connection: LiveConnection,
     ) -> AgentUpdate:
-        request = AgentRequest(
-            task=DelegationTask(
-                delegation_id=delegation.delegation_id,
-                call_id=context.call_id,
-                instructions="",
-                arguments={"offset_ms": delegation.offset_ms},
-            )
-        )
         terminal: AgentUpdate = TaskCompleted()
         try:
+            # Wait inside the tracked task so transport ingestion and cancellation
+            # remain responsive while delayed transcript deltas arrive.
+            if self._context_grace_seconds:
+                await asyncio.sleep(self._context_grace_seconds)
+            context = context() if callable(context) else context
+            request = AgentRequest(
+                task=DelegationTask(
+                    delegation_id=delegation.delegation_id,
+                    call_id=context.call_id,
+                    instructions="",
+                    arguments={"offset_ms": delegation.offset_ms},
+                )
+            )
             async for update in self._runtime.run(request, context):
                 event = to_live_event(
                     update,
@@ -221,7 +229,7 @@ class LiveSessionCoordinator:
                     await self._delegations.cancel_all(reason="superseded by new request")
                 await self._delegations.start(
                     update.delegation,
-                    self._context_at(update.delegation.offset_ms),
+                    lambda offset=update.delegation.offset_ms: self._context_at(offset),
                     self._connection,
                 )
         elif update.node is LiveSessionNode.CLOSE:
