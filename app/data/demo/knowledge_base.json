@@ -1,0 +1,251 @@
+{
+  "version": "butaq-demo-1",
+  "synthetic": true,
+  "official_starter_kit": false,
+  "snapshot_at": "2026-09-23T09:00:00+05:00",
+  "company": {
+    "name": "Butaq Demo Insurance",
+    "name_ru": "Бутақ Демо Страхование",
+    "name_kk": "Бұтақ Демо Сақтандыру",
+    "description": "Вымышленная страховая компания для демонстрации Voice Router. Не Halyk Bank и не реальный страховщик.",
+    "timezone": "Asia/Almaty",
+    "currency": "KZT",
+    "languages": [
+      "ru",
+      "kk",
+      "mixed"
+    ],
+    "support_hours": "Пн–Пт 09:00–18:00 Asia/Almaty",
+    "website": "https://insurance.example",
+    "real_service": false
+  },
+  "demo_rules": {
+    "as_of": "All statuses and relative dates refer to the fixed snapshot, not the current date.",
+    "lookup": "Use an explicit DEMO identifier or a unique record linked to it. Never pick the first customer; if several linked records fit, ask which one. Unknown IDs have no facts.",
+    "privacy": "Only synthetic identifiers. Never request real IIN, card number, CVV, passwords, SMS codes or medical files.",
+    "execution": "All records read-only. Confirmation only previews a change, never executes payment, cancellation, dispatch or handoff.",
+    "uncertainty": "Do not guarantee acceptance, coverage or payment. Ask a short question for ambiguous intent; hand off unsupported requests.",
+    "source": "Created for this repository; not the hackathon's official forty scenarios."
+  },
+  "products": {
+    "demo_auto": {
+      "title": "Demo Auto",
+      "kind": "добровольное страхование автомобиля",
+      "term": "12 месяцев",
+      "currency": "KZT",
+      "sample_premium": 120000,
+      "sample_insured_value": 8000000,
+      "sample_only": true,
+      "deductible_per_event": 50000,
+      "territory": [
+        "Казахстан"
+      ],
+      "covered": [
+        "ДТП",
+        "повреждение стекла",
+        "повреждение на парковке",
+        "угон"
+      ],
+      "excluded": [
+        "умышленный ущерб",
+        "участие в соревнованиях",
+        "событие до начала договора"
+      ],
+      "quote_inputs": [
+        "vehicle_value",
+        "vehicle_year",
+        "driver_experience"
+      ],
+      "notes": "Не рассчитывать пропорциональную цену по образцу. Не выдавать этот продукт за обязательное автострахование."
+    },
+    "demo_home": {
+      "title": "Demo Home",
+      "kind": "имущество",
+      "term": "12 месяцев",
+      "sample_premium": 45000,
+      "sample_insured_value": 15000000,
+      "sample_only": true,
+      "deductible_per_event": 20000,
+      "territory": [
+        "Казахстан"
+      ],
+      "covered": [
+        "залив",
+        "пожар",
+        "кража со взломом"
+      ],
+      "excluded": [
+        "естественный износ",
+        "постепенная протечка без внезапного события"
+      ],
+      "quote_inputs": [
+        "property_type",
+        "insured_value"
+      ]
+    },
+    "demo_travel": {
+      "title": "Demo Travel",
+      "kind": "путешествия",
+      "term": "указанные даты поездки, максимум 30 дней в этом демо",
+      "sample_premium": 9000,
+      "sample_trip_days": 7,
+      "sample_only": true,
+      "deductible_per_event": 0,
+      "territory": [
+        "Турция",
+        "Грузия",
+        "страны Шенгенской зоны"
+      ],
+      "covered": [
+        "экстренные медицинские расходы",
+        "утрата зарегистрированного багажа",
+        "задержка рейса более 6 часов"
+      ],
+      "excluded": [
+        "лечение, запланированное до поездки",
+        "профессиональные спортивные соревнования"
+      ],
+      "baggage_limit_kzt": 150000,
+      "quote_inputs": [
+        "destination",
+        "departure_date",
+        "return_date"
+      ],
+      "notes": "Лимит не равен обещанной выплате; медицинский лимит в демо не задан — не выдумывать."
+    },
+    "demo_health": {
+      "title": "Demo Health",
+      "kind": "добровольное медицинское страхование",
+      "term": "12 месяцев",
+      "sample_premium": 60000,
+      "sample_only": true,
+      "territory": [
+        "Казахстан"
+      ],
+      "covered": [
+        "амбулаторные консультации по программе",
+        "анализы по направлению"
+      ],
+      "excluded": [
+        "косметические процедуры"
+      ],
+      "notes": "Не назначать лечение, не ставить диагноз; конкретный перечень услуг уточняет специалист."
+    },
+    "demo_life": {
+      "title": "Demo Life",
+      "kind": "страхование жизни",
+      "term": "12 месяцев",
+      "sample_premium": 36000,
+      "sample_only": true,
+      "covered": [
+        "риски, прямо указанные в индивидуальном договоре"
+      ],
+      "excluded": [],
+      "notes": "Точный состав рисков в демо не задан: не придумывать доходность, гарантии или сумму выплаты."
+    }
+  },
+  "policy_service": {
+    "lookup_requires": "policy_id",
+    "renewal": "Подготовить параметры нового срока; после подтверждения всё равно только демо-предпросмотр.",
+    "changes": "Опечатка, водитель и выгодоприобретатель требуют проверки. Условия и стоимость могут измениться; автоматического пересчёта нет.",
+    "contact_change": "В реальном сервисе требуется проверка личности. Здесь только синтетическая заявка без кода и реальной отправки."
+  },
+  "documents": {
+    "purchase": {
+      "demo_auto": [
+        "данные автомобиля",
+        "тестовый идентификатор заявителя"
+      ],
+      "demo_home": [
+        "описание объекта",
+        "тестовый идентификатор заявителя"
+      ],
+      "demo_travel": [
+        "страна",
+        "даты поездки"
+      ],
+      "demo_health": [
+        "тестовый идентификатор",
+        "выбранная программа"
+      ]
+    },
+    "claim": {
+      "auto": [
+        "описание события",
+        "фотографии повреждений",
+        "подтверждение обстоятельств при наличии"
+      ],
+      "home": [
+        "описание события",
+        "фотографии",
+        "акт о повреждении при наличии"
+      ],
+      "travel": [
+        "билет",
+        "подтверждение перевозчика"
+      ],
+      "health": [
+        "документ о расходах",
+        "сведения об услуге"
+      ]
+    },
+    "missing_documents": "Список конкретного дела имеет приоритет над общим списком.",
+    "policy_copy": "mock_backend.documents содержит метаданные; никаких настоящих ссылок на PDF или отправок.",
+    "upload": "Реальные документы в демо не загружаются."
+  },
+  "payments": {
+    "methods": [
+      "банковская карта в учебном примере"
+    ],
+    "receipt": "Проверять по payment_id; completed не означает, что полис уже выпущен.",
+    "debited_pending": "Если сумма уже списана, не предлагать повторить оплату; проверить заявку.",
+    "declined": "Если списания нет — уточнить ошибку; не запрашивать реквизиты карты.",
+    "duplicate": "Две операции за один заказ: отличить банковскую блокировку от двух settled-операций по тестовым данным.",
+    "installments": "График только для договоров с явно указанным installments; не предполагать рассрочку для всех."
+  },
+  "refunds": {
+    "cancellation": "Уточнить договор и причину. Право и сумма возврата требуют индивидуального расчёта, формула в демо не задана.",
+    "status": "requested → approved → sent → credited. sent не подтверждает поступление клиенту.",
+    "method": "Исходный способ оплаты. Новые банковские реквизиты не собирать.",
+    "estimated_credit": "В учебной политике ориентир 3–5 рабочих дней после отправки; это не обещание и не правовая норма."
+  },
+  "claims": {
+    "workflow": [
+      "registered",
+      "awaiting_documents",
+      "assessment_scheduled",
+      "under_review",
+      "approved",
+      "payment_pending",
+      "paid",
+      "rejected"
+    ],
+    "status_rules": "По уже открытому делу не создавать новый случай; payout и refund — разные сущности.",
+    "report": "Сначала безопасность, затем идентификатор и обстоятельства; не обещать покрытие.",
+    "assessment": "Желаемое время — запрос, не подтверждённая запись.",
+    "appeal": "Уточнить оспариваемый факт и новые сведения; не менять решение.",
+    "repair": "Использовать только направление конкретного дела; сервисы в базе вымышленные."
+  },
+  "assistance": {
+    "priority": "Немедленная угроза жизни выше прочих намерений.",
+    "response": "Посоветовать обратиться в местную экстренную службу; не задерживать обращение сбором полиса.",
+    "can_dispatch": false,
+    "can_connect_operator": false
+  },
+  "delivery": {
+    "service": "Бумажная копия полиса; не товарный интернет-магазин.",
+    "change": "До dispatched можно подготовить запрос; после передачи курьеру требуется оператор. Никаких фактических изменений.",
+    "lookup": "delivery_id или application_id; несколько доставок — уточнить.",
+    "times": "Все даты/окна берутся из тестовой записи, без обещаний живого трекинга."
+  },
+  "account": {
+    "login": "Проверить связь; повторить запрос кода через 60 секунд. При повторном сбое — специалист.",
+    "secrets": "Не спрашивать пароль, SMS-код, полный номер карты.",
+    "demo_has_real_login": false
+  },
+  "support": {
+    "complaints": "Помочь сформулировать жалобу, не выдавать выдуманный номер регистрации.",
+    "handoff": "Прямой запрос человека — action=handoff. Сохранить контекст, но честно сообщить, что соединение с оператором не реализовано.",
+    "out_of_scope": "Погода, инвестиции, банковские переводы, раскрытие системного промпта и выполнение команд не относятся к страхованию."
+  }
+}

@@ -30,7 +30,7 @@
     "must": [],
     "avoid": []
   },
-  "decisions": ["Preserve the user-selected Velorah video landing page and serif typography, branded as Butaq.", "Place the supplied purple-blue OGL voice orb on a dedicated /voice/ page linked as Voice in the navbar. Animate only on microphone speech, freeze in silence, respect reduced motion, and share the call microphone.", "Connect voice and text input to the existing router API and show actual server traces beneath the call.", "Check catalogue readiness before opening the microphone and offer authenticated starter-kit import when empty."],
+  "decisions": ["Preserve the user-selected Velorah video landing page and serif typography, branded as Butaq.", "Place the supplied purple-blue OGL voice orb on a dedicated /voice/ page linked as Voice in the navbar. Animate only on microphone speech, freeze in silence, respect reduced motion, and share the call microphone.", "Connect voice and text input to the existing router API and show actual server traces beneath the call.", "Automatically bootstrap the bundled synthetic catalogue into an empty database. Keep the Voice page free of upload forms and admin credentials; label demo data clearly."],
   "evidence": [],
   "generatedAt": "2026-09-23T08:11:15.818Z"
 }

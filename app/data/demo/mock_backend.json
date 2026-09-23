@@ -1,0 +1,313 @@
+{
+  "version": "butaq-demo-1",
+  "synthetic": true,
+  "read_only": true,
+  "snapshot_at": "2026-09-23T09:00:00+05:00",
+  "customers": [
+    {
+      "id": "DEMO-U-001",
+      "display_name": "Демо-клиент А",
+      "preferred_language": "ru",
+      "email": "client-a@example.invalid",
+      "policy_ids": [
+        "DEMO-P-1001"
+      ],
+      "application_ids": [
+        "DEMO-A-2001"
+      ],
+      "verified": false
+    },
+    {
+      "id": "DEMO-U-002",
+      "display_name": "Демо-клиент Ә",
+      "preferred_language": "kk",
+      "email": "client-b@example.invalid",
+      "policy_ids": [
+        "DEMO-P-1002",
+        "DEMO-P-1003"
+      ],
+      "application_ids": [
+        "DEMO-A-2002"
+      ],
+      "verified": false
+    },
+    {
+      "id": "DEMO-U-003",
+      "display_name": "Демо-клиент Б",
+      "preferred_language": "mixed",
+      "email": "client-c@example.invalid",
+      "policy_ids": [
+        "DEMO-P-1004"
+      ],
+      "application_ids": [
+        "DEMO-A-2003"
+      ],
+      "verified": false
+    }
+  ],
+  "policies": [
+    {
+      "id": "DEMO-P-1001",
+      "customer_id": "DEMO-U-001",
+      "product": "demo_auto",
+      "status": "active",
+      "start_date": "2026-01-01",
+      "end_date": "2026-12-31",
+      "premium_kzt": 120000,
+      "insured_value_kzt": 8000000,
+      "deductible_kzt": 50000,
+      "vehicle": "Demo Sedan 2022",
+      "driver_ids": [
+        "DEMO-DR-001"
+      ],
+      "document_id": "DEMO-DOC-1001"
+    },
+    {
+      "id": "DEMO-P-1002",
+      "customer_id": "DEMO-U-002",
+      "product": "demo_travel",
+      "status": "active",
+      "start_date": "2026-09-20",
+      "end_date": "2026-09-27",
+      "destination": "Турция",
+      "premium_kzt": 9000,
+      "document_id": "DEMO-DOC-1002"
+    },
+    {
+      "id": "DEMO-P-1003",
+      "customer_id": "DEMO-U-002",
+      "product": "demo_home",
+      "status": "active",
+      "start_date": "2026-03-01",
+      "end_date": "2027-02-28",
+      "premium_kzt": 45000,
+      "insured_value_kzt": 15000000,
+      "deductible_kzt": 20000
+    },
+    {
+      "id": "DEMO-P-1004",
+      "customer_id": "DEMO-U-003",
+      "product": "demo_health",
+      "status": "active",
+      "start_date": "2026-07-01",
+      "end_date": "2027-06-30",
+      "premium_kzt": 60000,
+      "installments": [
+        {
+          "due_date": "2026-07-01",
+          "amount_kzt": 15000,
+          "status": "paid"
+        },
+        {
+          "due_date": "2026-10-01",
+          "amount_kzt": 15000,
+          "status": "scheduled"
+        },
+        {
+          "due_date": "2027-01-01",
+          "amount_kzt": 15000,
+          "status": "scheduled"
+        },
+        {
+          "due_date": "2027-04-01",
+          "amount_kzt": 15000,
+          "status": "scheduled"
+        }
+      ]
+    }
+  ],
+  "applications": [
+    {
+      "id": "DEMO-A-2001",
+      "customer_id": "DEMO-U-001",
+      "product": "demo_home",
+      "status": "issuance_pending",
+      "payment_ids": [
+        "DEMO-T-3001"
+      ],
+      "policy_id": null,
+      "delivery_id": "DEMO-L-6001",
+      "note": "Оплата получена 22 сентября; выпуск ещё не подтверждён."
+    },
+    {
+      "id": "DEMO-A-2002",
+      "customer_id": "DEMO-U-002",
+      "product": "demo_auto",
+      "status": "payment_declined",
+      "payment_ids": [
+        "DEMO-T-3002"
+      ],
+      "policy_id": null
+    },
+    {
+      "id": "DEMO-A-2003",
+      "customer_id": "DEMO-U-003",
+      "product": "demo_travel",
+      "status": "duplicate_payment_review",
+      "payment_ids": [
+        "DEMO-T-3003",
+        "DEMO-T-3004"
+      ],
+      "policy_id": null
+    }
+  ],
+  "payments": [
+    {
+      "id": "DEMO-T-3001",
+      "application_id": "DEMO-A-2001",
+      "amount_kzt": 45000,
+      "status": "settled",
+      "paid_at": "2026-09-22T15:30:00+05:00",
+      "receipt_id": "DEMO-RC-3001"
+    },
+    {
+      "id": "DEMO-T-3002",
+      "application_id": "DEMO-A-2002",
+      "amount_kzt": 120000,
+      "status": "declined",
+      "debited": false,
+      "error": "Demo bank declined the payment"
+    },
+    {
+      "id": "DEMO-T-3003",
+      "application_id": "DEMO-A-2003",
+      "amount_kzt": 9000,
+      "status": "settled"
+    },
+    {
+      "id": "DEMO-T-3004",
+      "application_id": "DEMO-A-2003",
+      "amount_kzt": 9000,
+      "status": "settled",
+      "duplicate_of": "DEMO-T-3003",
+      "refund_id": "DEMO-R-4001"
+    }
+  ],
+  "refunds": [
+    {
+      "id": "DEMO-R-4001",
+      "customer_id": "DEMO-U-003",
+      "payment_id": "DEMO-T-3004",
+      "amount_kzt": 9000,
+      "reason": "duplicate_payment",
+      "status": "sent",
+      "sent_at": "2026-09-22T16:00:00+05:00",
+      "credited_at": null
+    }
+  ],
+  "claims": [
+    {
+      "id": "DEMO-C-5001",
+      "policy_id": "DEMO-P-1001",
+      "event": "parking_damage",
+      "incident_date": "2026-09-20",
+      "status": "awaiting_documents",
+      "missing_documents": [
+        "фотографии повреждения"
+      ],
+      "payout_id": null
+    },
+    {
+      "id": "DEMO-C-5002",
+      "policy_id": "DEMO-P-1003",
+      "event": "water_damage",
+      "incident_date": "2026-09-21",
+      "status": "assessment_scheduled",
+      "assessment_at": "2026-09-25T10:00:00+05:00",
+      "payout_id": null
+    },
+    {
+      "id": "DEMO-C-5003",
+      "policy_id": "DEMO-P-1001",
+      "event": "glass_damage",
+      "incident_date": "2026-09-12",
+      "status": "approved",
+      "approved_payout_kzt": 180000,
+      "payout_id": "DEMO-PO-7001"
+    },
+    {
+      "id": "DEMO-C-5004",
+      "policy_id": "DEMO-P-1001",
+      "event": "body_damage",
+      "incident_date": "2025-12-30",
+      "status": "rejected",
+      "rejection_reason": "Событие до начала покрытия 2026-01-01",
+      "decision_date": "2026-09-19",
+      "payout_id": null
+    },
+    {
+      "id": "DEMO-C-5005",
+      "policy_id": "DEMO-P-1001",
+      "event": "bumper_damage",
+      "incident_date": "2026-09-10",
+      "status": "approved",
+      "repair": {
+        "referral_id": "DEMO-D-5005",
+        "garage": "Demo Garage",
+        "appointment_at": null
+      },
+      "payout_id": null
+    }
+  ],
+  "payouts": [
+    {
+      "id": "DEMO-PO-7001",
+      "claim_id": "DEMO-C-5003",
+      "amount_kzt": 180000,
+      "status": "payment_pending",
+      "sent_at": null,
+      "credited_at": null
+    }
+  ],
+  "deliveries": [
+    {
+      "id": "DEMO-L-6001",
+      "application_id": "DEMO-A-2001",
+      "status": "preparing",
+      "address": "Тестовый город, Демо-улица, 1",
+      "can_request_address_change": true,
+      "scheduled_window": null
+    },
+    {
+      "id": "DEMO-L-6002",
+      "policy_id": "DEMO-P-1002",
+      "status": "dispatched",
+      "address": "Тестовый город, Демо-улица, 2",
+      "can_request_address_change": false,
+      "scheduled_window": {
+        "date": "2026-09-24",
+        "start": "14:00",
+        "end": "18:00",
+        "timezone": "Asia/Almaty"
+      }
+    }
+  ],
+  "documents": [
+    {
+      "id": "DEMO-DOC-1001",
+      "policy_id": "DEMO-P-1001",
+      "type": "policy_pdf",
+      "available_metadata": true,
+      "download_url": null
+    },
+    {
+      "id": "DEMO-DOC-1002",
+      "policy_id": "DEMO-P-1002",
+      "type": "policy_pdf",
+      "available_metadata": true,
+      "download_url": null
+    },
+    {
+      "id": "DEMO-RC-3001",
+      "payment_id": "DEMO-T-3001",
+      "type": "receipt",
+      "download_url": null
+    }
+  ],
+  "operation_policy": {
+    "write_operations_enabled": false,
+    "real_customer_data": false,
+    "operator_connection_available": false,
+    "unknown_id": "No matching demo record. Ask for a supplied DEMO identifier; never invent status or silently substitute a different record."
+  }
+}

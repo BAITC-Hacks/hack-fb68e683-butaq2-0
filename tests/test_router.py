@@ -98,6 +98,8 @@ async def test_mixed_language_switch_and_resume_with_real_context() -> None:
     assert second.pending_scenario_ids == ["payment"]
     assert third.pending_scenario_ids == ["address"]
     context = json.loads(pipeline.responses.calls[2]["input"])
+    assert context["response_format"] == "json"
+    assert context["response_schema"]["properties"]["customer_message"]["minLength"] == 1
     assert context["active_scenario"] == "payment"
     assert context["pending_scenarios"] == ["address"]
     assert context["recent_dialog"][0]["content"].startswith("Ақша")

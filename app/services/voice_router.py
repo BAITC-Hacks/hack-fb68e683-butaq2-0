@@ -59,6 +59,8 @@ class RouterService:
         self, text: str, state: Conversation, catalog: Catalog, config: dict[str, str]
     ) -> Decision:
         context = {
+            "response_format": "json",
+            "response_schema": Decision.model_json_schema(),
             "catalog": catalog.prompt_data(),
             "active_scenario": state.active_scenario,
             "pending_scenarios": state.pending_scenarios,

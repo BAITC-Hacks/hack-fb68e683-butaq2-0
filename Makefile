@@ -25,6 +25,6 @@ ps:
 	$(COMPOSE) ps
 
 deploy:
-	@test -f .env || { printf '%s\n' 'Missing .env on this server. Copy .env.example to .env and set V2V_API_KEY, ROUTER_ADMIN_TOKEN, and POSTGRES_PASSWORD.' >&2; exit 1; }
+	@test -f .env || { printf '%s\n' 'Missing .env on this server. Copy .env.example to .env and set V2V_API_KEY and POSTGRES_PASSWORD. ROUTER_ADMIN_TOKEN is optional for admin editing.' >&2; exit 1; }
 	git pull --ff-only
 	$(COMPOSE) up --build -d

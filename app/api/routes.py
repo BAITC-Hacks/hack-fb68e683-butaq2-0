@@ -23,7 +23,9 @@ router = APIRouter(prefix="/router", tags=["Voice Router"])
 
 @lru_cache
 def get_service() -> RouterService:
-    return RouterService(VoicePipeline(), database=RouterDatabase())
+    database = RouterDatabase()
+    database.seed_demo_catalog()
+    return RouterService(VoicePipeline(), database=database)
 
 
 Service = Annotated[RouterService, Depends(get_service)]

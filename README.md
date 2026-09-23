@@ -9,7 +9,7 @@ PostgreSQL catalog on every turn; this is not an intent classifier. The separate
 
 ```bash
 cp .env.example .env
-# Set V2V_API_KEY, ROUTER_ADMIN_TOKEN and POSTGRES_PASSWORD in .env
+# Set V2V_API_KEY and POSTGRES_PASSWORD in .env; ROUTER_ADMIN_TOKEN is optional for admin editing
 make up
 ```
 
@@ -38,9 +38,14 @@ The backend waits for PostgreSQL and applies
 Alembic migrations before serving requests. Database data survives restarts in
 the `postgres-data` volume.
 
-**Import the actual starter-kit catalog before routing.** The starter kit is not
-in this repository; the database is intentionally empty, with no fabricated
-substitutes for its 40 scenarios. Upload the supplied files through
+An empty database automatically receives **40 synthetic insurance scenarios**,
+a knowledge base and linked mock records from `app/data/demo/` on first API use.
+Open `/voice/` and speak or type; no file upload or admin token is needed for the demo.
+Existing catalogues and edits are preserved. This is an authored simulation, not
+the official starter kit. See [demo dataset](app/data/demo/README.md) for examples,
+10 annotated dialogues, 48 development utterances and optional live evaluation.
+
+When the real starter kit is available, an administrator can replace the demo via
 `POST /router/admin/catalog/import-files` (or use `/docs`):
 
 ```bash

@@ -1,6 +1,7 @@
 """PostgreSQL + Alembic integration; run with TEST_DATABASE_URL set."""
 
 import os
+from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
 
 import pytest
@@ -125,3 +126,37 @@ def test_admin_import_and_live_prompt_are_used_by_next_turn(
             assert pipeline.responses.calls[0]["model"] == "new-model"
     finally:
         app.dependency_overrides.clear()
+
+
+def test_demo_seed_is_atomic_and_preserves_existing_edits(database: RouterDatabase) -> None:
+    assert database.seed_demo_catalog() is True
+    assert database.count_scenarios() == 40
+    assert database.catalog().knowledge["synthetic"] is True
+    assert database.catalog().backend["read_only"] is True
+    database.upsert_scenario(Scenario(id="S11", title="Edited payment flow", details={"custom": True}))
+    database.update_settings({"routing_prompt": "Custom prompt"})
+    assert database.seed_demo_catalog() is False
+    assert database.catalog().scenarios["S11"].details == {"custom": True}
+    assert database.settings()["routing_prompt"] == "Custom prompt"
+
+
+def test_demo_seed_does_not_replace_imported_catalog(database: RouterDatabase) -> None:
+    database.replace_catalog(Catalog([Scenario(id="official", title="Imported", details={})], knowledge={"source": "imported"}))
+    assert database.seed_demo_catalog() is False
+    assert set(database.catalog().scenarios) == {"official"}
+    assert database.catalog().knowledge == {"source": "imported"}
+
+
+def test_failed_demo_seed_rolls_back(database: RouterDatabase, monkeypatch) -> None:
+    broken = Catalog([Scenario(id="broken", title="Broken", details={})], knowledge={"source": "demo"}, backend={"not_json": object()})
+    monkeypatch.setattr("app.db.repository.load_demo_catalog", lambda: broken)
+    with pytest.raises(TypeError):
+        database.seed_demo_catalog()
+    assert database.count_scenarios() == 0
+
+
+def test_parallel_demo_seed_inserts_only_once(database: RouterDatabase) -> None:
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        results = list(pool.map(lambda _: database.seed_demo_catalog(), range(2)))
+    assert sorted(results) == [False, True]
+    assert database.count_scenarios() == 40

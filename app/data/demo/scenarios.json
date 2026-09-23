@@ -1,0 +1,1790 @@
+{
+  "version": "butaq-demo-1",
+  "synthetic": true,
+  "official_starter_kit": false,
+  "company": "Butaq Demo Insurance",
+  "scenarios": [
+    {
+      "id": "S01",
+      "dataset": "butaq-demo-1",
+      "title": "Выбор страхового продукта",
+      "title_kz": "Өнімді таңдау",
+      "category": "sales",
+      "purpose": "Сравнить виды страхования и выбрать продукт.",
+      "boundaries": "Не расчёт цены S02 и не оформление выбранного продукта S03.",
+      "parameters": [
+        {
+          "name": "insurance_type",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "products"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Что у вас есть для машины и квартиры?",
+          "response": "Можем сравнить Demo Auto и Demo Home. Что вы хотите защитить в первую очередь?"
+        },
+        {
+          "language": "kk",
+          "request": "Көлік пен пәтерді сақтандырудың қандай түрлері бар?",
+          "response": "Demo Auto мен Demo Home өнімдерін салыстырайық. Алдымен нені сақтандырғыңыз келеді?"
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S02",
+      "dataset": "butaq-demo-1",
+      "title": "Расчёт стоимости",
+      "title_kz": "Бағаны есептеу",
+      "category": "sales",
+      "purpose": "Узнать цену или параметры предварительного расчёта.",
+      "boundaries": "Сравнение покрытия — S06; готов купить — S03.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "coverage_limit",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "products"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Сколько будет стоить КАСКО на машину за восемь миллионов?",
+          "response": "Для Demo Auto в демо-базе есть фиксированный пример тарифа; окончательную цену по вашей машине система не рассчитывает."
+        },
+        {
+          "language": "kk",
+          "request": "Сегіз миллион теңгелік көлікке КАСКО қанша тұрады?",
+          "response": "Демо-базада Demo Auto үшін тариф үлгісі бар; нақты көлігіңіздің соңғы бағасы есептелмейді."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S03",
+      "dataset": "butaq-demo-1",
+      "title": "Новый полис",
+      "title_kz": "Жаңа полис",
+      "category": "sales",
+      "purpose": "Оформить новый выбранный страховой продукт.",
+      "boundaries": "Действующий полис на следующий срок — S04. Оплаченная заявка без полиса — S11.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "start_date",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": true,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "products"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу оформить страховку для поездки в Турцию.",
+          "response": "Уточните даты поездки. Могу объяснить оформление Demo Travel; покупку в демо не выполняю."
+        },
+        {
+          "language": "kk",
+          "request": "Түркияға сапарға сақтандыру рәсімдегім келеді.",
+          "response": "Сапар күндерін айтыңыз. Demo Travel рәсімдеу тәртібін түсіндіремін; демода сатып алу орындалмайды."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S04",
+      "dataset": "butaq-demo-1",
+      "title": "Продление полиса",
+      "title_kz": "Полисті ұзарту",
+      "category": "policy",
+      "purpose": "Продлить существующий договор на новый срок.",
+      "boundaries": "Только узнать дату окончания — S05; новый вид продукта — S03.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "new_start_date",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": true,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "policy_service"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу продлить мой полис DEMO-P-1001.",
+          "response": "Проверю срок демо-полиса и объясню продление. Продление и списание средств требуют отдельного подтверждения."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-P-1001 полисімнің мерзімін ұзартқым келеді.",
+          "response": "Демо-полистің мерзімін тексеріп, ұзартуды түсіндіремін. Ұзарту мен төлемге жеке растау қажет."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S05",
+      "dataset": "butaq-demo-1",
+      "title": "Срок и активность полиса",
+      "title_kz": "Полистің мерзімі мен мәртебесі",
+      "category": "policy",
+      "purpose": "Проверить активен ли полис и когда заканчивается.",
+      "boundaries": "Продлить — S04; платёж прошёл, полис не появился — S11.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "policy_service"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "До какого числа действует DEMO-P-1001?",
+          "response": "В демо-снимке DEMO-P-1001 активен до 31 декабря 2026 года. Это зафиксированные тестовые данные."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-P-1001 полисі қай күнге дейін жарамды?",
+          "response": "Демо-деректе DEMO-P-1001 полисі 2026 жылғы 31 желтоқсанға дейін белсенді. Бұл — бекітілген тестілік дерек."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S06",
+      "dataset": "butaq-demo-1",
+      "title": "Покрытие рисков",
+      "title_kz": "Сақтандыру қамтуы",
+      "category": "policy",
+      "purpose": "Объяснить какие риски включены в конкретный продукт.",
+      "boundaries": "Исключения — S07; собственная доля — S08; место действия — S09.",
+      "parameters": [
+        {
+          "name": "product_or_policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "risk",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "products"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "По Demo Auto стекло покрывается?",
+          "response": "В учебном Demo Auto указано повреждение стекла. Решение по конкретному случаю требует рассмотрения заявления."
+        },
+        {
+          "language": "kk",
+          "request": "Demo Auto бойынша әйнектің сынуы қамтыла ма?",
+          "response": "Оқу үлгісіндегі Demo Auto әйнектің зақымдануын қамтиды. Нақты жағдай өтініш қаралған соң анықталады."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S07",
+      "dataset": "butaq-demo-1",
+      "title": "Исключения из покрытия",
+      "title_kz": "Қамтылмайтын жағдайлар",
+      "category": "policy",
+      "purpose": "Разъяснить ограничения и исключённые риски.",
+      "boundaries": "Нет отказа по заявлению — не S27; вопрос о включённом риске — S06.",
+      "parameters": [
+        {
+          "name": "product_or_policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "circumstance",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "products"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Если машина использовалась в гонке, выплатят?",
+          "response": "В учебном Demo Auto участие в соревнованиях указано в исключениях. Это описание демо-продукта, а не решение по заявлению."
+        },
+        {
+          "language": "kk",
+          "request": "Көлік жарысқа қатысса, шығын өтеле ме?",
+          "response": "Оқу үлгісіндегі Demo Auto жарысқа қатысуды қамтымайды. Бұл — демо-өнім шарты, өтініш бойынша шешім емес."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S08",
+      "dataset": "butaq-demo-1",
+      "title": "Франшиза",
+      "title_kz": "Франшиза",
+      "category": "policy",
+      "purpose": "Объяснить долю ущерба за счёт клиента.",
+      "boundaries": "Полная цена полиса — S02; сумма уже назначенной выплаты — S26.",
+      "parameters": [
+        {
+          "name": "product_or_policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "products"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Что значит франшиза пятьдесят тысяч?",
+          "response": "В примере Demo Auto франшиза — 50 000 ₸ на событие: эта часть покрываемого ущерба остаётся на клиенте."
+        },
+        {
+          "language": "kk",
+          "request": "Елу мың теңге франшиза деген не?",
+          "response": "Demo Auto үлгісінде бір оқиғаға франшиза 50 000 ₸: қамтылған шығынның осы бөлігі клиентке тиесілі."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S09",
+      "dataset": "butaq-demo-1",
+      "title": "Территория покрытия",
+      "title_kz": "Қамту аумағы",
+      "category": "policy",
+      "purpose": "Уточнить действие полиса в стране или регионе.",
+      "boundaries": "Продлить срок — S04; страховой случай за рубежом — S19 или S21.",
+      "parameters": [
+        {
+          "name": "product_or_policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "destination",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "products"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Работает ли Demo Travel в Турции?",
+          "response": "В демо-продукте Demo Travel Турция включена в перечень стран. Уточните полис, чтобы сверить его параметры."
+        },
+        {
+          "language": "kk",
+          "request": "Demo Travel Түркияда жарамды ма?",
+          "response": "Demo Travel демо-өнімінде Түркия елдер тізіміне енгізілген. Шарттарын салыстыру үшін полис нөмірін айтыңыз."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S10",
+      "dataset": "butaq-demo-1",
+      "title": "Документы для оформления",
+      "title_kz": "Рәсімдеуге қажетті құжаттар",
+      "category": "sales",
+      "purpose": "Узнать документы для покупки нового полиса.",
+      "boundaries": "Документы для убытка — S24; копия уже выданного полиса — S30.",
+      "parameters": [
+        {
+          "name": "product",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "documents"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Что подготовить, чтобы оформить КАСКО?",
+          "response": "Для учебного Demo Auto предусмотрены данные автомобиля и заявителя. Не отправляйте реальные документы в эту демонстрацию."
+        },
+        {
+          "language": "kk",
+          "request": "КАСКО рәсімдеу үшін қандай құжат керек?",
+          "response": "Оқу үлгісіндегі Demo Auto үшін көлік пен өтініш беруші деректері қажет. Бұл демоға нақты құжаттарды жібермеңіз."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S11",
+      "dataset": "butaq-demo-1",
+      "title": "Платёж списан, статус не подтверждён",
+      "title_kz": "Төлем есептен шықты, мәртебесі расталмады",
+      "category": "billing",
+      "purpose": "Проверить списанный платёж или заявку, по которой нет подтверждения.",
+      "boundaries": "Отклонён без списания — S12; два списания — S13; возврат уже запущен — S16.",
+      "parameters": [
+        {
+          "name": "application_or_payment_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "payments"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "По DEMO-A-2001 деньги списались, а полиса нет.",
+          "response": "В тестовой заявке DEMO-A-2001 платёж получен, выпуск полиса ожидается. Повторно оплачивать не нужно."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-A-2001 бойынша ақша алынды, бірақ полис жоқ.",
+          "response": "DEMO-A-2001 тестілік өтінішінде төлем түскен, полистің шығарылуы күтілуде. Қайта төлеу қажет емес."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S12",
+      "dataset": "butaq-demo-1",
+      "title": "Ошибка оплаты без списания",
+      "title_kz": "Ақша алынбаған төлем қатесі",
+      "category": "billing",
+      "purpose": "Разобрать отклонённый или неудачный платёж без списания.",
+      "boundaries": "Есть списание — S11; двойное списание — S13.",
+      "parameters": [
+        {
+          "name": "application_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "error_message",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "payments"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Оплата отклонена, деньги остались на карте.",
+          "response": "Если списания нет, уточните текст ошибки. Для DEMO-A-2002 в тестовой базе указано отклонение платежа."
+        },
+        {
+          "language": "kk",
+          "request": "Төлем қабылданбады, ақша картамда қалды.",
+          "response": "Ақша алынбаса, қате мәтінін айтыңыз. Тестілік базада DEMO-A-2002 төлемі қабылданбаған деп көрсетілген."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S13",
+      "dataset": "butaq-demo-1",
+      "title": "Двойное списание",
+      "title_kz": "Қайталанған төлем",
+      "category": "billing",
+      "purpose": "Разобрать две операции за один полис или заявку.",
+      "boundaries": "Один платёж без полиса — S11; уточнение уже открытого возврата — S16.",
+      "parameters": [
+        {
+          "name": "application_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "payment_ids",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "payments"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "За DEMO-A-2003 списали два раза.",
+          "response": "В DEMO-A-2003 есть две тестовые операции, одна помечена как дубликат. Возврат в этой демонстрации не выполняется."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-A-2003 үшін екі рет ақша алынды.",
+          "response": "DEMO-A-2003 бойынша екі тестілік төлем бар, біреуі қайталанған. Бұл демода ақша қайтарылмайды."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S14",
+      "dataset": "butaq-demo-1",
+      "title": "Квитанция об оплате",
+      "title_kz": "Төлем түбіртегі",
+      "category": "billing",
+      "purpose": "Найти квитанцию или подтверждение завершённого платежа.",
+      "boundaries": "Статус платежа — S11; документ полиса — S30.",
+      "parameters": [
+        {
+          "name": "payment_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "payments"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Нужен чек по DEMO-T-3001.",
+          "response": "В демо-базе для DEMO-T-3001 есть квитанция DEMO-RC-3001. Реальная отправка документов здесь не выполняется."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-T-3001 төлемінің түбіртегі керек.",
+          "response": "Демо-базада DEMO-T-3001 үшін DEMO-RC-3001 түбіртегі бар. Мұнда құжаттар нақты жіберілмейді."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S15",
+      "dataset": "butaq-demo-1",
+      "title": "График взносов",
+      "title_kz": "Жарна кестесі",
+      "category": "billing",
+      "purpose": "Узнать размер, дату следующего взноса или задолженность по графику.",
+      "boundaries": "Оплата уже списалась — S11; расчёт годовой цены — S02.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "payments"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Когда следующий взнос по DEMO-P-1004?",
+          "response": "Следующий тестовый взнос по DEMO-P-1004 — 15 000 ₸ на 1 октября 2026 года."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-P-1004 бойынша келесі жарна қашан?",
+          "response": "DEMO-P-1004 бойынша келесі тестілік жарна — 2026 жылғы 1 қазанда 15 000 ₸."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S16",
+      "dataset": "butaq-demo-1",
+      "title": "Статус возврата премии",
+      "title_kz": "Сыйлықақыны қайтару мәртебесі",
+      "category": "billing",
+      "purpose": "Узнать состояние уже созданного возврата оплаты полиса.",
+      "boundaries": "Начать расторжение — S17; страховая выплата по ущербу — S26.",
+      "parameters": [
+        {
+          "name": "refund_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "refunds"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Возврат DEMO-R-4001 уже отправили?",
+          "response": "В демо-снимке DEMO-R-4001 отправлен на исходный способ оплаты 22 сентября; зачисление ещё не подтверждено."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-R-4001 қайтарымы жіберілді ме?",
+          "response": "Демо-деректе DEMO-R-4001 22 қыркүйекте бастапқы төлем әдісіне жіберілген; есепке түсуі әлі расталмаған."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S17",
+      "dataset": "butaq-demo-1",
+      "title": "Расторжение и расчёт возврата",
+      "title_kz": "Шартты бұзу және қайтарымды есептеу",
+      "category": "policy",
+      "purpose": "Запросить отмену полиса и узнать условия возможного возврата.",
+      "boundaries": "Уже оформленный возврат — S16; отмена заявки на выплату не поддерживается — handoff.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "cancellation_reason",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": true,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "refunds"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу отменить DEMO-P-1001 и вернуть оплату.",
+          "response": "Уточните причину отмены. Возврат зависит от условий договора; демо не расторгает полис и не переводит деньги."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-P-1001 полисін тоқтатып, ақшамды қайтарғым келеді.",
+          "response": "Тоқтату себебін айтыңыз. Қайтарым шартқа байланысты; демо полисті тоқтатпайды және ақша аудармайды."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S18",
+      "dataset": "butaq-demo-1",
+      "title": "Новый случай: автомобиль",
+      "title_kz": "Жаңа оқиға: автокөлік",
+      "category": "claims",
+      "purpose": "Сообщить о новом ДТП или повреждении автомобиля без текущей угрозы жизни.",
+      "boundaries": "Есть пострадавшие и нужна срочная помощь — S19; существующее дело — S23.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "incident_date",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "incident_description",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "claims"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "На парковке поцарапали машину, пострадавших нет.",
+          "response": "Сочувствую. Для подготовки демо-заявления уточните номер полиса и дату повреждения."
+        },
+        {
+          "language": "kk",
+          "request": "Тұрақта көлігімді сызып кеткен, зардап шеккендер жоқ.",
+          "response": "Өкінішті жағдай екен. Демо-өтінішті дайындау үшін полис нөмірі мен зақым болған күнді айтыңыз."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S19",
+      "dataset": "butaq-demo-1",
+      "title": "Срочная помощь и угроза жизни",
+      "title_kz": "Шұғыл көмек және өмірге қауіп",
+      "category": "assistance",
+      "purpose": "Срочная медицинская помощь, травмы, опасность прямо сейчас.",
+      "boundaries": "Плановое лечение — S20; нет угрозы, только багаж — S21. При угрозе приоритет над всеми темами.",
+      "parameters": [],
+      "actions": {
+        "type": "handoff",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "assistance"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "После аварии человеку плохо, срочно нужна помощь.",
+          "response": "Если есть угроза жизни, немедленно обратитесь в местную экстренную службу. Этот демо-бот не вызывает помощь; нужен живой специалист."
+        },
+        {
+          "language": "kk",
+          "request": "Апаттан кейін адамның жағдайы нашар, шұғыл көмек керек.",
+          "response": "Өмірге қауіп болса, дереу жергілікті шұғыл қызметке хабарласыңыз. Демо-бот көмек шақырмайды; маман қажет."
+        }
+      ],
+      "routing_notes": "action=handoff, scenario_id=null. Explain need for human help; do not claim a live operator connection."
+    },
+    {
+      "id": "S20",
+      "dataset": "butaq-demo-1",
+      "title": "Медицинское возмещение",
+      "title_kz": "Медициналық шығынды өтеу",
+      "category": "claims",
+      "purpose": "Заявить о понесённых расходах на плановое лечение.",
+      "boundaries": "Экстренное состояние — S19; лишь вопрос о покрытии — S06.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "treatment_date",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "expense_type",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "claims"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Оплатил приём врача, хочу подать на возмещение.",
+          "response": "Для демо-заявления уточните полис и дату приёма. Медицинские документы оценивает специалист, выплата не гарантируется."
+        },
+        {
+          "language": "kk",
+          "request": "Дәрігер қабылдауына төледім, шығынды өтеуге өтініш бергім келеді.",
+          "response": "Демо-өтініш үшін полис пен қабылдау күнін айтыңыз. Құжаттарды маман бағалайды, төлемге кепілдік берілмейді."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S21",
+      "dataset": "butaq-demo-1",
+      "title": "Страховой случай в путешествии",
+      "title_kz": "Сапардағы сақтандыру оқиғасы",
+      "category": "claims",
+      "purpose": "Сообщить о потере багажа или задержке рейса.",
+      "boundaries": "Срочная медицинская помощь — S19; только условия страны — S09.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "event_type",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "incident_date",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "claims"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Авиакомпания потеряла чемодан, хочу заявить случай.",
+          "response": "Уточните полис и дату рейса. В учебном Demo Travel для багажа предусмотрено подтверждение перевозчика."
+        },
+        {
+          "language": "kk",
+          "request": "Әуе компаниясы чемоданымды жоғалтты, өтініш бергім келеді.",
+          "response": "Полис пен рейс күнін айтыңыз. Оқу үлгісіндегі Demo Travel багаж үшін тасымалдаушының растауын қарастырады."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S22",
+      "dataset": "butaq-demo-1",
+      "title": "Страховой случай с имуществом",
+      "title_kz": "Мүлікке қатысты сақтандыру оқиғасы",
+      "category": "claims",
+      "purpose": "Сообщить о новом заливе, пожаре или повреждении жилья.",
+      "boundaries": "Непосредственная опасность — S19; уже открытое дело — S23.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "incident_date",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "damage_type",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "claims"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Соседи залили квартиру, как заявить ущерб?",
+          "response": "Если сейчас безопасно, уточните полис и дату залива. Помогу подготовить сведения для демо-заявления."
+        },
+        {
+          "language": "kk",
+          "request": "Көршілер пәтерімді су басты, шығын туралы қалай хабарлаймын?",
+          "response": "Қазір қауіп болмаса, полис пен су басқан күнді айтыңыз. Демо-өтінішке мәлімет дайындауға көмектесемін."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S23",
+      "dataset": "butaq-demo-1",
+      "title": "Статус страхового дела",
+      "title_kz": "Сақтандыру ісінің мәртебесі",
+      "category": "claims",
+      "purpose": "Проверить этап рассмотрения уже зарегистрированного дела.",
+      "boundaries": "Деньги по одобренному делу — S26; недостающие документы — S24; новый случай — S18/S20/S21/S22.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "claims"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "На каком этапе DEMO-C-5001?",
+          "response": "В демо-снимке DEMO-C-5001 ожидает документы: фотографии повреждения. Решение о выплате ещё не принято."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-C-5001 ісі қай кезеңде?",
+          "response": "Демо-деректе DEMO-C-5001 зақым суреттерін күтуде. Төлем туралы шешім әлі қабылданбаған."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S24",
+      "dataset": "butaq-demo-1",
+      "title": "Документы по страховому делу",
+      "title_kz": "Сақтандыру ісінің құжаттары",
+      "category": "claims",
+      "purpose": "Уточнить список или статус документов для заявления об ущербе.",
+      "boundaries": "Документы для покупки — S10; копия полиса — S30.",
+      "parameters": [
+        {
+          "name": "claim_id_or_event_type",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "documents"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Каких документов не хватает по DEMO-C-5001?",
+          "response": "Для DEMO-C-5001 в демо-базе не хватает фотографий повреждения. Не загружайте реальные личные документы в демо."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-C-5001 бойынша қандай құжат жетіспейді?",
+          "response": "Демо-базада DEMO-C-5001 үшін зақым суреттері жетіспейді. Демоға нақты жеке құжаттарды жүктемеңіз."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S25",
+      "dataset": "butaq-demo-1",
+      "title": "Осмотр и оценка ущерба",
+      "title_kz": "Тексеру және шығынды бағалау",
+      "category": "claims",
+      "purpose": "Узнать или изменить время осмотра, обсудить оценку до решения.",
+      "boundaries": "Ремонт после согласования — S29; оспорить окончательное решение — S28.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "preferred_time",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": true,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "claims"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Можно перенести осмотр по DEMO-C-5002?",
+          "response": "Тестовый осмотр назначен на 25 сентября, 10:00. Назовите желаемое время; демо не меняет запись."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-C-5002 бойынша тексеру уақытын ауыстыруға бола ма?",
+          "response": "Тестілік тексеру 25 қыркүйекте сағат 10:00-ге белгіленген. Қалаған уақытты айтыңыз; демо жазбаны өзгертпейді."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S26",
+      "dataset": "butaq-demo-1",
+      "title": "Статус страховой выплаты",
+      "title_kz": "Сақтандыру төлемінің мәртебесі",
+      "category": "claims",
+      "purpose": "Проверить перечисление компенсации по одобренному убытку.",
+      "boundaries": "Возврат цены полиса — S16; рассмотрение до решения — S23.",
+      "parameters": [
+        {
+          "name": "claim_id_or_payout_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "claims"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "По DEMO-C-5003 выплату одобрили, когда деньги?",
+          "response": "В демо-базе по DEMO-C-5003 одобрено 180 000 ₸, перевод ожидается. Дату зачисления база не подтверждает."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-C-5003 төлемі мақұлданды, ақша қашан түседі?",
+          "response": "Демо-базада DEMO-C-5003 бойынша 180 000 ₸ мақұлданған, аударым күтілуде. Түсу күні расталмаған."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S27",
+      "dataset": "butaq-demo-1",
+      "title": "Причина отказа",
+      "title_kz": "Бас тарту себебі",
+      "category": "claims",
+      "purpose": "Понять уже вынесенный отказ в возмещении.",
+      "boundaries": "Оспорить решение — S28; общие исключения до случая — S07.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "claims"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Почему отказали по DEMO-C-5004?",
+          "response": "В тестовом решении указан случай до начала покрытия. Если вы не согласны с датой, можно обсудить пересмотр."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-C-5004 бойынша неге бас тартылды?",
+          "response": "Тестілік шешімде оқиға қамту басталғанға дейін болғаны көрсетілген. Күнмен келіспесеңіз, қайта қарауды талқылай аламыз."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S28",
+      "dataset": "butaq-demo-1",
+      "title": "Обжалование решения",
+      "title_kz": "Шешімге шағымдану",
+      "category": "claims",
+      "purpose": "Попросить пересмотр отказа или суммы выплаты.",
+      "boundaries": "Только узнать причину — S27; жалоба на обслуживание — S38.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "disagreement_reason",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": true,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "claims"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Не согласен с отказом по DEMO-C-5004, хочу обжаловать.",
+          "response": "Уточните, с каким фактом решения вы не согласны. Помогу сформулировать обращение, но демо его не подаёт."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-C-5004 бойынша бас тартумен келіспеймін, қайта қарауды сұраймын.",
+          "response": "Шешімдегі қай дерекпен келіспейтініңізді айтыңыз. Өтінішті тұжырымдауға көмектесемін, бірақ демо оны жібермейді."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S29",
+      "dataset": "butaq-demo-1",
+      "title": "Направление на ремонт",
+      "title_kz": "Жөндеуге жолдама",
+      "category": "claims",
+      "purpose": "Узнать согласованный ремонт, сервис или направление.",
+      "boundaries": "Осмотр до согласования — S25; денежная выплата — S26.",
+      "parameters": [
+        {
+          "name": "claim_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "claims"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Куда ехать на ремонт по DEMO-C-5005?",
+          "response": "В демо-деле указан сервис Demo Garage и направление DEMO-D-5005. Это вымышленный сервис, реальной записи нет."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-C-5005 бойынша жөндеуге қайда бару керек?",
+          "response": "Демо-істе Demo Garage сервисі және DEMO-D-5005 жолдамасы бар. Бұл ойдан шығарылған сервис, нақты жазба жоқ."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S30",
+      "dataset": "butaq-demo-1",
+      "title": "Копия полиса",
+      "title_kz": "Полистің көшірмесі",
+      "category": "documents",
+      "purpose": "Получить копию или найти электронный полис.",
+      "boundaries": "Квитанция платежа — S14; изменение данных полиса — S31.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "documents"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Потерял PDF полиса DEMO-P-1001, нужна копия.",
+          "response": "Для DEMO-P-1001 в демо-базе есть запись электронного документа. Реальный PDF или отправка письма здесь не создаются."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-P-1001 полисінің PDF файлын жоғалттым, көшірмесі керек.",
+          "response": "Демо-базада DEMO-P-1001 электрондық құжатының жазбасы бар. Мұнда нақты PDF жасалмайды және хат жіберілмейді."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S31",
+      "dataset": "butaq-demo-1",
+      "title": "Исправление данных в полисе",
+      "title_kz": "Полистегі деректерді түзету",
+      "category": "policy",
+      "purpose": "Исправить опечатку в имени или характеристиках объекта.",
+      "boundaries": "Контактный телефон/email — S32; адрес курьера — S33; добавление водителя — S35.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "field_to_correct",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": true,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "policy_service"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "В полисе ошибка в марке автомобиля.",
+          "response": "Уточните номер демо-полиса и поле с ошибкой. Исправление требует проверки и подтверждения; сейчас данные не изменяются."
+        },
+        {
+          "language": "kk",
+          "request": "Полисте көлік маркасы қате жазылған.",
+          "response": "Демо-полис нөмірі мен қате өрісті айтыңыз. Түзету тексеру мен растауды қажет етеді; қазір деректер өзгермейді."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S32",
+      "dataset": "butaq-demo-1",
+      "title": "Смена контактных данных",
+      "title_kz": "Байланыс деректерін өзгерту",
+      "category": "account",
+      "purpose": "Изменить телефон или email для связи.",
+      "boundaries": "Адрес доставки — S33; опечатка в полисе — S31; невозможность входа — S37.",
+      "parameters": [
+        {
+          "name": "customer_or_policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "contact_type",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": true,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "policy_service"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу поменять email для уведомлений.",
+          "response": "Уточните демо-клиента и тип контакта. Не сообщайте пароли или SMS-коды; реальное изменение здесь не выполняется."
+        },
+        {
+          "language": "kk",
+          "request": "Хабарламаларға арналған email мекенжайын өзгерткім келеді.",
+          "response": "Демо-клиентті және байланыс түрін айтыңыз. Құпиясөз не SMS-код айтпаңыз; мұнда нақты өзгеріс орындалмайды."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S33",
+      "dataset": "butaq-demo-1",
+      "title": "Изменение адреса доставки",
+      "title_kz": "Жеткізу мекенжайын өзгерту",
+      "category": "delivery",
+      "purpose": "Изменить место доставки бумажного полиса.",
+      "boundaries": "Узнать где курьер — S34; изменить email — S32; изменить объект страхования — S31.",
+      "parameters": [
+        {
+          "name": "delivery_or_application_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "new_demo_address",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": true,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "delivery"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "По DEMO-A-2001 надо поменять адрес доставки.",
+          "response": "Демо-доставка ещё готовится к отправке. Назовите новый тестовый адрес; изменение без подтверждения не выполняется."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-A-2001 бойынша жеткізу мекенжайын өзгерту керек.",
+          "response": "Демо-жеткізу әлі жөнелтуге дайындалуда. Жаңа тестілік мекенжайды айтыңыз; растаусыз өзгеріс жасалмайды."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S34",
+      "dataset": "butaq-demo-1",
+      "title": "Статус доставки полиса",
+      "title_kz": "Полисті жеткізу мәртебесі",
+      "category": "delivery",
+      "purpose": "Проверить отправку, задержку или дату доставки бумажного документа.",
+      "boundaries": "Изменение адреса — S33; электронная копия — S30.",
+      "parameters": [
+        {
+          "name": "delivery_or_application_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "delivery"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Где курьер с DEMO-L-6002?",
+          "response": "В демо-снимке DEMO-L-6002 передан курьеру, окно доставки — 24 сентября с 14:00 до 18:00."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-L-6002 курьері қайда?",
+          "response": "Демо-деректе DEMO-L-6002 курьерге берілген, жеткізу уақыты — 24 қыркүйек, 14:00–18:00."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S35",
+      "dataset": "butaq-demo-1",
+      "title": "Добавление водителя",
+      "title_kz": "Жүргізушіні қосу",
+      "category": "policy",
+      "purpose": "Добавить допущенного водителя в автомобильный полис.",
+      "boundaries": "Исправить опечатку существующего водителя — S31; сменить выгодоприобретателя — S36.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "driver_demo_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": true,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "policy_service"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Хочу добавить второго водителя в DEMO-P-1001.",
+          "response": "Проверю тип демо-полиса. Добавление водителя может менять условия; в демо договор не изменяется."
+        },
+        {
+          "language": "kk",
+          "request": "DEMO-P-1001 полисіне екінші жүргізушіні қосқым келеді.",
+          "response": "Демо-полис түрін тексеремін. Жүргізуші қосу шарттарға әсер етуі мүмкін; демода шарт өзгермейді."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S36",
+      "dataset": "butaq-demo-1",
+      "title": "Смена выгодоприобретателя",
+      "title_kz": "Пайда алушыны өзгерту",
+      "category": "policy",
+      "purpose": "Уточнить изменение лица, получающего страховую выплату по договору.",
+      "boundaries": "Банковские реквизиты конкретной выплаты — handoff; добавить водителя — S35.",
+      "parameters": [
+        {
+          "name": "policy_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        },
+        {
+          "name": "beneficiary_demo_id",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": true,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "policy_service"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Как изменить выгодоприобретателя по полису?",
+          "response": "Это изменение требует проверки документов и явного подтверждения. Назовите демо-полис; реальное изменение не выполняется."
+        },
+        {
+          "language": "kk",
+          "request": "Полис бойынша пайда алушыны қалай өзгертуге болады?",
+          "response": "Бұл өзгеріс құжаттарды тексеруді және нақты растауды қажет етеді. Демо-полисті айтыңыз; нақты өзгеріс орындалмайды."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S37",
+      "dataset": "butaq-demo-1",
+      "title": "Вход в личный кабинет",
+      "title_kz": "Жеке кабинетке кіру",
+      "category": "account",
+      "purpose": "Проблемы входа, пароля или доставки кода.",
+      "boundaries": "Изменить контакт без проблем входа — S32; платёжная ошибка — S12.",
+      "parameters": [
+        {
+          "name": "issue_type",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "account"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Не приходит код входа в кабинет.",
+          "response": "Проверьте доступность связи и повторите запрос через минуту. Не сообщайте мне SMS-код; при повторной ошибке нужен специалист."
+        },
+        {
+          "language": "kk",
+          "request": "Кабинетке кіру коды келмейді.",
+          "response": "Байланысты тексеріп, бір минуттан кейін қайта сұратыңыз. SMS-кодты айтпаңыз; қате қайталанса, маман қажет."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S38",
+      "dataset": "butaq-demo-1",
+      "title": "Жалоба на обслуживание",
+      "title_kz": "Қызмет көрсетуге шағым",
+      "category": "support",
+      "purpose": "Жалоба на грубость, задержки обслуживания или работу поддержки.",
+      "boundaries": "Оспорить страховое решение — S28; просто попросить человека — S39.",
+      "parameters": [
+        {
+          "name": "complaint_topic",
+          "required_for_action": true,
+          "source": "Ask if absent; reuse explicit dialog values. Demo identifiers only."
+        }
+      ],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": true,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "support"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Оператор грубо разговаривал, хочу оставить жалобу.",
+          "response": "Мне жаль, что так произошло. Опишите ситуацию — помогу составить жалобу, но в демо она не отправляется."
+        },
+        {
+          "language": "kk",
+          "request": "Оператор дөрекі сөйледі, шағым қалдырғым келеді.",
+          "response": "Мұндай жағдай болғанына өкінемін. Жағдайды сипаттаңыз — шағым дайындауға көмектесемін, демода ол жіберілмейді."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    },
+    {
+      "id": "S39",
+      "dataset": "butaq-demo-1",
+      "title": "Разговор с оператором",
+      "title_kz": "Оператормен сөйлесу",
+      "category": "support",
+      "purpose": "Явный запрос живого человека либо невозможность продолжать с ботом.",
+      "boundaries": "Жалоба без требования человека — S38; срочная опасность — S19 с более высоким приоритетом.",
+      "parameters": [],
+      "actions": {
+        "type": "handoff",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "support"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Соедините с живым оператором, пожалуйста.",
+          "response": "Здесь нужна помощь оператора. Контекст разговора сохранён в демо, но реальное соединение в этой версии не выполняется."
+        },
+        {
+          "language": "kk",
+          "request": "Мені тірі операторға қосыңызшы.",
+          "response": "Оператордың көмегі қажет. Әңгіме контексті демода сақталған, бірақ бұл нұсқада нақты қосылу орындалмайды."
+        }
+      ],
+      "routing_notes": "action=handoff, scenario_id=null. Explain need for human help; do not claim a live operator connection."
+    },
+    {
+      "id": "S40",
+      "dataset": "butaq-demo-1",
+      "title": "Контакты и часы работы",
+      "title_kz": "Байланыс және жұмыс уақыты",
+      "category": "support",
+      "purpose": "Узнать часы обслуживания или общие сведения о вымышленной компании.",
+      "boundaries": "Запрос конкретного человека — S39; вопросы вне страхования — handoff без выдуманного ответа.",
+      "parameters": [],
+      "actions": {
+        "type": "explain_or_lookup",
+        "steps": [
+          "Identify intent using the full dialogue and boundaries.",
+          "Look up only explicitly identified demo records; ask for missing fields.",
+          "Return grounded response or clarification; never claim a mutation was executed."
+        ],
+        "requires_confirmation": false,
+        "executes_mutations": false
+      },
+      "knowledge_refs": [
+        "company"
+      ],
+      "examples": [
+        {
+          "language": "ru",
+          "request": "Во сколько работает ваша поддержка?",
+          "response": "У вымышленной Butaq Demo Insurance поддержка по будням 09:00–18:00 по Алматы. Это расписание демонстрации."
+        },
+        {
+          "language": "kk",
+          "request": "Қолдау қызметі қай уақытта жұмыс істейді?",
+          "response": "Ойдан шығарылған Butaq Demo Insurance қолдауы жұмыс күндері Алматы уақытымен 09:00–18:00 жұмыс істейді. Бұл — демо-кесте."
+        }
+      ],
+      "routing_notes": "Missing record identifiers can be collected after choosing a clear intent; if intent is ambiguous, clarify. Examples illustrate meaning, not exact-match rules."
+    }
+  ]
+}

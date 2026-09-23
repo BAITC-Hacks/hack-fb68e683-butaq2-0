@@ -5,11 +5,12 @@ from __future__ import annotations
 import json
 import os
 
-from sqlalchemy import create_engine, delete, func, select
+from sqlalchemy import create_engine, delete, func, select, text
 from sqlalchemy.orm import sessionmaker
 
 from app.core.prompts import ANSWER_PROMPT, ROUTING_PROMPT
 from app.domain import Catalog, Scenario
+from app.demo_catalog import load_demo_catalog
 
 from .models import ScenarioRecord, SettingRecord
 
@@ -56,6 +57,19 @@ class RouterDatabase:
                 db.merge(
                     SettingRecord(key=key, value=json.dumps(value, ensure_ascii=False))
                 )
+
+    def seed_demo_catalog(self) -> bool:
+        """Seed an empty database once; preserve all existing catalogues and edits."""
+        with self.session.begin() as db:
+            # Serialize bootstrapping across API workers. Lock releases on rollback too.
+            db.execute(text("SELECT pg_advisory_xact_lock(:key)"), {"key": 2840172040})
+            if db.scalar(select(func.count()).select_from(ScenarioRecord)):
+                return False
+            catalog = load_demo_catalog()
+            db.add_all(ScenarioRecord(id=s.id, title=s.title, details=s.details) for s in catalog.scenarios.values())
+            for key, value in (("knowledge_base", catalog.knowledge), ("mock_backend", catalog.backend)):
+                db.merge(SettingRecord(key=key, value=json.dumps(value, ensure_ascii=False)))
+        return True
 
     def catalog(self) -> Catalog:
         with self.session() as db:

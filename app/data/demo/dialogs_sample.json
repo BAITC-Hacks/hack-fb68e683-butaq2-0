@@ -1,0 +1,237 @@
+{
+  "synthetic": true,
+  "dialogs": [
+    {
+      "id": "dialog-01",
+      "focus": "Смена темы и возврат, сохранение ссылки на заявку",
+      "turns": [
+        {
+          "text": "По заявке DEMO-A-2001 деньги списаны, но нет полиса. Потом нужно поменять адрес доставки.",
+          "expected_action": "route",
+          "expected_scenario_id": "S11",
+          "expected_pending": [
+            "S33"
+          ]
+        },
+        {
+          "text": "Алдымен жеткізу мекенжайын өзгертейік: Демо-улица, 8.",
+          "expected_action": "route",
+          "expected_scenario_id": "S33",
+          "expected_pending": [
+            "S11"
+          ]
+        },
+        {
+          "text": "Теперь вернёмся к тому платежу, что с ним?",
+          "expected_action": "route",
+          "expected_scenario_id": "S11",
+          "expected_pending": []
+        }
+      ]
+    },
+    {
+      "id": "dialog-02",
+      "focus": "Возврат премии против выплаты ущерба",
+      "turns": [
+        {
+          "text": "Когда мне перечислят деньги?",
+          "expected_action": "clarify",
+          "expected_scenario_id": null
+        },
+        {
+          "text": "Я про уже созданный возврат за двойную оплату DEMO-R-4001.",
+          "expected_action": "route",
+          "expected_scenario_id": "S16",
+          "expected_pending": []
+        },
+        {
+          "text": "А отдельно по убытку DEMO-C-5003 выплату отправили?",
+          "expected_action": "route",
+          "expected_scenario_id": "S26",
+          "expected_pending": [
+            "S16"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dialog-03",
+      "focus": "Полностью казахский: срок, продление, смена продукта",
+      "turns": [
+        {
+          "text": "DEMO-P-1001 полисім қашан аяқталады?",
+          "expected_action": "route",
+          "expected_scenario_id": "S05",
+          "expected_pending": []
+        },
+        {
+          "text": "Сол полисті 2027 жылғы 1 қаңтардан ұзартқым келеді.",
+          "expected_action": "route",
+          "expected_scenario_id": "S04",
+          "expected_pending": []
+        },
+        {
+          "text": "Ал сапар үшін Demo Travel рәсімдейік: Түркия, 1–7 қазан 2026.",
+          "expected_action": "route",
+          "expected_scenario_id": "S03",
+          "expected_pending": []
+        }
+      ]
+    },
+    {
+      "id": "dialog-04",
+      "focus": "Причина отказа, обжалование, оператор",
+      "turns": [
+        {
+          "text": "DEMO-C-5004 бойынша неге бас тартылды?",
+          "expected_action": "route",
+          "expected_scenario_id": "S27",
+          "expected_pending": []
+        },
+        {
+          "text": "С указанной датой не согласен, прошу пересмотреть это решение.",
+          "expected_action": "route",
+          "expected_scenario_id": "S28",
+          "expected_pending": []
+        },
+        {
+          "text": "Хочу обсудить это с человеком. Соедините с оператором.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        }
+      ]
+    },
+    {
+      "id": "dialog-05",
+      "focus": "Новый случай против документов существующего дела",
+      "turns": [
+        {
+          "text": "Вчера машину по DEMO-P-1001 поцарапали, все целы. Хочу сообщить новый случай.",
+          "expected_action": "route",
+          "expected_scenario_id": "S18",
+          "expected_pending": []
+        },
+        {
+          "text": "У меня уже есть дело DEMO-C-5001: какие документы ещё нужны?",
+          "expected_action": "route",
+          "expected_scenario_id": "S24",
+          "expected_pending": []
+        },
+        {
+          "text": "И какая сейчас стадия у этого дела?",
+          "expected_action": "route",
+          "expected_scenario_id": "S23",
+          "expected_pending": []
+        }
+      ]
+    },
+    {
+      "id": "dialog-06",
+      "focus": "Три значения адреса, уточнение намерения",
+      "turns": [
+        {
+          "text": "Надо поменять адрес.",
+          "expected_action": "clarify",
+          "expected_scenario_id": null
+        },
+        {
+          "text": "Я про доставку DEMO-L-6001: Демо-улица, 8.",
+          "expected_action": "route",
+          "expected_scenario_id": "S33",
+          "expected_pending": []
+        },
+        {
+          "text": "И email для DEMO-U-001 тоже хочу поменять.",
+          "expected_action": "route",
+          "expected_scenario_id": "S32",
+          "expected_pending": []
+        }
+      ]
+    },
+    {
+      "id": "dialog-07",
+      "focus": "Экстренность прерывает обычный диалог",
+      "turns": [
+        {
+          "text": "Какие риски покрывает Demo Auto?",
+          "expected_action": "route",
+          "expected_scenario_id": "S06",
+          "expected_pending": []
+        },
+        {
+          "text": "Сейчас случилась авария и человеку трудно дышать, нужна срочная помощь.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        }
+      ]
+    },
+    {
+      "id": "dialog-08",
+      "focus": "Смешанная речь, статус и квитанция",
+      "turns": [
+        {
+          "text": "DEMO-A-2001 бойынша ақша кетті, но полиса всё нет.",
+          "expected_action": "route",
+          "expected_scenario_id": "S11",
+          "expected_pending": []
+        },
+        {
+          "text": "Осы төлемнің чегін беріңізші, DEMO-T-3001.",
+          "expected_action": "route",
+          "expected_scenario_id": "S14",
+          "expected_pending": []
+        },
+        {
+          "text": "Ал төлем мәселесіне қайта оралайық — полис неге жоқ?",
+          "expected_action": "route",
+          "expected_scenario_id": "S11",
+          "expected_pending": []
+        }
+      ]
+    },
+    {
+      "id": "dialog-09",
+      "focus": "Повторная неопределённость ведёт к человеку",
+      "turns": [
+        {
+          "text": "Мне что-то надо по страховке, не знаю что.",
+          "expected_action": "clarify",
+          "expected_scenario_id": null
+        },
+        {
+          "text": "Не могу объяснить, всё непонятно.",
+          "expected_action": "handoff",
+          "expected_scenario_id": null
+        }
+      ]
+    },
+    {
+      "id": "dialog-10",
+      "focus": "Подтверждение не выполняет необратимое действие",
+      "turns": [
+        {
+          "text": "Хочу расторгнуть DEMO-P-1001, машину продал.",
+          "expected_action": "route",
+          "expected_scenario_id": "S17",
+          "expected_pending": []
+        },
+        {
+          "text": "Да, подтверждаю расторжение этого полиса.",
+          "expected_action": "route",
+          "expected_scenario_id": "S17",
+          "expected_pending": []
+        },
+        {
+          "text": "Верните сначала копию этого полиса.",
+          "expected_action": "route",
+          "expected_scenario_id": "S30",
+          "expected_pending": []
+        }
+      ],
+      "assertions": [
+        "Ни один ответ не утверждает, что полис расторгнут или деньги реально возвращены.",
+        "mock_backend остаётся неизменным."
+      ]
+    }
+  ]
+}
