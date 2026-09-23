@@ -226,3 +226,20 @@ async def test_late_words_for_running_delegation_restart_with_complete_request_o
         results = [event for event in events if event["type"] == "result"]
         assert len(results) == 1
         assert results[0]["result"]["reply"] == "Уточняю: Проверьте срок полиса"
+
+
+@pytest.mark.asyncio
+async def test_typed_message_during_live_call_is_verified_and_read_aloud():
+    async with live_session() as (live, service, gateway, connection, _, events, _):
+        await live.say("  Когда заканчивается полис?  ")
+        await finish(live)
+        assert gateway.texts == ["Когда заканчивается полис?"]
+        sent = connection.send.call_args.args[0]
+        assert sent["type"] == "session.instructions.append" and sent["delegation_id"] is None
+        assert "Нөмірін айтыңыз" in sent["content"]
+        assert [event["type"] for event in events if event["type"] in {"working", "result", "working.done"}] == [
+            "working", "result", "working.done"]
+        assert service.sessions["caller"].history == [
+            {"role": "user", "content": "Когда заканчивается полис?"}]
+        await live.say("   ")
+        assert gateway.texts == ["Когда заканчивается полис?"]

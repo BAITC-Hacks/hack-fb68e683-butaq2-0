@@ -35,10 +35,10 @@ export function VoiceSession() {
       </div>}
       {call.routingDecision && <p role="status" className="mx-auto mt-3 max-w-lg text-xs text-violet-200">{call.routingDecision.scenario_id ? `Selected ${call.routingDecision.scenario_id}` : call.routingDecision.action} · {Math.round(call.routingDecision.confidence * 100)}% · {call.routingDecision.reason}</p>}
       {call.error && <p role="alert" className="mx-auto mt-4 max-w-lg rounded-xl border border-red-300/30 bg-black/80 p-4 text-sm text-red-200">{call.error}</p>}
-      <form className="mx-auto mt-6 flex max-w-lg gap-2" onSubmit={(event) => { event.preventDefault(); if (text.trim() && !active) { void call.sendText(text); setText(""); } }}>
+      <form className="mx-auto mt-6 flex max-w-lg gap-2" onSubmit={(event) => { event.preventDefault(); if (text.trim()) { void call.sendText(text); setText(""); } }}>
         <label htmlFor="voice-text" className="sr-only">Type your message</label>
-        <input id="voice-text" value={text} onChange={(event) => setText(event.target.value)} disabled={active} maxLength={8000} placeholder="Or type your message…" className="min-w-0 flex-1 rounded-full border border-white/25 bg-black/50 px-5 py-3 text-sm text-white placeholder:text-white/50 disabled:opacity-50" />
-        <Button type="submit" size="icon" aria-label="Send message" disabled={active || !text.trim()} className="h-12 w-12 rounded-full"><Send className="h-4 w-4" /></Button>
+        <input id="voice-text" value={text} onChange={(event) => setText(event.target.value)} maxLength={8000} placeholder="Or type your message…" className="min-w-0 flex-1 rounded-full border border-white/25 bg-black/50 px-5 py-3 text-sm text-white placeholder:text-white/50 disabled:opacity-50" />
+        <Button type="submit" size="icon" aria-label="Send message" disabled={!text.trim()} className="h-12 w-12 rounded-full"><Send className="h-4 w-4" /></Button>
       </form>
       {call.error && !active && <Button variant="outline" className="mt-3 rounded-full" disabled={!text.trim()} onClick={() => { if (text.trim()) { void call.sendTextFallback(text); setText(""); } }}>Send typed message without streaming</Button>}
       {current && (

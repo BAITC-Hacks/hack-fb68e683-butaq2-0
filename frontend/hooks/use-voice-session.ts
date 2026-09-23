@@ -93,7 +93,12 @@ export function useVoiceSession() {
   }, [changePhase]);
 
   const start = useCallback(() => open("voice"), [open]);
-  const sendText = useCallback(async (text: string) => { if (text.trim()) await open("text", text.trim()); }, [open]);
+  // Typing during a live call rides the open connection; otherwise it opens a text turn.
+  const sendText = useCallback(async (text: string) => {
+    if (!text.trim()) return;
+    if (connection.current instanceof VoiceLive) connection.current.sendText(text.trim());
+    else await open("text", text.trim());
+  }, [open]);
   const commit = useCallback(() => { if (connection.current instanceof VoiceStream) connection.current.commit(); }, []);
   const interrupt = useCallback(() => {
     if (connection.current) connection.current.interrupt();

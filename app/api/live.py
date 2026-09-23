@@ -46,10 +46,16 @@ async def live_conversation(socket: WebSocket, service: Annotated[RouterService,
         async def controls() -> None:
             while True:
                 message = await socket.receive_json()
-                if message == {"type": "stop"}:
+                kind = message.get("type") if isinstance(message, dict) else None
+                if kind == "stop":
                     return
-                if message == {"type": "interrupt"}:
+                if kind == "interrupt":
                     await conversation.interrupt()
+                elif kind == "text":
+                    text = message.get("text")
+                    if not isinstance(text, str) or not text.strip() or len(text) > 2000:
+                        raise ValueError("Invalid typed message")
+                    await conversation.say(text)
                 else:
                     raise ValueError("Unknown Live control")
 

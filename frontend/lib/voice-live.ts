@@ -126,6 +126,12 @@ export class VoiceLive {
     this.changePhase("listening");
   }
 
+  /** Typed message on an open call: the server verifies it and Live reads the answer. */
+  sendText(text: string): void {
+    if (!this.ready) return;
+    this.send({ type: "text", text });
+  }
+
   stop(): void {
     ++this.epoch;
     if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify({ type: "stop" }));

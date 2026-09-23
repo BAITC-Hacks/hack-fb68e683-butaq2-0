@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import uuid
 from collections.abc import Awaitable, Callable
 from contextlib import AsyncExitStack, suppress
 from typing import Any
@@ -227,6 +228,54 @@ class LiveConversation:
                         "content": "Проверка запроса не удалась. Попроси пользователя повторить. Не придумывай результат."})
         finally:
             self._resolving = False
+            await self.service.orchestrator.interrupt_delivery(self.session_id, identity)
+            await self.emit({"type": "working.done", "turn_id": identity})
+
+    async def say(self, text: str) -> None:
+        """A typed message during a live call: verify it, then let Live read the reply.
+
+        The sideband has no user-input event, so the verified answer arrives as an
+        instruction append instead of a delegation commentary.
+        """
+        text = text.strip()
+        if not text:
+            return
+        await self._cancel()
+        self._task = asyncio.create_task(
+            self._say(f"typed:{uuid.uuid4().hex}", text[:2000], self._generation))
+
+    async def _say(self, identity: str, text: str, generation: int) -> None:
+        def current() -> bool:
+            return not self._closed and generation == self._generation
+
+        async def on_route(decision: RoutingDecision) -> None:
+            if current():
+                await self.emit({"type": "route", "decision": decision.model_dump()})
+
+        try:
+            await self.emit({"type": "working", "turn_id": identity})
+            self._dialogue.append({"role": "user", "content": text[-2000:]})
+            self._dialogue = self._dialogue[-12:]
+            result = await self.service.turn(session_id=self.session_id, text=text,
+                on_route=on_route, delivery_id=identity,
+                voice_context=[entry.copy() for entry in self._dialogue])
+            if not current():
+                return
+            for chunk in commentary_chunks(
+                f"Пользователь написал: {text} "
+                f"Прочитай вслух этот проверенный ответ: {result.reply}"
+            ):
+                await self.connection.send({"type": "session.instructions.append",
+                    "delegation_id": None, "content": chunk})
+            await self.emit({"type": "result", "result": {**result.model_dump(), "turn_id": identity}})
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:
+            logger.warning("Live typed task failed", extra={"exception_type": type(exc).__name__})
+            if current():
+                await self.emit({"type": "task.error", "turn_id": identity,
+                    "message": "Не удалось проверить запрос. Повторите его, пожалуйста."})
+        finally:
             await self.service.orchestrator.interrupt_delivery(self.session_id, identity)
             await self.emit({"type": "working.done", "turn_id": identity})
 
