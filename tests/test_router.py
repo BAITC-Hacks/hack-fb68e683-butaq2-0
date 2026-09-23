@@ -244,3 +244,58 @@ def test_service_construction_does_not_initialize_the_api_client() -> None:
 
     service = RouterService(LazyPipeline(), catalog=catalog())
     assert service.sessions == {}
+
+
+def test_voice_topic_switch_with_inconsistent_router_label_returns_audio():
+    class RecordedPipeline(StubPipeline):
+        def __init__(self):
+            super().__init__()
+            self.transcripts = iter(
+                ["Где мой платёж?", "Сначала поменяем адрес", "Вернёмся к оплате"]
+            )
+
+        async def transcribe(self, audio, *, filename):
+            return Transcript(text=next(self.transcripts), model="stub")
+
+    pipeline = RecordedPipeline()
+    gateway = StubGateway(
+        [
+            decision("payment"),
+            "Уточните номер заявки.",
+            decision("address"),
+            "Назовите новый адрес.",
+            decision("payment"),
+            "Вернёмся к платежу.",
+        ]
+    )
+    service = RouterService(pipeline, catalog=catalog(), gateway=gateway)
+    app.dependency_overrides[get_service] = lambda: service
+    try:
+        with TestClient(app) as client:
+            results = []
+            for _ in range(3):
+                response = client.post(
+                    "/router/voice",
+                    data={"session_id": "switching-voice"},
+                    files={
+                        "audio": ("recording.webm", b"recorded-audio", "audio/webm")
+                    },
+                )
+                assert response.status_code == 200, response.text
+                results.append(response.json())
+        assert [result["topic_transition"] for result in results] == [
+            "continue",
+            "switch",
+            "resume",
+        ]
+        assert [result["scenario_id"] for result in results] == [
+            "payment",
+            "address",
+            "payment",
+        ]
+        assert all(result["audio_base64"] == "bXAzLWF1ZGlv" for result in results)
+        assert service.sessions["switching-voice"].pending_scenarios == ["address"]
+        assert len(pipeline.spoken) == 3
+        assert [call[0] for call in gateway.calls] == ["route", "resolve"] * 3
+    finally:
+        app.dependency_overrides.pop(get_service, None)

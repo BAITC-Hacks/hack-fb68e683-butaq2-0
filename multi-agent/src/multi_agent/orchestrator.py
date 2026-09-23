@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from dataclasses import dataclass, field
 from time import perf_counter
 from uuid import uuid4
@@ -21,6 +22,8 @@ from .contracts import (
     TurnResult,
     TurnTimeout,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -93,23 +96,31 @@ def _validate(decision: RoutingDecision, context: RoutingContext) -> None:
                 raise InvalidDecision(
                     "Router extracted an undeclared scenario parameter"
                 )
-    if decision.action != "route":
-        return
-    if (
-        decision.topic_transition == "resume"
-        and decision.scenario_id not in context.pending_scenarios
-    ):
-        raise InvalidDecision("A resumed scenario must already be pending")
-    if decision.topic_transition == "continue" and context.active_scenario not in (
-        None,
-        decision.scenario_id,
-    ):
-        raise InvalidDecision("Continuing cannot change the active scenario")
-    if (
-        decision.topic_transition == "switch"
-        and context.active_scenario == decision.scenario_id
-    ):
-        raise InvalidDecision("Switching must change the active scenario")
+
+
+def _normalize_transition(
+    decision: RoutingDecision, context: RoutingContext
+) -> RoutingDecision:
+    """Derive transition metadata from the accepted target and prior state.
+
+    The LLM selects the scenario. Its redundant transition label cannot override
+    that validated choice or turn an otherwise usable voice turn into an error.
+    """
+    transition = "continue"
+    if decision.action == "route" and decision.scenario_id != context.active_scenario:
+        if decision.scenario_id in context.pending_scenarios:
+            transition = "resume"
+        elif context.active_scenario is not None:
+            transition = "switch"
+    if decision.topic_transition == transition:
+        return decision
+    logger.info(
+        "Routing transition normalized from %s to %s (trace_id=%s)",
+        decision.topic_transition,
+        transition,
+        context.trace_id,
+    )
+    return decision.model_copy(update={"topic_transition": transition})
 
 
 def _operator_message(language: str) -> str:
@@ -207,8 +218,7 @@ class VoiceRouterOrchestrator:
                     + "; repeated uncertainty requires operator assistance",
                 }
             )
-        if decision.action != "route":
-            decision = decision.model_copy(update={"topic_transition": "continue"})
+        decision = _normalize_transition(decision, context)
 
         parameters = {(item.scenario_id, item.name): item for item in state.parameters}
         parameters.update(

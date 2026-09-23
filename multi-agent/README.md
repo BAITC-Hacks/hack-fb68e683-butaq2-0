@@ -66,7 +66,9 @@ not the official starter kit or evidence of jury accuracy.
 ## Boundaries of this slice
 
 - SDK Structured Outputs provide the Router shape; Python additionally validates
-  scenario references, topic transitions, and extracted parameter ownership.
+  scenario references and extracted parameter ownership. Python derives the final
+  topic transition from the accepted scenario and prior state, correcting inconsistent
+  model labels without an extra model call.
 - Context contains the latest ten turns, pending topics, and parameters scoped to
   each scenario. A failed/cancelled model turn does not commit dialogue state.
 - Same-session model turns are serialized. Sessions are currently in memory in

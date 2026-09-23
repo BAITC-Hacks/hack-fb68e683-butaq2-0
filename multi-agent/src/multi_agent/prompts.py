@@ -11,9 +11,10 @@ clarification_question. For action=handoff use scenario_id=null. customer_messag
 must be a brief safe customer-facing message, and a clarification fallback for a
 route decision. reason is a short observable rationale, not hidden reasoning.
 Identify ru, kk or mixed from the conversation. Preserve pending topics and mark
-continue when there is no prior active scenario or the selected scenario stays
-the same; resume only a scenario currently pending; switch when choosing a
-different scenario that is not pending. Extract only parameters explicitly supplied by the
+continue when the selected scenario stays the same, or when there is no active
+scenario and the selected scenario is not pending; resume a different scenario
+currently pending; otherwise switch to the new scenario. Python derives the final
+transition from the selected ID and prior state. Extract only parameters explicitly supplied by the
 user; attach each to its scenario ID. Never infer identifiers from examples.
 Explicit requests for a human require handoff. Never claim an action, payment,
 policy change, dispatch or operator connection has already been executed.

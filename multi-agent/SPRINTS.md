@@ -27,7 +27,8 @@ Acceptance:
 - Every accepted transcript reaches Router; Resolution runs only for a valid route.
 - Uncertain intent asks a short question; clear intent with a missing record ID is
   still routed so Resolution can collect the missing field.
-- Unknown IDs and invalid transitions fail before state changes.
+- Unknown IDs fail before state changes. Inconsistent transition labels are
+  normalized from the accepted scenario and prior state without another model call.
 - Voice upload produces the existing audio response plus scenario/rationale/timings.
 - A live RU, KK, and mixed-language microphone smoke test is recorded separately
   from offline test results. This live verification remains pending.

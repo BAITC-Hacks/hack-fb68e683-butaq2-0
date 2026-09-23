@@ -169,9 +169,6 @@ async def test_explicit_clarify_and_handoff_never_switch_topics(catalog, config)
         ),
         decision(None),
         decision(action="clarify"),
-        decision(topic_transition="resume"),
-        decision("address", topic_transition="continue"),
-        decision(topic_transition="switch"),
     ],
 )
 @pytest.mark.asyncio
@@ -368,3 +365,73 @@ async def test_trace_exposes_at_most_three_validated_alternatives(catalog, confi
     )
     result = await turn(VoiceRouterOrchestrator(gateway), catalog, config)
     assert len(result.alternatives) == 3
+
+
+@pytest.mark.parametrize("model_transition", ["continue", "switch", "resume"])
+@pytest.mark.parametrize(
+    "active,pending,target,expected,expected_pending",
+    [
+        (None, [], "payment", "continue", []),
+        ("payment", [], "payment", "continue", []),
+        ("payment", [], "address", "switch", ["payment"]),
+        ("payment", ["address"], "address", "resume", ["payment"]),
+        (None, ["address"], "address", "resume", []),
+    ],
+)
+@pytest.mark.asyncio
+async def test_transition_is_derived_from_selected_scenario_and_state(
+    catalog,
+    config,
+    model_transition,
+    active,
+    pending,
+    target,
+    expected,
+    expected_pending,
+):
+    proposed = decision(target, topic_transition=model_transition)
+    gateway = Gateway(proposed)
+    core = VoiceRouterOrchestrator(gateway)
+    core.sessions["caller"] = Conversation(
+        active_scenario=active, pending_scenarios=pending.copy()
+    )
+    result = await turn(core, catalog, config)
+    assert result.action == "route"
+    assert result.scenario_id == target
+    assert result.topic_transition == expected
+    assert result.pending_scenario_ids == expected_pending
+    assert core.sessions["caller"].active_scenario == target
+    assert gateway.resolution[0].decision.topic_transition == expected
+    assert proposed.topic_transition == model_transition
+    assert len(gateway.routing) == len(gateway.resolution) == 1
+
+
+@pytest.mark.asyncio
+async def test_uncertain_topic_change_clarifies_without_switching(catalog, config):
+    gateway = Gateway(decision("address", confidence=0.2, topic_transition="continue"))
+    core = VoiceRouterOrchestrator(gateway)
+    core.sessions["caller"] = Conversation(active_scenario="payment")
+    result = await turn(core, catalog, config)
+    assert result.action == "clarify"
+    assert result.topic_transition == "continue"
+    assert core.sessions["caller"].active_scenario == "payment"
+    assert not gateway.resolution
+
+
+@pytest.mark.asyncio
+async def test_corrected_transition_does_not_commit_on_resolution_failure(
+    catalog, config
+):
+    class FailingGateway(Gateway):
+        async def resolve(self, context, config):
+            assert context.decision.topic_transition == "switch"
+            raise AgentFailure("Provider failed")
+
+    core = VoiceRouterOrchestrator(FailingGateway(decision("address")))
+    core.sessions["caller"] = Conversation(active_scenario="payment")
+    with pytest.raises(AgentFailure):
+        await turn(core, catalog, config)
+    state = core.sessions["caller"]
+    assert state.active_scenario == "payment"
+    assert state.pending_scenarios == []
+    assert state.history == []
