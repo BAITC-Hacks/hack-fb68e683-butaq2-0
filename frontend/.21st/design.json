@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "project": {
+    "name": "hirael-velorah-v1",
+    "productType": "voice AI contact-center simulator",
+    "stack": ["static HTML", "CSS", "browser Web Speech API"]
+  },
+  "sources": {
+    "tokens": [],
+    "components": [],
+    "assets": [],
+    "instructions": []
+  },
+  "design": {
+    "colorMode": "dark",
+    "colors": { "canvas": "#07140f", "surface": "#10241c", "accent": "#c7f169" },
+    "typography": {},
+    "spacing": {},
+    "radius": {},
+    "shadows": {},
+    "motion": {},
+    "density": "compact"
+  },
+  "components": {
+    "installed": [],
+    "preferredPrimitives": [],
+    "patterns": []
+  },
+  "constraints": {
+    "must": [],
+    "avoid": []
+  },
+  "decisions": ["A supervisor-grade dark dashboard is used instead of the source landing page. Lime highlights distinguish live status, confidence and performance data; speech stays the primary action.", "The simulator exposes route selection, rationale, alternatives and stage timings after each real text or browser microphone input."],
+  "evidence": [],
+  "generatedAt": "2026-09-23T08:11:15.818Z"
+}
