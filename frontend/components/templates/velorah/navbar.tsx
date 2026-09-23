@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { label: "Admin", href: "/admin/" },
 ];
 
-export function Navbar() {
+export function Navbar({ actionLabel = "Talk to Butaq" }: { actionLabel?: string }) {
   const pathname = usePathname();
 
   return (
@@ -32,7 +32,7 @@ export function Navbar() {
         href="/voice/"
         className="liquid-glass hidden rounded-full px-6 py-3 text-sm text-foreground transition-colors hover:bg-white/10 motion-reduce:transition-none sm:inline-flex"
       >
-        Talk to Butaq
+        {actionLabel}
       </a>
     </nav>
   );

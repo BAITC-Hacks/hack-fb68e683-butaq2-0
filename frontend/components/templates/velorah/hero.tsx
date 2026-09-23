@@ -45,21 +45,21 @@ export function Hero({
         className="absolute inset-x-0 bottom-0 z-[1] h-[40%] bg-gradient-to-t from-black via-black/60 to-transparent"
       />
 
-      <Navbar />
+      <Navbar actionLabel="Start a conversation" />
 
       <div className="relative z-10 flex flex-col items-center justify-center px-6 pb-40 pt-[28px] text-center">
         <h1 className="animate-fade-rise max-w-7xl text-5xl font-normal leading-[0.95] tracking-[-2.46px] text-foreground [font-family:var(--font-velorah-serif)] sm:text-7xl md:text-8xl">
-          Every voice deserves{" "}
-          <em className="not-italic text-white">to be understood.</em>
+          A voice assistant{" "}
+          <em className="not-italic text-white">for insurance questions.</em>
         </h1>
 
         <p className="animate-fade-rise-delay mt-8 max-w-2xl text-base leading-relaxed text-white sm:text-lg">
-          Meet Butaq, a voice AI for conversations that don&apos;t follow
-          a script. Built around LLM routing, Russian and Kazakh, and the context
-          behind every request.
+          Ask in Russian or Kazakh. Butaq uses the conversation to choose a scenario,
+          replies by voice, and explains its decision.
         </p>
 
-        <a href="/voice/" className="animate-fade-rise-delay-2 liquid-glass mt-12 rounded-full px-14 py-5 text-base text-foreground transition-transform hover:scale-[1.03]">Talk to Butaq</a>
+        <a href="/voice/" className="animate-fade-rise-delay-2 liquid-glass mt-12 rounded-full px-14 py-5 text-base text-foreground transition-transform hover:scale-[1.03]">Start a conversation</a>
+        <p className="mt-4 max-w-lg text-sm leading-relaxed text-white/80">On the Voice page, click “Talk to Butaq” and allow microphone access. You can also type your question.</p>
       </div>
     </section>
   );

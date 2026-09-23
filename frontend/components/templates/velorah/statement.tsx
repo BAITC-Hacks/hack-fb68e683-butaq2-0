@@ -4,10 +4,10 @@ const STATEMENT_HLS =
   "https://stream.mux.com/9njY8qDfS02Uvbll018C8CK39p5EksK7mn02DDC1zYvppI.m3u8";
 
 const STATS = [
-  { value: "40", label: "Scenarios in the brief" },
-  { value: "RU / KZ", label: "Target conversation languages" },
-  { value: "500 ms", label: "Routing latency target" },
-  { value: "1.5 s", label: "Time-to-voice target" },
+  { value: "Scenario", label: "The selected path" },
+  { value: "Reason", label: "Why it fits" },
+  { value: "Alternatives", label: "Other options considered" },
+  { value: "Timing", label: "Time spent at each stage" },
 ];
 
 export function Statement() {
@@ -17,25 +17,25 @@ export function Statement() {
 
       <div className="relative z-10 flex max-w-5xl flex-col items-center text-center">
         <p className="mb-6 text-xs uppercase tracking-[0.3em] text-muted-foreground sm:text-sm">
-          Designed for supervisors
+          After every turn
         </p>
 
         <h2 className="text-4xl leading-[1.05] tracking-[-1.5px] text-foreground [font-family:var(--font-velorah-serif)] sm:text-6xl md:text-7xl">
-          Every decision.
+          See what was chosen.
           <br />
-          Open to understanding.
+          Understand why.
         </h2>
 
         <p className="mt-8 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          The supervisor view is designed to show the transcript, selected
-          scenario, rationale and alternatives after every turn. Separate timings
-          for recognition, routing and response make delays visible.
+          A language model selects the scenario using your question and conversation
+          history. The panel below the conversation lets you review its choice
+          and see where processing time was spent.
         </p>
 
-        <div className="mt-14 grid grid-cols-2 gap-8 sm:grid-cols-4 sm:gap-12">
+        <div className="mt-14 grid grid-cols-2 gap-8 lg:grid-cols-4 lg:gap-12">
           {STATS.map((stat) => (
             <div key={stat.label}>
-              <div className="text-3xl font-light text-foreground [font-family:var(--font-velorah-serif)] sm:text-4xl">
+              <div className="text-2xl font-light text-foreground [font-family:var(--font-velorah-serif)] sm:text-3xl">
                 {stat.value}
               </div>
               <div className="text-xs text-muted-foreground sm:text-sm">
@@ -46,10 +46,10 @@ export function Statement() {
         </div>
 
         <a
-          href="#project"
+          href="/voice/"
           className="liquid-glass mt-12 rounded-full px-10 py-4 text-sm text-foreground transition-transform hover:scale-[1.03]"
         >
-          Discover the project
+          Try it and see the result
         </a>
       </div>
     </section>
