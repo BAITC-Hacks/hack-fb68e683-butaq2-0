@@ -93,23 +93,19 @@ def _validate(decision: RoutingDecision, context: RoutingContext) -> None:
                 raise InvalidDecision(
                     "Router extracted an undeclared scenario parameter"
                 )
-    if decision.action != "route":
-        return
-    if (
-        decision.topic_transition == "resume"
-        and decision.scenario_id not in context.pending_scenarios
-    ):
-        raise InvalidDecision("A resumed scenario must already be pending")
-    if decision.topic_transition == "continue" and context.active_scenario not in (
-        None,
-        decision.scenario_id,
-    ):
-        raise InvalidDecision("Continuing cannot change the active scenario")
-    if (
-        decision.topic_transition == "switch"
-        and context.active_scenario == decision.scenario_id
-    ):
-        raise InvalidDecision("Switching must change the active scenario")
+
+
+def _normalize_transition(
+    decision: RoutingDecision, context: RoutingContext
+) -> RoutingDecision:
+    """Derive the transition from a validated scenario choice and prior state."""
+    transition = "continue"
+    if decision.action == "route" and decision.scenario_id != context.active_scenario:
+        if decision.scenario_id in context.pending_scenarios:
+            transition = "resume"
+        elif context.active_scenario is not None:
+            transition = "switch"
+    return decision.model_copy(update={"topic_transition": transition})
 
 
 def _operator_message(language: str) -> str:
@@ -207,8 +203,7 @@ class VoiceRouterOrchestrator:
                     + "; repeated uncertainty requires operator assistance",
                 }
             )
-        if decision.action != "route":
-            decision = decision.model_copy(update={"topic_transition": "continue"})
+        decision = _normalize_transition(decision, context)
 
         parameters = {(item.scenario_id, item.name): item for item in state.parameters}
         parameters.update(

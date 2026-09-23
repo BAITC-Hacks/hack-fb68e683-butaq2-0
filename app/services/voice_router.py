@@ -9,6 +9,7 @@ from typing import Any
 
 from fastapi import HTTPException
 from multi_agent.contracts import (
+    DEFAULT_MODEL,
     AgentFailure,
     AgentGateway,
     Catalog,
@@ -18,10 +19,10 @@ from multi_agent.contracts import (
     TurnTimeout,
 )
 from multi_agent.orchestrator import Conversation, VoiceRouterOrchestrator
+from multi_agent.prompts import ANSWER_PROMPT, ROUTING_PROMPT
 from multi_agent.sdk import SdkAgentGateway
 from pydantic import ValidationError
 
-from multi_agent.prompts import ANSWER_PROMPT, ROUTING_PROMPT
 from v2v import VoicePipeline
 from v2v.audio import CONTENT_TYPE_BY_FORMAT
 
@@ -41,7 +42,7 @@ class RouterService:
         self.database = database
         self.pipeline = pipeline
         self.config = RuntimeConfig(
-            model=model or os.getenv("ROUTER_MODEL", "gpt-4o-mini"),
+            model=model or os.getenv("ROUTER_MODEL", DEFAULT_MODEL),
             routing_prompt=ROUTING_PROMPT,
             answer_prompt=ANSWER_PROMPT,
             confidence_threshold=(

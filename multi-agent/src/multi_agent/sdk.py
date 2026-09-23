@@ -7,11 +7,20 @@ import json
 from collections.abc import Callable
 from typing import Any
 
-from agents import Agent, OpenAIResponsesModel, RunConfig, Runner, function_tool
+from agents import (
+    Agent,
+    ModelSettings,
+    OpenAIResponsesModel,
+    RunConfig,
+    Runner,
+    function_tool,
+)
 from agents.exceptions import AgentsException
 from openai import AsyncOpenAI, OpenAIError
+from openai.types.shared import Reasoning
 from pydantic import ValidationError
 
+from .context import routing_catalog, scenario_definition
 from .contracts import (
     AgentFailure,
     InvalidDecision,
@@ -21,6 +30,7 @@ from .contracts import (
     RuntimeConfig,
     TurnTimeout,
 )
+from .identifiers import demo_record_resource, explicit_demo_ids, parse_demo_ids
 from .prompts import RESOLUTION_INVARIANTS, ROUTER_INVARIANTS
 from .tools import DemoRecordLookup, scenario_knowledge
 
@@ -45,12 +55,13 @@ class SdkAgentGateway:
             name="Router",
             instructions=f"{config.routing_prompt}\n\n{ROUTER_INVARIANTS}",
             model=self._model(config),
+            model_settings=self._model_settings(config),
             output_type=RoutingDecision,
         )
         payload = {
-            **self._conversation(context),
-            "catalog": context.catalog.prompt_data(),
+            "catalog": routing_catalog(context.catalog),
             "confidence_threshold": config.confidence_threshold,
+            **self._conversation(context),
         }
         output = await self._run(agent, payload, context, config, max_turns=1)
         try:
@@ -68,28 +79,39 @@ class SdkAgentGateway:
         ):
             raise InvalidDecision("Resolution requires a validated route")
         lookup = DemoRecordLookup(context)
+        records = lookup.available_records()
+        supported_ids = explicit_demo_ids(context)
+        for record in records:
+            supported_ids.update(parse_demo_ids(json.dumps(record, ensure_ascii=False)))
         tools = []
         if lookup.enabled:
 
             @function_tool
             def lookup_demo_record(record_id: str) -> str:
                 """Read one allowed synthetic record using an ID explicitly supplied by the user."""
-                return json.dumps(lookup.lookup(record_id), ensure_ascii=False)
+                result = lookup.lookup(record_id)
+                if result.get("status") == "found":
+                    supported_ids.update(
+                        parse_demo_ids(json.dumps(result, ensure_ascii=False))
+                    )
+                return json.dumps(result, ensure_ascii=False)
 
             tools.append(lookup_demo_record)
         agent = Agent(
             name="Resolution",
             instructions=f"{config.answer_prompt}\n\n{RESOLUTION_INVARIANTS}",
             model=self._model(config),
+            model_settings=self._model_settings(config),
             tools=tools,
         )
         payload = {
-            **self._conversation(context),
-            "selected_scenario": context.catalog.scenarios[
-                decision.scenario_id
-            ].model_dump(),
-            "routing_decision": decision.model_dump(),
+            "selected_scenario": scenario_definition(
+                context.catalog.scenarios[decision.scenario_id]
+            ),
             "knowledge": scenario_knowledge(context),
+            **self._conversation(context),
+            "routing_decision": decision.model_dump(),
+            "verified_records": records,
             "available_tools": [tool.name for tool in tools],
         }
         output = await self._run(
@@ -97,7 +119,20 @@ class SdkAgentGateway:
         )
         if not isinstance(output, str) or not output.strip():
             raise AgentFailure("Resolution returned an empty or invalid answer")
+        if parse_demo_ids(output) - supported_ids:
+            # Reject fabricated example IDs without another model round trip.
+            if decision.language == "kk":
+                return "Бұл мәліметтер расталмады. Полис немесе өтініш нөмірін нақтылаңызшы."
+            return "Не удалось подтвердить эти сведения. Уточните, пожалуйста, номер полиса или обращения."
         return output.strip()
+
+    @staticmethod
+    def _model_settings(config: RuntimeConfig) -> ModelSettings:
+        # Keep the live-tested Luna budget explicit; legacy models may not
+        # accept reasoning parameters at all.
+        if config.model == "gpt-6-luna" or config.model.startswith("gpt-6-luna-"):
+            return ModelSettings(reasoning=Reasoning(effort="low"))
+        return ModelSettings()
 
     def _model(self, config: RuntimeConfig) -> OpenAIResponsesModel:
         client = self._client() if callable(self._client) else self._client
@@ -107,6 +142,11 @@ class SdkAgentGateway:
     def _conversation(context: RoutingContext) -> dict[str, Any]:
         return {
             "utterance": context.text,
+            "explicit_demo_ids": sorted(explicit_demo_ids(context)),
+            "current_record_references": [
+                {"id": identifier, "resource": demo_record_resource(identifier)}
+                for identifier in sorted(parse_demo_ids(context.text))
+            ],
             "recent_dialog": context.history,
             "active_scenario": context.active_scenario,
             "pending_scenarios": context.pending_scenarios,
@@ -133,7 +173,9 @@ class SdkAgentGateway:
             result = await asyncio.wait_for(
                 self._runner.run(
                     agent,
-                    input=json.dumps(payload, ensure_ascii=False),
+                    input=json.dumps(
+                        payload, ensure_ascii=False, separators=(",", ":")
+                    ),
                     max_turns=max_turns,
                     run_config=run_config,
                 ),

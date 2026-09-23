@@ -202,7 +202,7 @@ def test_lookup_denies_unsupplied_or_other_resource_ids(record_id):
 
 def test_explicit_user_id_does_not_grant_other_resource_access():
     current = resolution_context(text="DEMO-U-001 DEMO-P-1001")
-    assert DemoRecordLookup(current).lookup("DEMO-U-001")["status"] == "not_found"
+    assert DemoRecordLookup(current).lookup("DEMO-U-001")["status"] == "denied"
     assert DemoRecordLookup(current).lookup("DEMO-P-1001")["status"] == "found"
 
 
@@ -373,3 +373,96 @@ async def test_real_sdk_stops_tool_loop_at_max_turns():
                 resolution_context(), config(resolution_max_turns=1)
             )
     assert len(transport.requests) == 1
+
+
+@pytest.mark.asyncio
+async def test_scenario_examples_never_become_customer_facts():
+    current = resolution_context()
+    current.catalog.scenarios["policy"].details["examples"] = [
+        {
+            "request": "When is DEMO-C-5003 paid?",
+            "response": "180000 EXAMPLE-ONLY-FACT",
+        }
+    ]
+    transport = ResponsesTransport(
+        [
+            [message(decision().model_dump_json())],
+            [message("Ваш демо-полис активен.")],
+        ]
+    )
+    async with transport.client() as client:
+        gateway = SdkAgentGateway(client)
+        await gateway.route(current, config())
+        await gateway.resolve(current, config())
+    serialized = json.dumps(transport.requests)
+    assert "EXAMPLE-ONLY-FACT" not in serialized
+    assert "DEMO-C-5003" not in serialized
+    assert current.catalog.scenarios["policy"].details["examples"]
+
+
+@pytest.mark.asyncio
+async def test_spoken_identifier_prefetches_record_in_one_resolution_call():
+    current = resolution_context(text="Проверь полис демо П-1001")
+    transport = ResponsesTransport([[message("Полис DEMO-P-1001 активен.")]])
+    async with transport.client() as client:
+        result = await SdkAgentGateway(client).resolve(current, config())
+    assert result == "Полис DEMO-P-1001 активен."
+    assert len(transport.requests) == 1
+    payload = json.loads(transport.requests[0]["input"][0]["content"])
+    assert payload["utterance"] == current.text
+    assert payload["explicit_demo_ids"] == ["DEMO-P-1001"]
+    assert payload["verified_records"][0]["record"]["status"] == "active"
+    assert "PRIVATE-RECORD" not in json.dumps(payload)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("language", ["ru", "kk"])
+async def test_fabricated_record_id_is_not_spoken_even_from_previous_assistant(
+    language,
+):
+    current = resolution_context(
+        text="Когда придут деньги?",
+        history=[{"role": "assistant", "content": "По DEMO-C-5003 одобрено 180000"}],
+    )
+    current.decision.language = language
+    transport = ResponsesTransport([[message("По DEMO-C-5003 вам одобрено 180000.")]])
+    async with transport.client() as client:
+        answer = await SdkAgentGateway(client).resolve(current, config())
+    assert "DEMO-C-5003" not in answer
+    assert "180000" not in answer
+    assert "нөмірін" in answer if language == "kk" else "номер" in answer
+    assert len(transport.requests) == 1
+
+
+@pytest.mark.asyncio
+async def test_routing_prefix_is_stable_across_user_turns():
+    current = context()
+    transport = ResponsesTransport([[message(decision().model_dump_json())]] * 2)
+    async with transport.client() as client:
+        gateway = SdkAgentGateway(client)
+        await gateway.route(current, config())
+        await gateway.route(resolution_context(text="Другой вопрос"), config())
+    inputs = [request["input"][0]["content"] for request in transport.requests]
+    assert inputs[0].startswith('{"catalog":')
+    assert inputs[0].split(',"utterance":')[0] == inputs[1].split(',"utterance":')[0]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("model", ["gpt-6-luna", "gpt-6-luna-2026-09-01", "gpt-4o-mini"])
+async def test_model_reasoning_settings_reach_both_agents(model):
+    transport = ResponsesTransport([
+        [message(decision().model_dump_json())],
+        [message("Ваш полис активен.")],
+    ])
+    settings = config().model_copy(update={"model": model})
+    async with transport.client() as client:
+        gateway = SdkAgentGateway(client)
+        await gateway.route(context(), settings)
+        await gateway.resolve(resolution_context(), settings)
+    assert len(transport.requests) == 2
+    for request in transport.requests:
+        assert request["model"] == model
+        if model.startswith("gpt-6-luna"):
+            assert request["reasoning"]["effort"] == "low"
+        else:
+            assert request.get("reasoning") is None

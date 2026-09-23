@@ -128,6 +128,9 @@ class TurnResult(BaseModel):
     extracted_parameters: list[ExtractedParameter] = Field(default_factory=list)
 
 
+DEFAULT_MODEL = "gpt-6-luna"
+
+
 class RuntimeConfig(BaseModel):
     """Per-turn snapshot of live application settings."""
 
