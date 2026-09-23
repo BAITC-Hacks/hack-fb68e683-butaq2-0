@@ -17,31 +17,31 @@ export function Cta() {
 
       <div className="relative z-10 flex max-w-4xl flex-col items-center">
         <p className="mb-4 text-xs uppercase tracking-[0.3em] text-muted-foreground sm:text-sm">
-          HackAlem AI · Halyk Bank track · Case 2
+          For administrators
         </p>
 
         <h2 className="text-5xl leading-[0.95] tracking-[-2px] text-foreground [font-family:var(--font-velorah-serif)] sm:text-7xl md:text-8xl">
-          A better conversation starts here.
+          Set up Butaq for your scenarios.
         </h2>
 
         <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-          Butaq is our Voice Router concept: an LLM decision layer for natural
-          conversations, with clear explanations and human support when it matters.
-          Start a voice conversation and follow each routing decision as it happens.
+          Use Admin to edit scenarios, import a catalogue, and adjust instructions,
+          the model, and the confidence threshold. Sign in with an admin token
+          or a registered passkey.
         </p>
 
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row">
           <a
-            href="/voice/"
+            href="/admin/"
             className="liquid-glass rounded-full px-10 py-4 text-sm text-foreground transition-transform hover:scale-[1.03]"
           >
-            Talk to Butaq
+            Open Admin
           </a>
           <a
-            href="#insights"
+            href="/voice/"
             className="rounded-full border border-border px-10 py-4 text-sm text-muted-foreground transition-colors hover:border-foreground/30 hover:text-foreground"
           >
-            View routing goals
+            Start a conversation
           </a>
         </div>
       </div>

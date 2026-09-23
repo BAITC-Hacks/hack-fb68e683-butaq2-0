@@ -14,6 +14,7 @@ import { VelorahStyles } from "./styles";
 export default function Velorah() {
   return (
     <div
+      lang="en"
       className={cn(
         "velorah",
         inter.variable,

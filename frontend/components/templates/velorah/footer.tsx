@@ -1,10 +1,10 @@
 import { Wordmark } from "./primitives";
 
 const FOOTER_LINKS = [
-  { label: "Why Butaq", href: "#about" },
-  { label: "Voice", href: "/voice/" },
-  { label: "Supervisor insights", href: "#insights" },
-  { label: "The project", href: "#project" },
+  { label: "How to use Butaq", href: "#routing" },
+  { label: "Start a conversation", href: "/voice/" },
+  { label: "Review the result", href: "#insights" },
+  { label: "Admin settings", href: "/admin/" },
 ];
 
 export function Footer() {
@@ -12,9 +12,9 @@ export function Footer() {
     <footer className="mx-auto max-w-7xl border-t border-border bg-[hsl(0,0%,0%)] px-6 py-16 md:px-12">
       <div className="mb-16 grid grid-cols-1 gap-12 md:grid-cols-3">
         <h2 className="text-2xl leading-tight text-foreground [font-family:var(--font-velorah-serif)] sm:text-3xl">
-          Your voice.
+          Ask by voice.
           <br />
-          Understood in context.
+          Understand the answer.
         </h2>
 
         <nav className="flex flex-col items-start gap-3">
@@ -31,15 +31,15 @@ export function Footer() {
 
         <div>
           <p className="mb-4 text-sm text-muted-foreground">
-            Built for natural conversations.
+            An insurance contact-centre simulator.
             <br />
-            Designed for human trust.
+            Test data. No real transactions.
           </p>
           <a
             href="#home"
             className="liquid-glass rounded-full px-6 py-2.5 text-sm text-foreground transition-transform hover:scale-[1.03]"
           >
-            Back to the beginning
+            Back to top
           </a>
         </div>
       </div>
@@ -48,7 +48,7 @@ export function Footer() {
         <Wordmark className="text-xl" />
         <div className="flex items-center gap-6">
           <span>HackAlem AI · Voice Router</span>
-          <span>Frontend preview</span>
+          <span>Russian · Kazakh</span>
         </div>
       </div>
     </footer>

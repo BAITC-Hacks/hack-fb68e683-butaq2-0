@@ -10,42 +10,42 @@ const FEATURE_VIDEO =
 const FEATURE_TABS = [
   {
     id: "voice",
-    label: "Natural speech",
-    heading: "Speak your way",
+    label: "1. Start",
+    heading: "Open Voice",
     description:
-      "A voice-first experience for insurance contact centres. Speak into the microphone and hear a reply, with text available whenever you need it.",
+      "Click “Talk to Butaq” and allow microphone access. Prefer typing? Use the message field instead.",
     progress: 20,
   },
   {
     id: "routing",
-    label: "LLM routing",
-    heading: "Meaning guides the route",
+    label: "2. Ask",
+    heading: "Describe what you need",
     description:
-      "The routing design uses an LLM to interpret your request against a catalogue of 40 scenarios, their boundaries and the conversation so far.",
+      "Ask about a policy, payment, or claim. Speak Russian, Kazakh, or mix both. Pause to send your turn.",
     progress: 40,
   },
   {
     id: "context",
-    label: "Context",
-    heading: "A new topic. Same conversation.",
+    label: "3. Continue",
+    heading: "Follow up or change topics",
     description:
-      "Ask about a payment, then switch to a policy question. Butaq is designed to keep unfinished topics in context and return to them when you are ready.",
+      "Wait for the spoken reply, then ask your next question. Butaq considers earlier turns when choosing a scenario.",
     progress: 60,
   },
   {
     id: "languages",
-    label: "RU / KZ",
-    heading: "Two languages. One dialogue.",
+    label: "4. Review",
+    heading: "See the result",
     description:
-      "Russian, Kazakh, or both within a sentence. Mixed-language understanding is central to the Voice Router brief, so clients can use the words that come naturally.",
+      "Below the conversation, see the transcript, selected scenario, explanation, alternatives, and processing times.",
     progress: 80,
   },
   {
     id: "handoff",
-    label: "Human support",
-    heading: "Know when to ask for help",
+    label: "When uncertain",
+    heading: "Clarify before deciding",
     description:
-      "When a request is unclear, ask a follow-up. When it needs a person, hand over with context. Irreversible actions require the client’s confirmation.",
+      "When details are missing, Butaq asks a follow-up or flags that an operator is needed. This demo does not connect to a live operator.",
     progress: 100,
   },
 ];
@@ -108,7 +108,7 @@ export function Feature({
               href="#insights"
               className="liquid-glass rounded-full px-8 py-3 text-sm text-foreground transition-transform hover:scale-[1.03]"
             >
-              See the decision layer
+              Understand the result
             </a>
           </div>
         </div>
