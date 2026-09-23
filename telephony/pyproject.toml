@@ -1,0 +1,53 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "telephony"
+version = "0.1.0"
+description = "Drop-in phone calls for FastAPI: GPT-Live conversations over Twilio, with client delegation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["fastapi", "openai", "gpt-live", "twilio", "telephony", "voice-agent"]
+classifiers = [
+    "Framework :: FastAPI",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Communications :: Telephony",
+]
+dependencies = [
+    "fastapi>=0.115",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.5",
+    "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+twilio = ["twilio>=9.3"]
+openai = ["openai[realtime]>=3.16.2"]
+langchain = ["langchain-core>=0.3"]
+langgraph = ["langgraph>=1.0"]
+redis = ["redis>=5.0"]
+postgres = ["sqlalchemy[asyncio]>=2.0", "asyncpg>=0.29", "alembic>=1.13"]
+serve = ["uvicorn[standard]>=0.30"]
+dev = ["pytest>=8.3", "pytest-asyncio>=0.24", "httpx>=0.27", "uvicorn[standard]>=0.30", "ruff>=0.6", "mypy>=1.11"]
+all = ["telephony[twilio,openai,langchain,langgraph,redis,postgres,serve]"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["telephony"]
+
+[tool.hatch.build.targets.sdist]
+include = ["telephony", "tests", "README.md", "example_app.py"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]

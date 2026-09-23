@@ -1,0 +1,8 @@
+services:
+  api:
+    build: .
+    env_file: .env
+    ports:
+      - "8000:8000"
+    stop_grace_period: 40s
+    restart: unless-stopped
