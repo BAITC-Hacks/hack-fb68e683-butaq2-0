@@ -15,7 +15,7 @@ from app.db.repository import RouterDatabase
 from app.domain import Catalog, Scenario
 from app.main import app
 from app.services.voice_router import RouterService
-from tests.test_router import StubPipeline, decision
+from tests.test_router import StubGateway, StubPipeline, decision
 
 
 @pytest.fixture
@@ -76,8 +76,9 @@ def test_admin_import_and_live_prompt_are_used_by_next_turn(
     database: RouterDatabase, monkeypatch
 ) -> None:
     monkeypatch.setenv("ROUTER_ADMIN_TOKEN", "test-secret")
-    pipeline = StubPipeline([decision("a"), "Номер заявки, пожалуйста."])
-    service = RouterService(pipeline, database=database)
+    pipeline = StubPipeline()
+    gateway = StubGateway([decision("a"), "Номер заявки, пожалуйста."])
+    service = RouterService(pipeline, database=database, gateway=gateway)
     app.dependency_overrides[get_service] = lambda: service
     try:
         with TestClient(app) as client:
@@ -120,20 +121,23 @@ def test_admin_import_and_live_prompt_are_used_by_next_turn(
             assert routed.status_code == 200
             assert routed.json()["scenario_id"] == "a"
             assert (
-                pipeline.responses.calls[0]["instructions"]
-                == "Updated prompt from PostgreSQL"
+                gateway.calls[0][2].routing_prompt == "Updated prompt from PostgreSQL"
             )
-            assert pipeline.responses.calls[0]["model"] == "new-model"
+            assert gateway.calls[0][2].model == "new-model"
     finally:
         app.dependency_overrides.clear()
 
 
-def test_demo_seed_is_atomic_and_preserves_existing_edits(database: RouterDatabase) -> None:
+def test_demo_seed_is_atomic_and_preserves_existing_edits(
+    database: RouterDatabase,
+) -> None:
     assert database.seed_demo_catalog() is True
     assert database.count_scenarios() == 40
     assert database.catalog().knowledge["synthetic"] is True
     assert database.catalog().backend["read_only"] is True
-    database.upsert_scenario(Scenario(id="S11", title="Edited payment flow", details={"custom": True}))
+    database.upsert_scenario(
+        Scenario(id="S11", title="Edited payment flow", details={"custom": True})
+    )
     database.update_settings({"routing_prompt": "Custom prompt"})
     assert database.seed_demo_catalog() is False
     assert database.catalog().scenarios["S11"].details == {"custom": True}
@@ -141,14 +145,23 @@ def test_demo_seed_is_atomic_and_preserves_existing_edits(database: RouterDataba
 
 
 def test_demo_seed_does_not_replace_imported_catalog(database: RouterDatabase) -> None:
-    database.replace_catalog(Catalog([Scenario(id="official", title="Imported", details={})], knowledge={"source": "imported"}))
+    database.replace_catalog(
+        Catalog(
+            [Scenario(id="official", title="Imported", details={})],
+            knowledge={"source": "imported"},
+        )
+    )
     assert database.seed_demo_catalog() is False
     assert set(database.catalog().scenarios) == {"official"}
     assert database.catalog().knowledge == {"source": "imported"}
 
 
 def test_failed_demo_seed_rolls_back(database: RouterDatabase, monkeypatch) -> None:
-    broken = Catalog([Scenario(id="broken", title="Broken", details={})], knowledge={"source": "demo"}, backend={"not_json": object()})
+    broken = Catalog(
+        [Scenario(id="broken", title="Broken", details={})],
+        knowledge={"source": "demo"},
+        backend={"not_json": object()},
+    )
     monkeypatch.setattr("app.db.repository.load_demo_catalog", lambda: broken)
     with pytest.raises(TypeError):
         database.seed_demo_catalog()
